@@ -1,0 +1,180 @@
+import { Link } from '@inertiajs/react';
+import {
+    Facebook,
+    Instagram,
+    Linkedin,
+    Mail,
+    MapPin,
+    Phone,
+    Twitter,
+} from 'lucide-react';
+
+export const Footer = () => {
+    return (
+        <footer className="border-t bg-muted/30">
+            <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+                    {/* Brand */}
+                    <div className="space-y-4">
+                        <Link href="/" className="flex items-center space-x-2">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-900 text-white">
+                                <span className="text-xl font-bold">M</span>
+                            </div>
+                            <span className="text-xl font-bold">
+                                Mighty<span className="text-pink-500">Share</span>
+                            </span>
+                        </Link>
+                        <p className="text-sm text-muted-foreground">
+                            Empowering communities through collective giving and
+                            financial support. Together, we make a difference.
+                        </p>
+                        <div className="flex space-x-4">
+                            <a
+                                href="#"
+                                className="text-muted-foreground transition-colors hover:text-pink-500"
+                            >
+                                <Facebook className="h-5 w-5" />
+                            </a>
+                            <a
+                                href="#"
+                                className="text-muted-foreground transition-colors hover:text-pink-500"
+                            >
+                                <Twitter className="h-5 w-5" />
+                            </a>
+                            <a
+                                href="#"
+                                className="text-muted-foreground transition-colors hover:text-pink-500"
+                            >
+                                <Instagram className="h-5 w-5" />
+                            </a>
+                            <a
+                                href="#"
+                                className="text-muted-foreground transition-colors hover:text-pink-500"
+                            >
+                                <Linkedin className="h-5 w-5" />
+                            </a>
+                        </div>
+                    </div>
+
+                    {/* Quick Links */}
+                    <div>
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
+                            Quick Links
+                        </h3>
+                        <ul className="space-y-2">
+                            <li>
+                                <a
+                                    href="#about"
+                                    className="text-sm text-muted-foreground transition-colors hover:text-pink-500"
+                                >
+                                    About Us
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="#membership"
+                                    className="text-sm text-muted-foreground transition-colors hover:text-pink-500"
+                                >
+                                    Membership
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="#features"
+                                    className="text-sm text-muted-foreground transition-colors hover:text-pink-500"
+                                >
+                                    Features
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="#testimonials"
+                                    className="text-sm text-muted-foreground transition-colors hover:text-pink-500"
+                                >
+                                    Testimonials
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* Support */}
+                    <div>
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
+                            Support
+                        </h3>
+                        <ul className="space-y-2">
+                            <li>
+                                <Link
+                                    href="/help"
+                                    className="text-sm text-muted-foreground transition-colors hover:text-pink-500"
+                                >
+                                    Help Center
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href="/faq"
+                                    className="text-sm text-muted-foreground transition-colors hover:text-pink-500"
+                                >
+                                    FAQ
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href="/privacy"
+                                    className="text-sm text-muted-foreground transition-colors hover:text-pink-500"
+                                >
+                                    Privacy Policy
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href="/terms"
+                                    className="text-sm text-muted-foreground transition-colors hover:text-pink-500"
+                                >
+                                    Terms of Service
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* Contact */}
+                    <div>
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
+                            Contact Us
+                        </h3>
+                        <ul className="space-y-3">
+                            <li className="flex items-start space-x-3">
+                                <MapPin className="mt-1 h-5 w-5 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
+                                    123 Charity Street
+                                    <br />
+                                    City, State 12345
+                                </span>
+                            </li>
+                            <li className="flex items-center space-x-3">
+                                <Phone className="h-5 w-5 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
+                                    +1 (555) 123-4567
+                                </span>
+                            </li>
+                            <li className="flex items-center space-x-3">
+                                <Mail className="h-5 w-5 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
+                                    info@mightyshare.org
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="mt-12 border-t pt-8">
+                    <p className="text-center text-sm text-muted-foreground">
+                        © {new Date().getFullYear()} MightyShare. All rights
+                        reserved.
+                    </p>
+                </div>
+            </div>
+        </footer>
+    );
+};
