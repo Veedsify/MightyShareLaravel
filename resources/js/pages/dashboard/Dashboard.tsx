@@ -6,20 +6,14 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
 import {
     ArrowUpRight,
-    Bell,
-    ChevronDown,
     CreditCard,
     DollarSign,
-    Menu,
     Package,
-    Search,
     TrendingDown,
     TrendingUp,
     User,
     Wallet,
-    X,
 } from 'lucide-react';
-import { useState } from 'react';
 
 type StatCard = {
     title: string;
@@ -41,25 +35,25 @@ const quickActions: QuickAction[] = [
     {
         label: 'Add Account',
         icon: User,
-        href: '/accounts/add',
+        href: '/dashboard/accounts/add',
         color: 'bg-blue-500 hover:bg-blue-600',
     },
     {
         label: 'View Wallet',
         icon: Wallet,
-        href: '/wallet',
+        href: '/dashboard/wallet',
         color: 'bg-blue-600 hover:bg-blue-700',
     },
     {
         label: 'Transactions',
         icon: CreditCard,
-        href: '/transactions',
+        href: '/dashboard/transactions',
         color: 'bg-pink-500 hover:bg-pink-600',
     },
     {
         label: 'Packages',
         icon: Package,
-        href: '/packages',
+        href: '/dashboard/packages',
         color: 'bg-pink-600 hover:bg-pink-700',
     },
 ];
@@ -72,7 +66,7 @@ interface DashboardProps {
         phone: string;
         referralId: string;
         registrationPaid: boolean;
-        notifications?: any[];
+        notifications?: unknown[];
         accounts: Array<{
             id: number;
             name: string;
@@ -118,32 +112,13 @@ interface DashboardProps {
 }
 
 const Dashboard = () => {
-    const { auth, user, dashboardStats, recentTransactions } = usePage<
+    const { user, dashboardStats, recentTransactions } = usePage<
         SharedData & DashboardProps
     >().props;
 
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
-    const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-
     // Use real user data with proper fallbacks
     const userName = user?.name || 'User';
-    const userEmail = user?.email || 'user@example.com';
-    const userPhone = user?.phone || '';
     const firstName = userName.split(' ')[0] || 'User';
-    const userInitials = userName
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
-
-    const accounts = user?.accounts || [];
-    const [selectedAccount, setSelectedAccount] = useState(accounts[0] || null);
-
-    // Calculate notification count from user data (using notifications array from user model)
-    const notificationCount = user?.notifications?.length || 0;
 
     // Generate stat cards from real data with meaningful change indicators
     const statCards: StatCard[] = [
@@ -198,215 +173,6 @@ const Dashboard = () => {
         <>
             <Head title="Dashboard" />
             <DashboardLayout>
-                {/* Top Navbar */}
-                <div className="sticky top-0 z-40 border-b border-gray-200 bg-white">
-                    <div className="flex items-center justify-between px-6 py-4 lg:px-8">
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() =>
-                                    setMobileMenuOpen(!mobileMenuOpen)
-                                }
-                                className="rounded-md border border-gray-300 p-2 text-gray-700 transition-colors hover:bg-gray-50 lg:hidden"
-                                type="button"
-                            >
-                                {mobileMenuOpen ? (
-                                    <X className="h-5 w-5" />
-                                ) : (
-                                    <Menu className="h-5 w-5" />
-                                )}
-                            </button>
-
-                            {/* Search Bar */}
-                            <div className="hidden w-96 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 md:flex">
-                                <Search className="h-4 w-4 text-gray-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Search transactions, accounts..."
-                                    className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-500"
-                                />
-                            </div>
-
-                            <button
-                                onClick={() => setSearchOpen(!searchOpen)}
-                                className="rounded-md border border-gray-300 p-2 text-gray-700 transition-colors hover:bg-gray-50 md:hidden"
-                                type="button"
-                            >
-                                <Search className="h-5 w-5" />
-                            </button>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            {/* Account Switcher */}
-                            <div className="relative hidden sm:block">
-                                <button
-                                    onClick={() =>
-                                        setAccountDropdownOpen(
-                                            !accountDropdownOpen,
-                                        )
-                                    }
-                                    className="flex items-center gap-2 rounded-md border border-blue-500 bg-blue-50 px-4 py-2.5 text-blue-600 transition-colors hover:bg-blue-100"
-                                    type="button"
-                                >
-                                    <Wallet className="h-4 w-4" />
-                                    <span className="hidden text-sm font-semibold lg:inline">
-                                        {selectedAccount?.name || 'No Account'}
-                                    </span>
-                                    <ChevronDown className="h-4 w-4" />
-                                </button>
-
-                                {accountDropdownOpen && (
-                                    <>
-                                        <div
-                                            className="fixed inset-0 z-10"
-                                            onClick={() =>
-                                                setAccountDropdownOpen(false)
-                                            }
-                                        />
-                                        <div className="absolute right-0 z-20 mt-2 w-72 rounded-lg border border-gray-200 bg-white shadow-lg">
-                                            {accounts.length > 0 ? (
-                                                accounts.map((account) => (
-                                                    <button
-                                                        key={account.id}
-                                                        onClick={() => {
-                                                            setSelectedAccount(
-                                                                account,
-                                                            );
-                                                            setAccountDropdownOpen(
-                                                                false,
-                                                            );
-                                                        }}
-                                                        className={cn(
-                                                            'w-full border-b border-gray-200 px-5 py-4 text-left transition-colors hover:bg-gray-50',
-                                                            selectedAccount?.id ===
-                                                                account.id &&
-                                                                'border-l-4 border-l-blue-600 bg-blue-50',
-                                                        )}
-                                                        type="button"
-                                                    >
-                                                        <p className="text-sm font-semibold text-gray-900">
-                                                            {account.name}
-                                                        </p>
-                                                        <p className="mt-1 text-xs text-gray-600">
-                                                            {account.balance}
-                                                        </p>
-                                                    </button>
-                                                ))
-                                            ) : (
-                                                <div className="px-5 py-4 text-center text-sm text-gray-500">
-                                                    No accounts found
-                                                </div>
-                                            )}
-                                            <div className="p-2">
-                                                <Link
-                                                    href="/accounts/add"
-                                                    className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-                                                >
-                                                    <User className="h-4 w-4" />
-                                                    Add New Account
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Notifications */}
-                            <Link
-                                href="/notifications"
-                                className="relative rounded-md border border-gray-300 p-2 text-gray-700 transition-colors hover:bg-gray-50"
-                            >
-                                <Bell className="h-5 w-5" />
-                                {notificationCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-pink-500 text-[10px] font-bold text-white">
-                                        {notificationCount > 99
-                                            ? '99+'
-                                            : notificationCount}
-                                    </span>
-                                )}
-                            </Link>
-
-                            {/* Profile Menu */}
-                            <div className="relative">
-                                <button
-                                    onClick={() =>
-                                        setProfileDropdownOpen(
-                                            !profileDropdownOpen,
-                                        )
-                                    }
-                                    className="flex items-center gap-2 rounded-md border border-gray-300 p-1.5 transition-colors hover:bg-gray-50"
-                                    type="button"
-                                >
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600">
-                                        <span className="text-xs font-semibold text-white">
-                                            {userInitials}
-                                        </span>
-                                    </div>
-                                    <ChevronDown className="hidden h-4 w-4 text-gray-600 sm:block" />
-                                </button>
-
-                                {profileDropdownOpen && (
-                                    <>
-                                        <div
-                                            className="fixed inset-0 z-10"
-                                            onClick={() =>
-                                                setProfileDropdownOpen(false)
-                                            }
-                                        />
-                                        <div className="absolute right-0 z-20 mt-2 w-72 rounded-lg border border-gray-200 bg-white shadow-lg">
-                                            <div className="rounded-t-lg border-b border-gray-200 bg-blue-50 px-5 py-4">
-                                                <p className="text-sm font-semibold text-gray-900">
-                                                    {userName}
-                                                </p>
-                                                <p className="mt-1 text-xs text-gray-600">
-                                                    {userEmail}
-                                                </p>
-                                                {userPhone && (
-                                                    <p className="mt-1 text-xs text-gray-600">
-                                                        {userPhone}
-                                                    </p>
-                                                )}
-                                                {user?.referralId && (
-                                                    <p className="mt-2 text-xs font-medium text-blue-600">
-                                                        Referral ID:{' '}
-                                                        {user.referralId}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <Link
-                                                href="/settings"
-                                                className="flex items-center gap-2 border-b border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                                            >
-                                                Settings
-                                            </Link>
-                                            <Link
-                                                href="/logout"
-                                                method="post"
-                                                className="flex items-center gap-2 px-5 py-3 text-sm font-medium text-pink-600 transition-colors hover:bg-pink-50"
-                                            >
-                                                Sign out
-                                            </Link>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Mobile Search */}
-                    {searchOpen && (
-                        <div className="border-t border-gray-200 px-6 py-3 md:hidden">
-                            <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5">
-                                <Search className="h-4 w-4 text-gray-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Search..."
-                                    className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-500"
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
-
                 <div className="bg-gray-50 p-6 lg:p-8">
                     {/* Welcome Header */}
                     <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
@@ -668,45 +434,6 @@ const Dashboard = () => {
                                             Across all accounts
                                         </div>
                                     </div>
-                                    {selectedAccount && (
-                                        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                            <h4 className="mb-2 font-semibold text-gray-900">
-                                                Selected Account
-                                            </h4>
-                                            <div className="space-y-1 text-sm text-gray-600">
-                                                <p>
-                                                    Account:{' '}
-                                                    {
-                                                        selectedAccount.accountNumber
-                                                    }
-                                                </p>
-                                                <p>
-                                                    Balance:{' '}
-                                                    {selectedAccount.balance}
-                                                </p>
-                                                {selectedAccount.totalContributions >
-                                                    0 && (
-                                                    <p>
-                                                        Contributions: ₦
-                                                        {(
-                                                            selectedAccount.totalContributions /
-                                                            100
-                                                        ).toLocaleString()}
-                                                    </p>
-                                                )}
-                                                {selectedAccount.rewards >
-                                                    0 && (
-                                                    <p>
-                                                        Rewards: ₦
-                                                        {(
-                                                            selectedAccount.rewards /
-                                                            100
-                                                        ).toLocaleString()}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
                                     <div className="border-t border-gray-200 pt-4">
                                         <Link href="/wallet" className="w-full">
                                             <Button className="w-full rounded-md py-3 font-medium">

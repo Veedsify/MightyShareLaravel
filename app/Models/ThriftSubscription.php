@@ -15,6 +15,7 @@ class ThriftSubscription extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'user_id',
         'package_id',
         'amount_invested',

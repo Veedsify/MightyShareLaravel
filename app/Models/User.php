@@ -130,6 +130,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the static account for the user.
+     */
+    public function staticAccount()
+    {
+        return $this->hasOne(StaticAccount::class);
+    }
+
+    /**
      * Generate a unique referral ID
      *
      * @return string

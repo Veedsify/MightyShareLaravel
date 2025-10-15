@@ -21,6 +21,7 @@ class Account extends Model
         'rewards',
         'total_debt',
         'referral_earnings',
+        'is_paid',
         'user_id',
     ];
 
@@ -35,6 +36,7 @@ class Account extends Model
         'rewards' => 'integer',
         'total_debt' => 'integer',
         'referral_earnings' => 'integer',
+        'is_paid' => 'boolean',
     ];
 
     /**
@@ -100,6 +102,7 @@ class Account extends Model
             'rewards' => $this->rewards,
             'totalDebt' => $this->total_debt,
             'referralEarnings' => $this->referral_earnings,
+            'isPaid' => $this->is_paid,
             'userId' => $this->user_id,
             'createdAt' => $this->created_at?->toISOString(),
             'updatedAt' => $this->updated_at?->toISOString(),

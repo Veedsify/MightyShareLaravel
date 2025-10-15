@@ -1,6 +1,15 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import axios, { AxiosError } from 'axios';
-import { CreditCard, Loader, Package, Sparkles } from 'lucide-react';
+import {
+    CreditCard,
+    Loader,
+    Package,
+    Sparkles,
+    Check,
+    Shield,
+    ArrowRight,
+    Lock,
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import BankModal from '../../components/BankModal';
 import { Button } from '../../components/ui/Button';
@@ -269,113 +278,236 @@ export default function RegisterPayment({ user }: RegisterPaymentProps) {
     return (
         <>
             <Head title="Complete Registration Payment" />
-            <div className="relative flex min-h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-blue-50 to-pink-50">
+            <div className="relative flex min-h-screen overflow-hidden bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
                 {/* Animated Background Elements */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                    <div className="absolute top-20 -left-4 h-72 w-72 animate-pulse rounded-full bg-blue-400/20 blur-3xl" />
-                    <div className="absolute top-40 right-20 h-96 w-96 animate-pulse rounded-full bg-pink-400/20 blur-3xl" />
-                    <div className="absolute bottom-20 left-1/3 h-80 w-80 animate-pulse rounded-full bg-purple-400/20 blur-3xl" />
+                    <div className="absolute top-20 -right-4 h-72 w-72 animate-pulse rounded-full bg-blue-400/20 blur-3xl" />
+                    <div className="absolute top-40 left-20 h-96 w-96 animate-pulse rounded-full bg-indigo-400/20 blur-3xl" />
+                    <div className="absolute right-1/3 bottom-20 h-80 w-80 animate-pulse rounded-full bg-cyan-400/20 blur-3xl" />
                 </div>
 
-                <div className="relative z-10 flex w-full items-center justify-center p-4 md:p-8">
+                {/* Left Side - Enhanced Branding */}
+                <div className="relative hidden w-1/2 overflow-hidden bg-blue-800 p-12 lg:flex lg:flex-col lg:justify-between">
+                    {/* Decorative Pattern */}
+                    <div className="pointer-events-none absolute inset-0 opacity-10">
+                        <div
+                            className="absolute inset-0"
+                            style={{
+                                backgroundImage:
+                                    'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                                backgroundSize: '40px 40px',
+                            }}
+                        />
+                    </div>
+
+                    <div className="relative z-10">
+                        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
+                            <Sparkles className="h-5 w-5 text-yellow-300" />
+                            <span className="text-sm font-medium text-white">
+                                Welcome to MightyShare
+                            </span>
+                        </div>
+                        <h1 className="mb-3 text-5xl font-bold text-white">
+                            Almost There!
+                        </h1>
+                        <p className="text-xl text-blue-100">
+                            Complete your registration to unlock all features
+                        </p>
+                    </div>
+
+                    <div className="relative z-10 space-y-6">
+                        {/* Benefits List */}
+                        <div className="rounded-2xl border border-blue-400/30 bg-white/10 p-6 backdrop-blur-md">
+                            <h3 className="mb-4 text-xl font-bold text-white">
+                                What You'll Get
+                            </h3>
+                            <ul className="space-y-3">
+                                {[
+                                    'Access to your savings dashboard',
+                                    'Flexible withdrawal options',
+                                    'Real-time transaction tracking',
+                                    'Secure payment processing',
+                                    'Dedicated customer support',
+                                ].map((benefit, i) => (
+                                    <li
+                                        key={i}
+                                        className="flex items-center gap-3 text-blue-100"
+                                    >
+                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500">
+                                            <Check className="h-4 w-4 text-white" />
+                                        </div>
+                                        <span>{benefit}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Security Badge */}
+                        <div className="rounded-2xl bg-white/10 p-6 backdrop-blur-sm">
+                            <div className="flex items-center gap-4">
+                                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500/20">
+                                    <Shield className="h-7 w-7 text-green-400" />
+                                </div>
+                                <div>
+                                    <p className="text-lg font-bold text-white">
+                                        Secure Payment
+                                    </p>
+                                    <p className="text-sm text-blue-200">
+                                        256-bit SSL encrypted
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p className="relative z-10 text-sm text-blue-200">
+                        © 2025 MightyShare. All rights reserved.
+                    </p>
+                </div>
+
+                {/* Right Side - Enhanced Payment Form */}
+                <div className="relative flex w-full items-center justify-center overflow-y-auto p-4 md:p-8 lg:w-1/2">
                     <div className="w-full max-w-lg">
-                        <Card className="border-2 border-gray-200 shadow-xl">
-                            <CardHeader className="text-center">
-                                <div className="mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-600">
+                        {/* Mobile Logo */}
+                        <div className="mb-10 text-center lg:hidden">
+                            <div className="mb-4 inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-4">
+                                <Package className="h-8 w-8 text-white" />
+                            </div>
+                            <h1 className="mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-4xl font-bold text-transparent">
+                                MightyShare
+                            </h1>
+                            <p className="text-gray-600">
+                                Complete Your Registration
+                            </p>
+                        </div>
+
+                        {/* Payment Card */}
+                        <div className="w-full rounded-xl border border-gray-200 bg-white p-8 shadow-xl">
+                            {/* Form Header */}
+                            <div className="mb-8 text-center">
+                                <div className="mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg">
                                     <Package className="h-10 w-10 text-white" />
                                 </div>
-                                <CardTitle className="mb-3 text-3xl font-bold text-gray-900">
-                                    Complete Registration
-                                </CardTitle>
-                                <div className="space-y-2">
-                                    <p className="text-base leading-relaxed text-gray-600">
-                                        A one-time registration fee of{' '}
-                                        <span className="font-bold text-blue-900">
-                                            ₦{Number(fee).toLocaleString()}
-                                        </span>{' '}
-                                        is required to activate your MightyShare
-                                        account.
-                                    </p>
-                                    <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2">
-                                        <Sparkles className="h-4 w-4 text-blue-600" />
-                                        <span className="text-sm font-medium text-blue-800">
-                                            Secure Payment Processing
-                                        </span>
-                                    </div>
-                                </div>
-                            </CardHeader>
+                                <h2 className="mb-2 text-3xl font-bold text-gray-900">
+                                    Complete Registration 🎉
+                                </h2>
+                                <p className="text-gray-600">
+                                    Just one step away from your savings journey
+                                </p>
+                            </div>
 
-                            <CardContent>
-                                {/* Verification State */}
-                                {isVerifying ? (
-                                    <div className="py-10 text-center">
-                                        <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-4 border-blue-200 border-t-blue-900"></div>
-                                        <p className="text-lg font-medium text-gray-700">
-                                            {message.text}
-                                        </p>
+                            {/* Verification State */}
+                            {isVerifying ? (
+                                <div className="py-10 text-center">
+                                    <div className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+                                    <p className="text-lg font-semibold text-gray-700">
+                                        {message.text}
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Fee Display */}
+                                    <div className="mb-8 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-[2px]">
+                                        <div className="rounded-[14px] bg-white p-6">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-600">
+                                                        Registration Fee
+                                                    </p>
+                                                    <p className="mt-1 text-3xl font-bold text-gray-900">
+                                                        ₦
+                                                        {Number(
+                                                            fee,
+                                                        ).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600">
+                                                    <Lock className="h-7 w-7 text-white" />
+                                                </div>
+                                            </div>
+                                            <div className="mt-4 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2">
+                                                <Check className="h-4 w-4 text-green-600" />
+                                                <p className="text-sm font-medium text-green-800">
+                                                    One-time payment only
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                ) : (
-                                    <>
-                                        {/* Payment Buttons */}
-                                        <div className="mb-6 space-y-4">
-                                            <Button
-                                                onClick={() =>
-                                                    initializePayment('alatpay')
-                                                }
-                                                disabled={isAnyActionInProgress}
-                                                variant="default"
-                                                size="lg"
-                                                className="h-14 w-full text-base font-semibold shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl disabled:hover:scale-100"
-                                            >
+
+                                    {/* Payment Button */}
+                                    <div className="mb-6">
+                                        <button
+                                            onClick={() =>
+                                                initializePayment('alatpay')
+                                            }
+                                            disabled={isAnyActionInProgress}
+                                            className="group relative w-full cursor-pointer overflow-hidden rounded-xl bg-blue-600 py-4 text-base font-semibold text-white transition-all hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+                                        >
+                                            <span className="relative z-10 flex items-center justify-center gap-2">
                                                 {loadingProvider ===
                                                 'alatpay' ? (
                                                     <>
-                                                        <Loader
-                                                            className="animate-spin"
-                                                            size={20}
-                                                        />
+                                                        <Loader className="h-5 w-5 animate-spin" />
                                                         <span>
-                                                            Processing...
+                                                            Processing
+                                                            Payment...
                                                         </span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <CreditCard size={20} />
+                                                        <CreditCard className="h-5 w-5" />
                                                         <span>
                                                             Pay with ALATPay
                                                         </span>
+                                                        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                                                     </>
                                                 )}
-                                            </Button>
-                                        </div>
+                                            </span>
+                                            <div className="absolute inset-0 -z-0 bg-blue-700 opacity-0 transition-opacity group-hover:opacity-100" />
+                                        </button>
+                                    </div>
 
-                                        {/* Message Display */}
-                                        {message.text && (
-                                            <div
-                                                className={getMessageClassName()}
-                                            >
-                                                {message.text}
+                                    {/* Message Display */}
+                                    {message.text && (
+                                        <div className={getMessageClassName()}>
+                                            {message.text}
+                                        </div>
+                                    )}
+
+                                    {/* Security Note */}
+                                    <div className="mt-6 rounded-xl bg-gray-50 p-4">
+                                        <div className="flex items-start gap-3">
+                                            <Shield className="mt-0.5 h-5 w-5 text-blue-600" />
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900">
+                                                    Secure Payment
+                                                </p>
+                                                <p className="mt-1 text-xs text-gray-600">
+                                                    Your payment information is
+                                                    encrypted and secure. We
+                                                    never store your card
+                                                    details.
+                                                </p>
                                             </div>
-                                        )}
-
-                                        {/* Skip Option */}
-                                        <div className="mt-8 border-t border-gray-200 pt-6">
-                                            <Button
-                                                onClick={() =>
-                                                    router.visit('/dashboard')
-                                                }
-                                                disabled={isAnyActionInProgress}
-                                                variant="ghost"
-                                                className="w-full text-gray-600 hover:text-gray-800 disabled:text-gray-300"
-                                            >
-                                                Skip payment and continue to
-                                                Dashboard →
-                                            </Button>
                                         </div>
-                                    </>
-                                )}
-                            </CardContent>
-                        </Card>
+                                    </div>
+
+                                    {/* Skip Option */}
+                                    <div className="mt-8 border-t border-gray-200 pt-6 text-center">
+                                        <button
+                                            onClick={() =>
+                                                router.visit('/dashboard')
+                                            }
+                                            disabled={isAnyActionInProgress}
+                                            className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 disabled:text-gray-300"
+                                        >
+                                            Skip payment and continue to
+                                            Dashboard →
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
 

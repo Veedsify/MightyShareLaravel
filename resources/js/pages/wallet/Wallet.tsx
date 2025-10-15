@@ -1,16 +1,43 @@
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { cn } from '@/lib/utils';
-import { Head, Link } from '@inertiajs/react';
+import type { SharedData } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
+    AlertCircle,
     ArrowDownLeft,
     ArrowUpRight,
     CreditCard,
     Eye,
     EyeOff,
+    LucidePiggyBank,
     Plus,
     TrendingUp,
 } from 'lucide-react';
 import { useState } from 'react';
+
+type WalletAccount = {
+    id: number;
+    account_number: string;
+    balance: number;
+    is_paid: boolean;
+};
+
+type WalletData = {
+    staticAccountBalance: number;
+    hasStaticAccount: boolean;
+    staticAccountNumber?: string;
+    staticAccountBank?: string;
+    unpaidAccountsCount: number;
+    totalInitialPaymentRequired: number;
+    packagePrice: number;
+    minContribution: number;
+    packageName: string;
+    accounts: WalletAccount[];
+};
+
+interface WalletPageProps extends SharedData {
+    walletData: WalletData;
+}
 
 type Transaction = {
     id: string;
@@ -22,10 +49,68 @@ type Transaction = {
 };
 
 const Wallet = () => {
+    const { walletData } = usePage<WalletPageProps>().props;
     const [balanceVisible, setBalanceVisible] = useState(true);
+    const [showTopupModal, setShowTopupModal] = useState(false);
+    const [topupAmount, setTopupAmount] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    const balance = 2458500.0;
-    const formattedBalance = `₦${balance.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+    const formattedBalance = `₦${walletData.staticAccountBalance.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+    const formattedPackagePrice = `₦${walletData.packagePrice.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+    const formattedMinContribution = `₦${walletData.minContribution.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+
+    const handleTopup = () => {
+        // Check if user has static account
+        if (!walletData.hasStaticAccount) {
+            alert(
+                'You need to generate a static account first. Please go to Settings.',
+            );
+            return;
+        }
+        setTopupAmount('');
+        setShowTopupModal(true);
+    };
+
+    const processTopup = () => {
+        if (!topupAmount) return;
+
+        const amount = Math.round(parseFloat(topupAmount));
+
+        // Validation based on unpaid accounts
+        if (walletData.unpaidAccountsCount > 0) {
+            if (amount < walletData.totalInitialPaymentRequired) {
+                alert(
+                    `You have ${walletData.unpaidAccountsCount} unpaid account(s). Minimum required: ${formattedPackagePrice} × ${walletData.unpaidAccountsCount} = ₦${walletData.totalInitialPaymentRequired.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`,
+                );
+                return;
+            }
+        } else {
+            // Check minimum contribution
+            if (amount < walletData.minContribution) {
+                alert(`Minimum top-up amount is ${formattedMinContribution}`);
+                return;
+            }
+        }
+
+        setIsProcessing(true);
+
+        router.post(
+            '/dashboard/wallet/topup',
+            {
+                amount: amount,
+            },
+            {
+                onSuccess: () => {
+                    setShowTopupModal(false);
+                    setTopupAmount('');
+                    setIsProcessing(false);
+                },
+                onError: () => {
+                    setIsProcessing(false);
+                },
+            },
+        );
+    };
 
     const recentTransactions: Transaction[] = [
         {
@@ -72,43 +157,22 @@ const Wallet = () => {
 
     const quickActions = [
         {
-            label: 'Deposit',
-            icon: ArrowDownLeft,
+            label: 'Static Account',
+            icon: LucidePiggyBank,
             color: 'bg-blue-600 hover:bg-blue-700',
-            href: '/wallet/deposit',
+            href: '/dashboard/settings',
         },
         {
             label: 'Withdraw',
             icon: ArrowUpRight,
             color: 'bg-pink-600 hover:bg-pink-700',
-            href: '/wallet/withdraw',
+            href: '/dashboard/wallet/withdraw',
         },
         {
             label: 'Add Account',
             icon: Plus,
             color: 'bg-blue-500 hover:bg-blue-600',
-            href: '/accounts/add',
-        },
-    ];
-
-    const stats = [
-        {
-            label: 'Total Deposits',
-            value: '₦850,000.00',
-            change: '+12.5%',
-            trend: 'up',
-        },
-        {
-            label: 'Total Withdrawals',
-            value: '₦320,000.00',
-            change: '-5.2%',
-            trend: 'down',
-        },
-        {
-            label: 'This Month',
-            value: '₦180,000.00',
-            change: '+8.3%',
-            trend: 'up',
+            href: '/dashboard/accounts/add',
         },
     ];
 
@@ -126,6 +190,41 @@ const Wallet = () => {
                             Manage your balance, deposits, and withdrawals
                         </p>
                     </div>
+
+                    {/* Unpaid Accounts Alert */}
+                    {walletData.unpaidAccountsCount > 0 && (
+                        <div className="mb-6 rounded-lg border border-orange-200 bg-orange-50 p-4">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="mt-0.5 h-5 w-5 text-orange-600" />
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-orange-900">
+                                        Initial Payment Required
+                                    </h3>
+                                    <p className="mt-1 text-sm text-orange-800">
+                                        You have{' '}
+                                        {walletData.unpaidAccountsCount} unpaid
+                                        account
+                                        {walletData.unpaidAccountsCount > 1
+                                            ? 's'
+                                            : ''}
+                                        . Each account requires an initial
+                                        payment of {formattedPackagePrice} (
+                                        {walletData.packageName}). Total
+                                        required:{' '}
+                                        <strong>
+                                            ₦
+                                            {walletData.totalInitialPaymentRequired.toLocaleString(
+                                                'en-NG',
+                                                {
+                                                    minimumFractionDigits: 2,
+                                                },
+                                            )}
+                                        </strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Balance Card */}
                     <div className="mb-6 rounded-lg bg-blue-600 p-8 text-white shadow-lg">
@@ -180,42 +279,100 @@ const Wallet = () => {
                         ))}
                     </div>
 
-                    {/* Stats */}
-                    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-                        {stats.map((stat) => (
-                            <div
-                                key={stat.label}
-                                className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                    {/* My Accounts - Replace Linked Accounts */}
+                    <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                        <div className="mb-4 flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                                My Accounts
+                            </h3>
+                            <Link
+                                href="/dashboard/accounts/add"
+                                className="text-sm font-medium text-blue-600 hover:text-blue-700"
                             >
-                                <p className="mb-2 text-sm text-gray-600">
-                                    {stat.label}
-                                </p>
-                                <p className="mb-2 text-2xl font-bold text-gray-900">
-                                    {stat.value}
-                                </p>
-                                <div
-                                    className={cn(
-                                        'flex items-center gap-1 text-sm font-medium',
-                                        stat.trend === 'up'
-                                            ? 'text-green-600'
-                                            : 'text-red-600',
-                                    )}
-                                >
-                                    <TrendingUp
-                                        className={cn(
-                                            'h-4 w-4',
-                                            stat.trend === 'down' &&
-                                                'rotate-180',
-                                        )}
-                                    />
-                                    {stat.change}
+                                Add Account
+                            </Link>
+                        </div>
+                        <div className="space-y-3">
+                            {walletData.accounts.length > 0 ? (
+                                walletData.accounts.map((account) => {
+                                    const accountBalance = `₦${(account.balance / 100).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+                                    return (
+                                        <div
+                                            key={account.id}
+                                            className="flex items-center justify-between rounded-lg border border-gray-200 p-4"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className={cn(
+                                                        'rounded-md p-2',
+                                                        account.is_paid
+                                                            ? 'bg-green-100'
+                                                            : 'bg-orange-100',
+                                                    )}
+                                                >
+                                                    <CreditCard
+                                                        className={cn(
+                                                            'h-5 w-5',
+                                                            account.is_paid
+                                                                ? 'text-green-600'
+                                                                : 'text-orange-600',
+                                                        )}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-gray-900">
+                                                        {account.account_number}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600">
+                                                        Balance:{' '}
+                                                        {accountBalance}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {!account.is_paid && (
+                                                    <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
+                                                        Unpaid
+                                                    </span>
+                                                )}
+                                                {account.is_paid && (
+                                                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                                        Active
+                                                    </span>
+                                                )}
+                                                <button
+                                                    onClick={() =>
+                                                        handleTopup()
+                                                    }
+                                                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                                                    type="button"
+                                                >
+                                                    Top Up
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
+                                    <p className="text-gray-600">
+                                        No accounts found. Create your first
+                                        account to get started.
+                                    </p>
+                                    <Link
+                                        href="/dashboard/accounts/add"
+                                        className="mt-4 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                        Add Account
+                                    </Link>
                                 </div>
-                            </div>
-                        ))}
+                            )}
+                        </div>
                     </div>
 
                     {/* Recent Transactions */}
-                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+                    <div className="mt-6 rounded-lg border border-gray-200 bg-white shadow-sm">
                         <div className="flex items-center justify-between border-b border-gray-200 p-6">
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900">
@@ -299,55 +456,102 @@ const Wallet = () => {
                         </div>
                     </div>
 
-                    {/* Linked Accounts */}
-                    <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                        <div className="mb-4 flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-gray-900">
-                                Linked Accounts
-                            </h3>
-                            <Link
-                                href="/accounts/add"
-                                className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                            >
-                                Add Account
-                            </Link>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="rounded-md bg-blue-100 p-2">
-                                        <CreditCard className="h-5 w-5 text-blue-600" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900">
-                                            Access Bank
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            •••• 4567
-                                        </p>
-                                    </div>
+                    {/* Top-up Modal */}
+                    {showTopupModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                                <h3 className="mb-4 text-xl font-bold text-gray-900">
+                                    Top Up Wallet
+                                </h3>
+                                <div className="mb-4 rounded-lg bg-gray-50 p-4">
+                                    <p className="text-sm text-gray-600">
+                                        Static Account Number
+                                    </p>
+                                    <p className="font-semibold text-gray-900">
+                                        {walletData.staticAccountNumber}
+                                    </p>
+                                    <p className="mt-2 text-sm text-gray-600">
+                                        Bank
+                                    </p>
+                                    <p className="font-semibold text-gray-900">
+                                        {walletData.staticAccountBank}
+                                    </p>
+                                    <p className="mt-2 text-sm text-gray-600">
+                                        Current Balance
+                                    </p>
+                                    <p className="font-semibold text-gray-900">
+                                        {formattedBalance}
+                                    </p>
+                                    {walletData.unpaidAccountsCount > 0 && (
+                                        <div className="mt-3 rounded-md border border-orange-200 bg-orange-50 p-3">
+                                            <p className="text-sm font-medium text-orange-900">
+                                                {walletData.unpaidAccountsCount}{' '}
+                                                Unpaid Account(s)
+                                            </p>
+                                            <p className="mt-1 text-xs text-orange-700">
+                                                Minimum deposit: ₦
+                                                {walletData.totalInitialPaymentRequired.toLocaleString(
+                                                    'en-NG',
+                                                    {
+                                                        minimumFractionDigits: 2,
+                                                    },
+                                                )}{' '}
+                                                (
+                                                {walletData.unpaidAccountsCount}{' '}
+                                                × {formattedPackagePrice})
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
-                                <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                    Primary
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="rounded-md bg-pink-100 p-2">
-                                        <CreditCard className="h-5 w-5 text-pink-600" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900">
-                                            GTBank
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            •••• 8901
-                                        </p>
-                                    </div>
+                                <div className="mb-4">
+                                    <label
+                                        htmlFor="amount"
+                                        className="mb-2 block text-sm font-medium text-gray-700"
+                                    >
+                                        Amount (₦)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="amount"
+                                        value={topupAmount}
+                                        onChange={(e) =>
+                                            setTopupAmount(e.target.value)
+                                        }
+                                        placeholder={
+                                            walletData.unpaidAccountsCount > 0
+                                                ? `Min: ${walletData.totalInitialPaymentRequired.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`
+                                                : `Min: ${formattedMinContribution}`
+                                        }
+                                        min="1"
+                                        step="1"
+                                        className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                    />
+                                </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowTopupModal(false);
+                                            setTopupAmount('');
+                                        }}
+                                        className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                                        type="button"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={processTopup}
+                                        disabled={isProcessing || !topupAmount}
+                                        className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                                        type="button"
+                                    >
+                                        {isProcessing
+                                            ? 'Processing...'
+                                            : 'Top Up'}
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </DashboardLayout>
         </>

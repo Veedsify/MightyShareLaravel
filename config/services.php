@@ -38,6 +38,7 @@ return [
     'alatpay' => [
         'public_key' => env('ALATPAY_PUBLIC_KEY'),
         'secret_key' => env('ALATPAY_SECRET_KEY'),
+        'subscription_key' => env('ALATPAY_SUBSCRIPTION_KEY'),
         'business_id' => env('ALATPAY_BUSINESS_ID', '27a4ed9c-e6db-490e-1495-08ddfceabbff'),
         'base_url' => env('ALATPAY_BASE_URL', 'https://apibox.alatpay.ng'),
     ],

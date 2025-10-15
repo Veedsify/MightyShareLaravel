@@ -15,6 +15,7 @@ class ThriftPackage extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'name',
         'price',
         'duration',
@@ -24,6 +25,8 @@ class ThriftPackage extends Model
         'is_active',
         'min_contribution',
         'max_contribution',
+        'number_of_accounts',
+        'min_number_of_accounts',
         'features',
     ];
 

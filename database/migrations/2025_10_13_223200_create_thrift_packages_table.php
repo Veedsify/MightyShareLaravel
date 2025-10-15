@@ -22,6 +22,8 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->integer('min_contribution')->nullable();
             $table->integer('max_contribution')->nullable();
+            $table->integer('number_of_accounts')->nullable();
+            $table->integer('min_number_of_accounts')->nullable();
             $table->json('features')->default('[]');
             $table->timestamps();
             

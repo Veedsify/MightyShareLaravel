@@ -11,19 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('accounts', function (Blueprint $table) {
+        Schema::create('static_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('account_number')->unique();
+            $table->string('bank_name')->default('MightyShare Bank');
             $table->integer('balance')->default(0);
-            $table->integer('total_contributions')->default(0);
-            $table->integer('rewards')->default(0);
-            $table->integer('total_debt')->default(0);
-            $table->integer('referral_earnings')->default(0);
-            $table->boolean('is_paid')->default(false);
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
             
             $table->index('user_id');
+            $table->index('account_number');
         });
     }
 
@@ -32,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('accounts');
+        Schema::dropIfExists('static_accounts');
     }
 };
