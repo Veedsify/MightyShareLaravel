@@ -18,38 +18,41 @@ import {
 } from 'lucide-react';
 import { FormEventHandler, useEffect, useRef, useState } from 'react';
 
-const packageOptions = [
-    {
-        value: 'bronze',
-        label: 'Bronze Package',
-        description: '₦10,000 - ₦100,000 • 5% Returns • 3 Months',
-        color: 'from-orange-400 to-orange-600',
-        icon: Award,
-    },
-    {
-        value: 'silver',
-        label: 'Silver Package',
-        description: '₦100,000 - ₦500,000 • 8% Returns • 6 Months',
-        color: 'from-gray-400 to-gray-600',
-        icon: Medal,
-    },
-    {
-        value: 'gold',
-        label: 'Gold Package',
-        description: '₦500,000 - ₦1,000,000 • 12% Returns • 6 Months',
-        color: 'from-yellow-400 to-yellow-600',
-        icon: Crown,
-    },
-    {
-        value: 'platinum',
-        label: 'Platinum Package',
-        description: '₦1,000,000+ • 15% Returns • 12 Months',
-        color: 'from-purple-400 to-purple-600',
-        icon: Gem,
-    },
-];
+// Icon mapping for packages
+const packageIcons = {
+    'Bronze Package': Award,
+    'Silver Package': Medal,
+    'Gold Package': Crown,
+    'Platinum Package': Gem,
+};
 
-const Register = () => {
+// Color mapping for packages
+const packageColors = {
+    'Bronze Package': 'from-orange-400 to-orange-600',
+    'Silver Package': 'from-gray-400 to-gray-600',
+    'Gold Package': 'from-yellow-400 to-yellow-600',
+    'Platinum Package': 'from-purple-400 to-purple-600',
+};
+
+interface ThriftPackage {
+    id: number;
+    name: string;
+    price: number;
+    duration: number;
+    profitPercentage: number;
+    description: string;
+    features: string[];
+    terms: string;
+    isActive: boolean;
+    minContribution: number;
+    maxContribution: number;
+}
+
+interface RegisterProps {
+    packages: ThriftPackage[];
+}
+
+const Register = ({ packages }: RegisterProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isPackageDropdownOpen, setIsPackageDropdownOpen] = useState(false);
@@ -59,7 +62,7 @@ const Register = () => {
         name: '',
         email: '',
         phone: '',
-        package: '',
+        package_id: '',
         password: '',
         password_confirmation: '',
         terms: false,
@@ -86,8 +89,20 @@ const Register = () => {
         post('/register');
     };
 
+    // Transform packages for display
+    const packageOptions = packages.map((pkg) => ({
+        id: pkg.id,
+        name: pkg.name,
+        description: `₦${pkg.price.toLocaleString()} • ${pkg.profitPercentage}% Returns • ${pkg.duration} Months`,
+        color:
+            packageColors[pkg.name as keyof typeof packageColors] ||
+            'from-blue-400 to-blue-600',
+        icon: packageIcons[pkg.name as keyof typeof packageIcons] || Package,
+        originalPackage: pkg,
+    }));
+
     const selectedPackage = packageOptions.find(
-        (pkg) => pkg.value === data.package,
+        (pkg) => pkg.id.toString() === data.package_id,
     );
 
     return (
@@ -335,13 +350,13 @@ const Register = () => {
                                         >
                                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 transition-colors group-focus:text-blue-600">
                                                 <Package
-                                                    className={`h-5 w-5 transition-colors ${isPackageDropdownOpen || data.package ? 'text-blue-600' : 'text-gray-400'}`}
+                                                    className={`h-5 w-5 transition-colors ${isPackageDropdownOpen || data.package_id ? 'text-blue-600' : 'text-gray-400'}`}
                                                 />
                                             </div>
 
                                             <span
                                                 className={
-                                                    data.package
+                                                    data.package_id
                                                         ? 'text-gray-900'
                                                         : 'text-gray-500'
                                                 }
@@ -351,7 +366,7 @@ const Register = () => {
                                                         <selectedPackage.icon className="h-5 w-5" />
                                                         <span className="font-medium">
                                                             {
-                                                                selectedPackage.label
+                                                                selectedPackage.name
                                                             }
                                                         </span>
                                                     </span>
@@ -374,20 +389,20 @@ const Register = () => {
                                                     {packageOptions.map(
                                                         (pkg) => (
                                                             <button
-                                                                key={pkg.value}
+                                                                key={pkg.id}
                                                                 type="button"
                                                                 onClick={() => {
                                                                     setData(
-                                                                        'package',
-                                                                        pkg.value,
+                                                                        'package_id',
+                                                                        pkg.id.toString(),
                                                                     );
                                                                     setIsPackageDropdownOpen(
                                                                         false,
                                                                     );
                                                                 }}
                                                                 className={`group relative w-full rounded-lg p-4 text-left transition-all duration-200 ${
-                                                                    data.package ===
-                                                                    pkg.value
+                                                                    data.package_id ===
+                                                                    pkg.id.toString()
                                                                         ? 'bg-gradient-to-r ' +
                                                                           pkg.color +
                                                                           ' text-white'
@@ -398,15 +413,15 @@ const Register = () => {
                                                                     <div className="flex items-start gap-3">
                                                                         <div
                                                                             className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-all ${
-                                                                                data.package ===
-                                                                                pkg.value
+                                                                                data.package_id ===
+                                                                                pkg.id.toString()
                                                                                     ? 'bg-white/20'
                                                                                     : 'bg-gradient-to-br ' +
                                                                                       pkg.color
                                                                             }`}
                                                                         >
-                                                                            {data.package ===
-                                                                            pkg.value ? (
+                                                                            {data.package_id ===
+                                                                            pkg.id.toString() ? (
                                                                                 <Check className="h-6 w-6" />
                                                                             ) : (
                                                                                 <pkg.icon className="h-6 w-6" />
@@ -414,14 +429,14 @@ const Register = () => {
                                                                         </div>
                                                                         <div className="flex-1">
                                                                             <p
-                                                                                className={`mb-1 font-bold ${data.package === pkg.value ? 'text-white' : 'text-gray-900'}`}
+                                                                                className={`mb-1 font-bold ${data.package_id === pkg.id.toString() ? 'text-white' : 'text-gray-900'}`}
                                                                             >
                                                                                 {
-                                                                                    pkg.label
+                                                                                    pkg.name
                                                                                 }
                                                                             </p>
                                                                             <p
-                                                                                className={`text-sm ${data.package === pkg.value ? 'text-white/90' : 'text-gray-600'}`}
+                                                                                className={`text-sm ${data.package_id === pkg.id.toString() ? 'text-white/90' : 'text-gray-600'}`}
                                                                             >
                                                                                 {
                                                                                     pkg.description
@@ -430,8 +445,8 @@ const Register = () => {
                                                                         </div>
                                                                     </div>
 
-                                                                    {data.package ===
-                                                                        pkg.value && (
+                                                                    {data.package_id ===
+                                                                        pkg.id.toString() && (
                                                                         <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
                                                                             <Check className="h-4 w-4 text-white" />
                                                                         </div>
@@ -439,8 +454,8 @@ const Register = () => {
                                                                 </div>
 
                                                                 {/* Hover Glow Effect */}
-                                                                {data.package !==
-                                                                    pkg.value && (
+                                                                {data.package_id !==
+                                                                    pkg.id.toString() && (
                                                                     <div
                                                                         className={`absolute inset-0 -z-10 rounded-lg bg-gradient-to-r ${pkg.color} opacity-0 blur-xl transition-opacity group-hover:opacity-20`}
                                                                     />
@@ -468,7 +483,7 @@ const Register = () => {
                                                     <div className="flex-1">
                                                         <p className="mb-1 font-bold text-gray-900">
                                                             {
-                                                                selectedPackage.label
+                                                                selectedPackage.name
                                                             }
                                                         </p>
                                                         <p className="text-sm text-gray-600">
@@ -485,9 +500,9 @@ const Register = () => {
                                         </div>
                                     )}
 
-                                    {errors.package && (
+                                    {errors.package_id && (
                                         <p className="mt-2 text-sm text-red-600">
-                                            {errors.package}
+                                            {errors.package_id}
                                         </p>
                                     )}
                                 </div>

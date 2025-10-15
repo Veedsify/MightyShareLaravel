@@ -84,4 +84,25 @@ class Account extends Model
     {
         return $this->hasMany(NextSettlementAccount::class);
     }
+
+    /**
+     * Convert model to array with camelCase keys for API responses
+     *
+     * @return array
+     */
+    public function toApiArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'accountNumber' => $this->account_number,
+            'balance' => $this->balance,
+            'totalContributions' => $this->total_contributions,
+            'rewards' => $this->rewards,
+            'totalDebt' => $this->total_debt,
+            'referralEarnings' => $this->referral_earnings,
+            'userId' => $this->user_id,
+            'createdAt' => $this->created_at?->toISOString(),
+            'updatedAt' => $this->updated_at?->toISOString(),
+        ];
+    }
 }

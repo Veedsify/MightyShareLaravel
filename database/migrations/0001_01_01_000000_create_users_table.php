@@ -17,6 +17,15 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('phone');
+            $table->string('referral_id')->unique();
+            $table->timestamp('plan_start_date')->nullable()->default(now());
+            $table->boolean('registration_paid')->default(false);
+            $table->json('notifications')->default('[]');
+            $table->string('last_activity')->nullable();
+            $table->text('two_factor_secret')->nullable();
+            $table->text('two_factor_recovery_codes')->nullable();
+            $table->timestamp('two_factor_confirmed_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

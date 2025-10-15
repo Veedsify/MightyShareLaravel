@@ -19,10 +19,10 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'fullname',
+        'name',
+        'email',
         'phone',
         'password',
-        'plan',
         'referral_id',
         'plan_start_date',
         'registration_paid',
@@ -127,5 +127,118 @@ class User extends Authenticatable
     public function nextSettlementAccounts()
     {
         return $this->hasMany(NextSettlementAccount::class);
+    }
+
+    /**
+     * Generate a unique referral ID
+     *
+     * @return string
+     */
+    public function generateReferralId(): string
+    {
+        do {
+            $referralId = 'REF-' . time() . rand(100, 999);
+        } while (self::where('referral_id', $referralId)->exists());
+
+        return $referralId;
+    }
+
+    /**
+     * Generate a unique account number
+     *
+     * @return string
+     */
+    public function generateAccountNumber(): string
+    {
+        do {
+            $accountNumber = 'MS' . time() . rand(100, 999);
+        } while (Account::where('account_number', $accountNumber)->exists());
+
+        return $accountNumber;
+    }
+
+    /**
+     * Check if registration payment has been made
+     *
+     * @return bool
+     */
+    public function isRegistrationPaid(): bool
+    {
+        return $this->registration_paid;
+    }
+
+    /**
+     * Get the active thrift subscription for the user
+     *
+     * @return \App\Models\ThriftSubscription|null
+     */
+    public function getActiveThriftSubscription()
+    {
+        return $this->thriftSubscriptions()
+            ->where('status', 'active')
+            ->with('package')
+            ->first();
+    }
+
+    /**
+     * Get the referral ID in camelCase format
+     *
+     * @return string|null
+     */
+    public function getReferralIdAttribute($value)
+    {
+        return $value;
+    }
+
+    /**
+     * Get the registration paid status in camelCase format
+     *
+     * @return bool
+     */
+    public function getRegistrationPaidAttribute($value)
+    {
+        return (bool) $value;
+    }
+
+    /**
+     * Get the plan start date in camelCase format
+     *
+     * @return string|null
+     */
+    public function getPlanStartDateAttribute($value)
+    {
+        return $value ? $this->asDateTime($value)->toISOString() : null;
+    }
+
+    /**
+     * Get the last activity in camelCase format
+     *
+     * @return string|null
+     */
+    public function getLastActivityAttribute($value)
+    {
+        return $value ? $this->asDateTime($value)->toISOString() : null;
+    }
+
+    /**
+     * Convert model to array with camelCase keys for API responses
+     *
+     * @return array
+     */
+    public function toApiArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'fullname' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'referralId' => $this->referral_id,
+            'planStartDate' => $this->plan_start_date?->toISOString(),
+            'registrationPaid' => $this->registration_paid,
+            'notifications' => $this->notifications,
+            'lastActivity' => $this->last_activity?->toISOString(),
+            'createdAt' => $this->created_at?->toISOString(),
+            'updatedAt' => $this->updated_at?->toISOString(),
+        ];
     }
 }

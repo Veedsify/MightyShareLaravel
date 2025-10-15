@@ -30,93 +30,6 @@ type StatCard = {
     bgColor: string;
 };
 
-const statCards: StatCard[] = [
-    {
-        title: 'Total Balance',
-        value: '₦2,458,500.00',
-        change: '+12.5%',
-        trend: 'up',
-        icon: Wallet,
-        bgColor: 'bg-blue-500',
-    },
-    {
-        title: 'Total Transactions',
-        value: '1,245',
-        change: '+8.2%',
-        trend: 'up',
-        icon: CreditCard,
-        bgColor: 'bg-blue-600',
-    },
-    {
-        title: 'Pending Settlements',
-        value: '₦125,000.00',
-        change: '-3.1%',
-        trend: 'down',
-        icon: DollarSign,
-        bgColor: 'bg-pink-500',
-    },
-    {
-        title: 'Active Packages',
-        value: '12',
-        change: '+2 new',
-        trend: 'up',
-        icon: Package,
-        bgColor: 'bg-pink-600',
-    },
-];
-
-type Transaction = {
-    id: string;
-    type: string;
-    amount: string;
-    status: 'completed' | 'pending' | 'failed';
-    date: string;
-    reference: string;
-};
-
-const recentTransactions: Transaction[] = [
-    {
-        id: '1',
-        type: 'Deposit',
-        amount: '₦50,000.00',
-        status: 'completed',
-        date: '2 hours ago',
-        reference: 'TRX001234567',
-    },
-    {
-        id: '2',
-        type: 'Withdrawal',
-        amount: '₦25,000.00',
-        status: 'pending',
-        date: '5 hours ago',
-        reference: 'TRX001234568',
-    },
-    {
-        id: '3',
-        type: 'Transfer',
-        amount: '₦15,000.00',
-        status: 'completed',
-        date: '1 day ago',
-        reference: 'TRX001234569',
-    },
-    {
-        id: '4',
-        type: 'Deposit',
-        amount: '₦100,000.00',
-        status: 'completed',
-        date: '2 days ago',
-        reference: 'TRX001234570',
-    },
-    {
-        id: '5',
-        type: 'Withdrawal',
-        amount: '₦30,000.00',
-        status: 'failed',
-        date: '3 days ago',
-        reference: 'TRX001234571',
-    },
-];
-
 type QuickAction = {
     label: string;
     icon: LucideIcon;
@@ -151,14 +64,73 @@ const quickActions: QuickAction[] = [
     },
 ];
 
+interface DashboardProps {
+    user: {
+        id: number;
+        name: string;
+        email: string;
+        phone: string;
+        referralId: string;
+        registrationPaid: boolean;
+        notifications?: any[];
+        accounts: Array<{
+            id: number;
+            name: string;
+            accountNumber: string;
+            balance: string;
+            balanceRaw: number;
+            totalContributions: number;
+            rewards: number;
+            totalDebt: number;
+            referralEarnings: number;
+        }>;
+        thriftSubscriptions: Array<{
+            id: number;
+            packageId: number;
+            amountInvested: number;
+            status: string;
+            package: {
+                id: number;
+                name: string;
+                price: number;
+                duration: number;
+                profitPercentage: number;
+                description?: string;
+            } | null;
+        }>;
+    };
+    dashboardStats: {
+        totalBalance: string;
+        totalTransactions: number;
+        totalContributions: string;
+        totalRewards: string;
+        activePackages: number;
+    };
+    recentTransactions: Array<{
+        id: number;
+        type: string;
+        amount: string;
+        status: string;
+        date: string;
+        reference: string;
+        accountNumber: string;
+    }>;
+}
+
 const Dashboard = () => {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, user, dashboardStats, recentTransactions } = usePage<
+        SharedData & DashboardProps
+    >().props;
+
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
-    const userName = auth?.user?.name || 'User';
+    // Use real user data with proper fallbacks
+    const userName = user?.name || 'User';
+    const userEmail = user?.email || 'user@example.com';
+    const userPhone = user?.phone || '';
     const firstName = userName.split(' ')[0] || 'User';
     const userInitials = userName
         .split(' ')
@@ -167,18 +139,67 @@ const Dashboard = () => {
         .toUpperCase()
         .slice(0, 2);
 
-    const accounts = [
-        { id: '1', name: 'Main Account', balance: '₦1,458,500.00' },
-        { id: '2', name: 'Savings Account', balance: '₦1,000,000.00' },
+    const accounts = user?.accounts || [];
+    const [selectedAccount, setSelectedAccount] = useState(accounts[0] || null);
+
+    // Calculate notification count from user data (using notifications array from user model)
+    const notificationCount = user?.notifications?.length || 0;
+
+    // Generate stat cards from real data with meaningful change indicators
+    const statCards: StatCard[] = [
+        {
+            title: 'Total Balance',
+            value: dashboardStats?.totalBalance || '₦0.00',
+            change:
+                dashboardStats?.totalBalance !== '₦0.00'
+                    ? 'Active'
+                    : 'No activity',
+            trend: dashboardStats?.totalBalance !== '₦0.00' ? 'up' : 'down',
+            icon: Wallet,
+            bgColor: 'bg-blue-500',
+        },
+        {
+            title: 'Total Transactions',
+            value: dashboardStats?.totalTransactions?.toString() || '0',
+            change:
+                dashboardStats?.totalTransactions > 0
+                    ? `${dashboardStats.totalTransactions} total`
+                    : 'No transactions',
+            trend: dashboardStats?.totalTransactions > 0 ? 'up' : 'down',
+            icon: CreditCard,
+            bgColor: 'bg-blue-600',
+        },
+        {
+            title: 'Total Contributions',
+            value: dashboardStats?.totalContributions || '₦0.00',
+            change:
+                dashboardStats?.totalContributions !== '₦0.00'
+                    ? 'Contributing'
+                    : 'No contributions',
+            trend:
+                dashboardStats?.totalContributions !== '₦0.00' ? 'up' : 'down',
+            icon: DollarSign,
+            bgColor: 'bg-pink-500',
+        },
+        {
+            title: 'Active Packages',
+            value: dashboardStats?.activePackages?.toString() || '0',
+            change:
+                dashboardStats?.activePackages > 0
+                    ? `${dashboardStats.activePackages} active`
+                    : 'No packages',
+            trend: dashboardStats?.activePackages > 0 ? 'up' : 'down',
+            icon: Package,
+            bgColor: 'bg-pink-600',
+        },
     ];
-    const [selectedAccount, setSelectedAccount] = useState(accounts[0]);
 
     return (
         <>
             <Head title="Dashboard" />
             <DashboardLayout>
                 {/* Top Navbar */}
-                <div className="sticky top-0 z-40 border-b border-gray-200 bg-white ">
+                <div className="sticky top-0 z-40 border-b border-gray-200 bg-white">
                     <div className="flex items-center justify-between px-6 py-4 lg:px-8">
                         <div className="flex items-center gap-3">
                             <button
@@ -196,7 +217,7 @@ const Dashboard = () => {
                             </button>
 
                             {/* Search Bar */}
-                            <div className="hidden w-96 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5  md:flex">
+                            <div className="hidden w-96 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 md:flex">
                                 <Search className="h-4 w-4 text-gray-500" />
                                 <input
                                     type="text"
@@ -228,7 +249,7 @@ const Dashboard = () => {
                                 >
                                     <Wallet className="h-4 w-4" />
                                     <span className="hidden text-sm font-semibold lg:inline">
-                                        {selectedAccount.name}
+                                        {selectedAccount?.name || 'No Account'}
                                     </span>
                                     <ChevronDown className="h-4 w-4" />
                                 </button>
@@ -242,33 +263,39 @@ const Dashboard = () => {
                                             }
                                         />
                                         <div className="absolute right-0 z-20 mt-2 w-72 rounded-lg border border-gray-200 bg-white shadow-lg">
-                                            {accounts.map((account) => (
-                                                <button
-                                                    key={account.id}
-                                                    onClick={() => {
-                                                        setSelectedAccount(
-                                                            account,
-                                                        );
-                                                        setAccountDropdownOpen(
-                                                            false,
-                                                        );
-                                                    }}
-                                                    className={cn(
-                                                        'w-full border-b border-gray-200 px-5 py-4 text-left transition-colors hover:bg-gray-50',
-                                                        selectedAccount.id ===
-                                                            account.id &&
-                                                            'border-l-4 border-l-blue-600 bg-blue-50',
-                                                    )}
-                                                    type="button"
-                                                >
-                                                    <p className="text-sm font-semibold text-gray-900">
-                                                        {account.name}
-                                                    </p>
-                                                    <p className="mt-1 text-xs text-gray-600">
-                                                        {account.balance}
-                                                    </p>
-                                                </button>
-                                            ))}
+                                            {accounts.length > 0 ? (
+                                                accounts.map((account) => (
+                                                    <button
+                                                        key={account.id}
+                                                        onClick={() => {
+                                                            setSelectedAccount(
+                                                                account,
+                                                            );
+                                                            setAccountDropdownOpen(
+                                                                false,
+                                                            );
+                                                        }}
+                                                        className={cn(
+                                                            'w-full border-b border-gray-200 px-5 py-4 text-left transition-colors hover:bg-gray-50',
+                                                            selectedAccount?.id ===
+                                                                account.id &&
+                                                                'border-l-4 border-l-blue-600 bg-blue-50',
+                                                        )}
+                                                        type="button"
+                                                    >
+                                                        <p className="text-sm font-semibold text-gray-900">
+                                                            {account.name}
+                                                        </p>
+                                                        <p className="mt-1 text-xs text-gray-600">
+                                                            {account.balance}
+                                                        </p>
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                <div className="px-5 py-4 text-center text-sm text-gray-500">
+                                                    No accounts found
+                                                </div>
+                                            )}
                                             <div className="p-2">
                                                 <Link
                                                     href="/accounts/add"
@@ -289,9 +316,13 @@ const Dashboard = () => {
                                 className="relative rounded-md border border-gray-300 p-2 text-gray-700 transition-colors hover:bg-gray-50"
                             >
                                 <Bell className="h-5 w-5" />
-                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-pink-500 text-[10px] font-bold text-white">
-                                    3
-                                </span>
+                                {notificationCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-pink-500 text-[10px] font-bold text-white">
+                                        {notificationCount > 99
+                                            ? '99+'
+                                            : notificationCount}
+                                    </span>
+                                )}
                             </Link>
 
                             {/* Profile Menu */}
@@ -321,15 +352,25 @@ const Dashboard = () => {
                                                 setProfileDropdownOpen(false)
                                             }
                                         />
-                                        <div className="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg">
+                                        <div className="absolute right-0 z-20 mt-2 w-72 rounded-lg border border-gray-200 bg-white shadow-lg">
                                             <div className="rounded-t-lg border-b border-gray-200 bg-blue-50 px-5 py-4">
                                                 <p className="text-sm font-semibold text-gray-900">
                                                     {userName}
                                                 </p>
                                                 <p className="mt-1 text-xs text-gray-600">
-                                                    {auth?.user?.email ||
-                                                        'member@example.com'}
+                                                    {userEmail}
                                                 </p>
+                                                {userPhone && (
+                                                    <p className="mt-1 text-xs text-gray-600">
+                                                        {userPhone}
+                                                    </p>
+                                                )}
+                                                {user?.referralId && (
+                                                    <p className="mt-2 text-xs font-medium text-blue-600">
+                                                        Referral ID:{' '}
+                                                        {user.referralId}
+                                                    </p>
+                                                )}
                                             </div>
                                             <Link
                                                 href="/settings"
@@ -354,7 +395,7 @@ const Dashboard = () => {
                     {/* Mobile Search */}
                     {searchOpen && (
                         <div className="border-t border-gray-200 px-6 py-3 md:hidden">
-                            <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 ">
+                            <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5">
                                 <Search className="h-4 w-4 text-gray-500" />
                                 <input
                                     type="text"
@@ -368,13 +409,39 @@ const Dashboard = () => {
 
                 <div className="bg-gray-50 p-6 lg:p-8">
                     {/* Welcome Header */}
-                    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 ">
+                    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900">
                             Welcome back, {firstName}! 👋
                         </h1>
                         <p className="text-base text-gray-600">
                             Here's what's happening with your accounts today.
                         </p>
+                        {!user?.registrationPaid && (
+                            <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="rounded-full bg-yellow-100 p-2">
+                                        <Package className="h-5 w-5 text-yellow-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="text-sm font-semibold text-yellow-800">
+                                            Complete Your Registration
+                                        </h3>
+                                        <p className="text-sm text-yellow-700">
+                                            Pay your registration fee to unlock
+                                            all features
+                                        </p>
+                                    </div>
+                                    <Link href="/register-payment">
+                                        <Button
+                                            size="sm"
+                                            className="bg-yellow-600 text-white hover:bg-yellow-700"
+                                        >
+                                            Pay Now
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Stats Grid */}
@@ -413,7 +480,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 ">
+                    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
                         <h2 className="mb-5 text-xl font-bold text-gray-900">
                             Quick Actions
                         </h2>
@@ -442,7 +509,7 @@ const Dashboard = () => {
                     <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
                         {/* Recent Transactions */}
                         <div className="lg:col-span-2">
-                            <div className="rounded-lg border border-gray-200 bg-white ">
+                            <div className="rounded-lg border border-gray-200 bg-white">
                                 <div className="flex items-center justify-between border-b border-gray-200 p-6">
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-900">
@@ -462,69 +529,90 @@ const Dashboard = () => {
                                 </div>
                                 <div className="p-6">
                                     <div className="space-y-3">
-                                        {recentTransactions.map(
-                                            (transaction) => (
-                                                <div
-                                                    key={transaction.id}
-                                                    className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 transition-all hover:border-gray-300 hover:"
-                                                >
-                                                    <div className="flex items-center gap-4">
-                                                        <div
-                                                            className={cn(
-                                                                'rounded-md p-3',
-                                                                transaction.type ===
-                                                                    'Deposit' &&
-                                                                    'bg-blue-100 text-blue-600',
-                                                                transaction.type ===
-                                                                    'Withdrawal' &&
-                                                                    'bg-pink-100 text-pink-600',
-                                                                transaction.type ===
-                                                                    'Transfer' &&
-                                                                    'bg-purple-100 text-purple-600',
-                                                            )}
-                                                        >
-                                                            <CreditCard className="h-5 w-5" />
+                                        {recentTransactions &&
+                                        recentTransactions.length > 0 ? (
+                                            recentTransactions.map(
+                                                (transaction) => (
+                                                    <div
+                                                        key={transaction.id}
+                                                        className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4 transition-all hover:border-gray-300"
+                                                    >
+                                                        <div className="flex items-center gap-4">
+                                                            <div
+                                                                className={cn(
+                                                                    'rounded-md p-3',
+                                                                    transaction.type ===
+                                                                        'Deposit' &&
+                                                                        'bg-blue-100 text-blue-600',
+                                                                    transaction.type ===
+                                                                        'Withdrawal' &&
+                                                                        'bg-pink-100 text-pink-600',
+                                                                    transaction.type ===
+                                                                        'Transfer' &&
+                                                                        'bg-purple-100 text-purple-600',
+                                                                    transaction.type ===
+                                                                        'Payment' &&
+                                                                        'bg-green-100 text-green-600',
+                                                                )}
+                                                            >
+                                                                <CreditCard className="h-5 w-5" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-semibold text-gray-900">
+                                                                    {
+                                                                        transaction.type
+                                                                    }
+                                                                </p>
+                                                                <p className="mt-0.5 text-xs text-gray-600">
+                                                                    {
+                                                                        transaction.reference
+                                                                    }{' '}
+                                                                    •{' '}
+                                                                    {
+                                                                        transaction.date
+                                                                    }
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                        <div>
+                                                        <div className="text-right">
                                                             <p className="text-sm font-semibold text-gray-900">
                                                                 {
-                                                                    transaction.type
+                                                                    transaction.amount
                                                                 }
                                                             </p>
-                                                            <p className="mt-0.5 text-xs text-gray-600">
+                                                            <span
+                                                                className={cn(
+                                                                    'mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                                                    transaction.status ===
+                                                                        'completed' &&
+                                                                        'bg-green-100 text-green-700',
+                                                                    transaction.status ===
+                                                                        'pending' &&
+                                                                        'bg-yellow-100 text-yellow-700',
+                                                                    transaction.status ===
+                                                                        'failed' &&
+                                                                        'bg-red-100 text-red-700',
+                                                                )}
+                                                            >
                                                                 {
-                                                                    transaction.reference
-                                                                }{' '}
-                                                                •{' '}
-                                                                {
-                                                                    transaction.date
+                                                                    transaction.status
                                                                 }
-                                                            </p>
+                                                            </span>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <p className="text-sm font-semibold text-gray-900">
-                                                            {transaction.amount}
-                                                        </p>
-                                                        <span
-                                                            className={cn(
-                                                                'mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
-                                                                transaction.status ===
-                                                                    'completed' &&
-                                                                    'bg-green-100 text-green-700',
-                                                                transaction.status ===
-                                                                    'pending' &&
-                                                                    'bg-yellow-100 text-yellow-700',
-                                                                transaction.status ===
-                                                                    'failed' &&
-                                                                    'bg-red-100 text-red-700',
-                                                            )}
-                                                        >
-                                                            {transaction.status}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            ),
+                                                ),
+                                            )
+                                        ) : (
+                                            <div className="py-8 text-center">
+                                                <CreditCard className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                                                <p className="text-sm text-gray-500">
+                                                    No transactions yet
+                                                </p>
+                                                <p className="mt-1 text-xs text-gray-400">
+                                                    Your transaction history
+                                                    will appear here
+                                                </p>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -534,7 +622,7 @@ const Dashboard = () => {
                         {/* Sidebar Cards */}
                         <div className="space-y-5">
                             {/* Account Summary */}
-                            <div className="rounded-lg border border-gray-200 bg-white ">
+                            <div className="rounded-lg border border-gray-200 bg-white">
                                 <div className="border-b border-gray-200 p-6">
                                     <h3 className="text-xl font-bold text-gray-900">
                                         Account Summary
@@ -546,28 +634,79 @@ const Dashboard = () => {
                                 <div className="space-y-4 p-6">
                                     <div className="rounded-lg bg-blue-600 p-5 shadow-md">
                                         <p className="mb-2 text-sm font-medium text-blue-100">
-                                            Total Income
+                                            Total Rewards
                                         </p>
                                         <p className="text-3xl font-bold text-white">
-                                            ₦850,000.00
+                                            {dashboardStats?.totalRewards ||
+                                                '₦0.00'}
                                         </p>
                                         <div className="mt-2 flex items-center gap-1 text-xs font-semibold text-blue-100">
-                                            <TrendingUp className="h-3.5 w-3.5" />
-                                            +15% from last month
+                                            {dashboardStats?.totalRewards !==
+                                            '₦0.00' ? (
+                                                <TrendingUp className="h-3.5 w-3.5" />
+                                            ) : (
+                                                <TrendingDown className="h-3.5 w-3.5" />
+                                            )}
+                                            From thrift packages
                                         </div>
                                     </div>
                                     <div className="rounded-lg bg-pink-600 p-5 shadow-md">
                                         <p className="mb-2 text-sm font-medium text-pink-100">
-                                            Total Expenses
+                                            Total Contributions
                                         </p>
                                         <p className="text-3xl font-bold text-white">
-                                            ₦320,000.00
+                                            {dashboardStats?.totalContributions ||
+                                                '₦0.00'}
                                         </p>
                                         <div className="mt-2 flex items-center gap-1 text-xs font-semibold text-pink-100">
-                                            <TrendingDown className="h-3.5 w-3.5" />
-                                            -5% from last month
+                                            {dashboardStats?.totalContributions !==
+                                            '₦0.00' ? (
+                                                <TrendingUp className="h-3.5 w-3.5" />
+                                            ) : (
+                                                <TrendingDown className="h-3.5 w-3.5" />
+                                            )}
+                                            Across all accounts
                                         </div>
                                     </div>
+                                    {selectedAccount && (
+                                        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                            <h4 className="mb-2 font-semibold text-gray-900">
+                                                Selected Account
+                                            </h4>
+                                            <div className="space-y-1 text-sm text-gray-600">
+                                                <p>
+                                                    Account:{' '}
+                                                    {
+                                                        selectedAccount.accountNumber
+                                                    }
+                                                </p>
+                                                <p>
+                                                    Balance:{' '}
+                                                    {selectedAccount.balance}
+                                                </p>
+                                                {selectedAccount.totalContributions >
+                                                    0 && (
+                                                    <p>
+                                                        Contributions: ₦
+                                                        {(
+                                                            selectedAccount.totalContributions /
+                                                            100
+                                                        ).toLocaleString()}
+                                                    </p>
+                                                )}
+                                                {selectedAccount.rewards >
+                                                    0 && (
+                                                    <p>
+                                                        Rewards: ₦
+                                                        {(
+                                                            selectedAccount.rewards /
+                                                            100
+                                                        ).toLocaleString()}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="border-t border-gray-200 pt-4">
                                         <Link href="/wallet" className="w-full">
                                             <Button className="w-full rounded-md py-3 font-medium">
@@ -578,25 +717,123 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
-                            {/* Premium Upgrade */}
-                            <div className="rounded-lg bg-blue-600 p-6 text-white shadow-md">
-                                <div className="mb-5 inline-block rounded-md bg-white/20 p-4">
-                                    <Package className="h-8 w-8" />
+                            {/* Active Packages */}
+                            {user?.thriftSubscriptions &&
+                            user.thriftSubscriptions.length > 0 ? (
+                                <div className="rounded-lg border border-gray-200 bg-white">
+                                    <div className="border-b border-gray-200 p-6">
+                                        <h3 className="text-xl font-bold text-gray-900">
+                                            Active Packages
+                                        </h3>
+                                        <p className="mt-1 text-sm text-gray-600">
+                                            Your current thrift subscriptions
+                                        </p>
+                                    </div>
+                                    <div className="space-y-4 p-6">
+                                        {user.thriftSubscriptions.map(
+                                            (subscription) => (
+                                                <div
+                                                    key={subscription.id}
+                                                    className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <h4 className="font-semibold text-gray-900">
+                                                                {subscription
+                                                                    .package
+                                                                    ?.name ||
+                                                                    'Package'}
+                                                            </h4>
+                                                            <p className="text-sm text-gray-600">
+                                                                {
+                                                                    subscription
+                                                                        .package
+                                                                        ?.profitPercentage
+                                                                }
+                                                                % returns
+                                                            </p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="font-semibold text-gray-900">
+                                                                ₦
+                                                                {subscription
+                                                                    .package
+                                                                    ?.price
+                                                                    ? (
+                                                                          subscription
+                                                                              .package
+                                                                              .price /
+                                                                          100
+                                                                      ).toLocaleString()
+                                                                    : '0'}
+                                                            </p>
+                                                            <span
+                                                                className={cn(
+                                                                    'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                                                    subscription.status ===
+                                                                        'active' &&
+                                                                        'bg-green-100 text-green-700',
+                                                                    subscription.status ===
+                                                                        'inactive' &&
+                                                                        'bg-gray-100 text-gray-700',
+                                                                    subscription.status ===
+                                                                        'expired' &&
+                                                                        'bg-red-100 text-red-700',
+                                                                )}
+                                                            >
+                                                                {
+                                                                    subscription.status
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    {subscription.amountInvested >
+                                                        0 && (
+                                                        <div className="mt-2 text-sm text-gray-600">
+                                                            Invested: ₦
+                                                            {(
+                                                                subscription.amountInvested /
+                                                                100
+                                                            ).toLocaleString()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ),
+                                        )}
+                                        <div className="border-t border-gray-200 pt-4">
+                                            <Link
+                                                href="/packages"
+                                                className="w-full"
+                                            >
+                                                <Button className="w-full rounded-md py-3 font-medium">
+                                                    View All Packages
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    </div>
                                 </div>
-                                <h3 className="mb-2 text-xl font-bold">
-                                    Upgrade to Premium
-                                </h3>
-                                <p className="mb-5 text-sm text-blue-100">
-                                    Get access to exclusive thrift packages and
-                                    higher returns
-                                </p>
-                                <Button
-                                    variant="secondary"
-                                    className="w-full rounded-md bg-white py-3 font-medium text-blue-600 hover:bg-blue-50"
-                                >
-                                    Learn More
-                                </Button>
-                            </div>
+                            ) : (
+                                <div className="rounded-lg bg-blue-600 p-6 text-white shadow-md">
+                                    <div className="mb-5 inline-block rounded-md bg-white/20 p-4">
+                                        <Package className="h-8 w-8" />
+                                    </div>
+                                    <h3 className="mb-2 text-xl font-bold">
+                                        Get Started with Thrift
+                                    </h3>
+                                    <p className="mb-5 text-sm text-blue-100">
+                                        Choose a thrift package and start
+                                        earning returns on your investments
+                                    </p>
+                                    <Link href="/packages">
+                                        <Button
+                                            variant="secondary"
+                                            className="w-full rounded-md bg-white py-3 font-medium text-blue-600 hover:bg-blue-50"
+                                        >
+                                            Browse Packages
+                                        </Button>
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

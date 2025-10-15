@@ -4,29 +4,146 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\UserRegistrationRequest;
+use App\Services\UserRegistrationService;
+use App\Models\ThriftPackage;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
 
-    public function loginPage ()
+    public function loginPage()
     {
         return inertia('auth/Login');
     }
-    public function registerPage ()
+    public function registerPage()
     {
-        return inertia('auth/Register');
+        // Load ThriftPackages for the registration form
+        $packages = ThriftPackage::where('is_active', true)->get()->map(function ($package) {
+            return [
+                'id' => $package->id,
+                'name' => $package->name,
+                'price' => $package->price,
+                'duration' => $package->duration,
+                'profitPercentage' => $package->profit_percentage,
+                'description' => $package->description,
+                'features' => $package->features,
+                'terms' => $package->terms,
+                'isActive' => $package->is_active,
+                'minContribution' => $package->min_contribution,
+                'maxContribution' => $package->max_contribution,
+            ];
+        });
+
+        return inertia('auth/Register', [
+            'packages' => $packages
+        ]);
     }
+    /**
+     * Handle user registration
+     *
+     * @param UserRegistrationRequest $request
+     * @param UserRegistrationService $registrationService
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function register(UserRegistrationRequest $request, UserRegistrationService $registrationService)
+    {
+        try {
+            // Register the user using the service
+            $user = $registrationService->register($request->validated());
+
+            // Authenticate the user
+            Auth::login($user);
+            $request->session()->regenerate();
+
+            // Redirect to register-payment page on successful registration
+            return redirect()->route('register-payment')->with('success', 'Registration successful! Please complete your payment to activate your account.');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Registration failed - Package not found', [
+                'package_id' => $request->input('package_id'),
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->withErrors([
+                'package_id' => 'Selected package does not exist'
+            ])->withInput();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle duplicate email error
+            if ($e->getCode() === '23000') {
+                Log::error('Registration failed - Duplicate email', [
+                    'email' => $request->input('email'),
+                    'error' => $e->getMessage()
+                ]);
+
+                return back()->withErrors([
+                    'email' => 'Sorry this account already exists'
+                ])->withInput();
+            }
+
+            Log::error('Registration failed - Database error', [
+                'email' => $request->input('email'),
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->withErrors([
+                'general' => 'Registration failed. Please try again.'
+            ])->withInput();
+        } catch (\Exception $e) {
+            Log::error('Registration failed', [
+                'email' => $request->input('email'),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->withErrors([
+                'general' => 'Registration failed. Please try again.'
+            ])->withInput();
+        }
+    }
+
+
+
+    /**
+     * Handle user login with email-based authentication
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function login(Request $request)
     {
+        // Validate the request
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('dashboard');
+
+            // Redirect to dashboard on successful login
+            return redirect()->intended('dashboard')->with('success', 'Login successful!');
         }
 
+        // Authentication failed - return with error
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ]);
+            'email' => 'Invalid credentials. Please check your email and password.',
+        ])->onlyInput('email');
+    }
+
+    /**
+     * Handle user logout
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')->with('success', 'Logged out successfully');
     }
 }
