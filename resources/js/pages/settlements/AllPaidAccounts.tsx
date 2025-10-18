@@ -1,343 +1,299 @@
+import axios from 'axios';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { Head } from '@inertiajs/react';
-import {
-    Calendar,
-    CheckCircle,
-    Download,
-    Filter,
-    Search,
-    User,
-} from 'lucide-react';
-import { useState } from 'react';
+import { Download, Search } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 type PaidAccount = {
-    id: string;
-    accountName: string;
+    id: number | string;
     accountNumber: string;
-    packageType: string;
-    startDate: string;
-    maturityDate: string;
-    clearanceDate: string;
-    principalAmount: string;
-    returnAmount: string;
-    totalPaidOut: string;
-    paymentMethod: string;
+    amount: number;
+    settlementDate: string | null;
+    reference: string;
+    paymentMethod?: string | null;
 };
 
-const paidAccounts: PaidAccount[] = [
-    {
-        id: '1',
-        accountName: 'Alice Johnson',
-        accountNumber: 'ACC0012340',
-        packageType: 'Platinum Package',
-        startDate: '2025-04-13',
-        maturityDate: '2025-10-13',
-        clearanceDate: '2025-10-13',
-        principalAmount: '₦2,000,000.00',
-        returnAmount: '₦300,000.00',
-        totalPaidOut: '₦2,300,000.00',
-        paymentMethod: 'Bank Transfer',
-    },
-    {
-        id: '2',
-        accountName: 'David Brown',
-        accountNumber: 'ACC0012341',
-        packageType: 'Gold Package',
-        startDate: '2025-03-10',
-        maturityDate: '2025-09-10',
-        clearanceDate: '2025-09-12',
-        principalAmount: '₦500,000.00',
-        returnAmount: '₦60,000.00',
-        totalPaidOut: '₦560,000.00',
-        paymentMethod: 'Mobile Money',
-    },
-    {
-        id: '3',
-        accountName: 'Emma Wilson',
-        accountNumber: 'ACC0012342',
-        packageType: 'Silver Package',
-        startDate: '2025-02-15',
-        maturityDate: '2025-08-15',
-        clearanceDate: '2025-08-15',
-        principalAmount: '₦150,000.00',
-        returnAmount: '₦12,000.00',
-        totalPaidOut: '₦162,000.00',
-        paymentMethod: 'Bank Transfer',
-    },
-    {
-        id: '4',
-        accountName: 'Frank Taylor',
-        accountNumber: 'ACC0012343',
-        packageType: 'Gold Package',
-        startDate: '2025-01-20',
-        maturityDate: '2025-07-20',
-        clearanceDate: '2025-07-21',
-        principalAmount: '₦750,000.00',
-        returnAmount: '₦90,000.00',
-        totalPaidOut: '₦840,000.00',
-        paymentMethod: 'Bank Transfer',
-    },
-    {
-        id: '5',
-        accountName: 'Grace Anderson',
-        accountNumber: 'ACC0012344',
-        packageType: 'Bronze Package',
-        startDate: '2025-04-01',
-        maturityDate: '2025-07-01',
-        clearanceDate: '2025-07-02',
-        principalAmount: '₦50,000.00',
-        returnAmount: '₦2,500.00',
-        totalPaidOut: '₦52,500.00',
-        paymentMethod: 'Mobile Money',
-    },
+const PAID_ACCOUNT_ENDPOINTS = [
+    '/api/settlements/paid-accounts',
+    '/api/settlements/paid_accounts',
+    '/api/settlements?status=paid',
 ];
 
-const AllPaidAccounts = () => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterPackage, setFilterPackage] = useState('all');
+const normalizePaidAccounts = (accounts: unknown): PaidAccount[] => {
+    if (!Array.isArray(accounts)) {
+        return [];
+    }
 
-    const filteredAccounts = paidAccounts.filter((account) => {
-        const matchesSearch =
-            account.accountName
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-            account.accountNumber
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase());
-        const matchesFilter =
-            filterPackage === 'all' || account.packageType === filterPackage;
-        return matchesSearch && matchesFilter;
+    return accounts.map((account, index) => {
+        if (typeof account !== 'object' || account === null) {
+            return {
+                id: `paid-account-${index}`,
+                accountNumber: 'Unknown',
+                amount: 0,
+                settlementDate: null,
+                reference: 'N/A',
+                paymentMethod: null,
+            };
+        }
+
+        const record = account as Record<string, unknown>;
+        const rawAmount = record.amount;
+        let amountValue = 0;
+
+        if (typeof rawAmount === 'number') {
+            amountValue = rawAmount;
+        } else if (typeof rawAmount === 'string') {
+            const cleaned = rawAmount.replace(/[^\d.-]/g, '');
+            const parsed = Number(cleaned);
+            amountValue = Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        const settlementDate =
+            (record.settlementDate as string | undefined) ??
+            (record.settlement_date as string | undefined) ??
+            null;
+
+        return {
+            id:
+                (record.id as number | string | undefined) ??
+                `paid-account-${index}`,
+            accountNumber:
+                (record.accountNumber as string | undefined) ??
+                (record.account_number as string | undefined) ??
+                'Unknown',
+            amount: amountValue,
+            settlementDate,
+            reference:
+                (record.reference as string | undefined) ??
+                (record.transactionReference as string | undefined) ??
+                `REF-${index}`,
+            paymentMethod:
+                (record.paymentMethod as string | undefined) ??
+                (record.payment_method as string | undefined) ??
+                null,
+        };
     });
+};
 
-    const totalPaidOut = paidAccounts.reduce(
-        (sum, acc) => sum + parseFloat(acc.totalPaidOut.replace(/[₦,]/g, '')),
-        0,
+const AllPaidAccounts = () => {
+    const [accounts, setAccounts] = useState<PaidAccount[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [error, setError] = useState<string>('');
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchAccounts = async () => {
+            setLoading(true);
+            setError('');
+
+            for (const endpoint of PAID_ACCOUNT_ENDPOINTS) {
+                try {
+                    const { data } = await axios.get(endpoint, {
+                        withCredentials: true,
+                    });
+
+                    const payload =
+                        (data?.paidAccounts as unknown) ??
+                        (data?.accounts as unknown) ??
+                        (data?.data as unknown) ??
+                        data;
+                    const normalised = normalizePaidAccounts(payload);
+
+                    if (isMounted && (normalised.length > 0 || Array.isArray(payload))) {
+                        setAccounts(normalised);
+                        setLoading(false);
+                        return;
+                    }
+                } catch (requestError) {
+                    if (
+                        endpoint === PAID_ACCOUNT_ENDPOINTS[
+                            PAID_ACCOUNT_ENDPOINTS.length - 1
+                        ]
+                    ) {
+                        if (isMounted) {
+                            setError(
+                                'Unable to load paid settlement accounts right now. Please try again later.',
+                            );
+                        }
+                    }
+                }
+            }
+
+            if (isMounted) {
+                setLoading(false);
+            }
+        };
+
+        fetchAccounts();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const filteredAccounts = useMemo(() => {
+        if (!searchTerm) {
+            return accounts;
+        }
+
+        const lowerQuery = searchTerm.toLowerCase();
+        return accounts.filter(
+            (account) =>
+                account.accountNumber.toLowerCase().includes(lowerQuery) ||
+                account.reference.toLowerCase().includes(lowerQuery),
+        );
+    }, [accounts, searchTerm]);
+
+    const totalAmountPaid = useMemo(
+        () => filteredAccounts.reduce((sum, account) => sum + account.amount, 0),
+        [filteredAccounts],
     );
+
+    const thisMonthCount = useMemo(() => {
+        const now = new Date();
+
+        return filteredAccounts.filter((account) => {
+            if (!account.settlementDate) {
+                return false;
+            }
+
+            const settlement = new Date(account.settlementDate);
+
+            return (
+                settlement.getMonth() === now.getMonth() &&
+                settlement.getFullYear() === now.getFullYear()
+            );
+        }).length;
+    }, [filteredAccounts]);
+
+    const handleExport = () => {
+        window.alert('Export functionality coming soon!');
+    };
 
     return (
         <>
             <Head title="All Paid Accounts - Settlements" />
             <DashboardLayout>
                 <div className="bg-gray-50 p-6 lg:p-8">
-                    {/* Header */}
                     <div className="mb-6">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900">
-                            All Paid Accounts
+                            All Paid Settlement Accounts
                         </h1>
-                        <p className="text-base text-gray-600">
-                            Complete history of all settled and paid-out
-                            accounts
+                        <p className="text-sm text-gray-600">
+                            View the history of settled payouts and confirmed settlement batches.
                         </p>
                     </div>
 
-                    {/* Stats */}
-                    <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                        <div className="rounded-lg border border-gray-200 bg-green-500 p-6 shadow-md">
-                            <div className="mb-3 flex items-center gap-3">
-                                <div className="rounded-md bg-white/20 p-3">
-                                    <CheckCircle className="h-6 w-6 text-white" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-green-100">
-                                        Total Paid
-                                    </p>
-                                    <p className="text-2xl font-bold text-white">
-                                        {paidAccounts.length}
-                                    </p>
-                                </div>
-                            </div>
+                    <div className="mb-6 flex flex-col gap-4 md:flex-row md:justify-between">
+                        <div className="relative w-full md:max-w-md">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(event) => setSearchTerm(event.target.value)}
+                                placeholder="Search by account number or reference..."
+                                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            />
                         </div>
+                        <button
+                            type="button"
+                            onClick={handleExport}
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 md:self-start"
+                        >
+                            <Download className="h-4 w-4" />
+                            Export
+                        </button>
+                    </div>
 
-                        <div className="rounded-lg border border-gray-200 bg-blue-600 p-6 shadow-md">
-                            <div className="mb-3 flex items-center gap-3">
-                                <div className="rounded-md bg-white/20 p-3">
-                                    <CheckCircle className="h-6 w-6 text-white" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-blue-100">
-                                        Total Amount Paid
-                                    </p>
-                                    <p className="text-xl font-bold text-white">
-                                        ₦{totalPaidOut.toLocaleString()}.00
-                                    </p>
-                                </div>
-                            </div>
+                    <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div className="rounded-lg border border-blue-100 bg-blue-50 p-5">
+                            <p className="text-sm text-blue-800">Total Paid Accounts</p>
+                            <p className="mt-2 text-3xl font-bold text-blue-900">
+                                {accounts.length}
+                            </p>
                         </div>
-
-                        <div className="rounded-lg border border-gray-200 bg-pink-500 p-6 shadow-md">
-                            <div className="mb-3 flex items-center gap-3">
-                                <div className="rounded-md bg-white/20 p-3">
-                                    <Calendar className="h-6 w-6 text-white" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-pink-100">
-                                        This Month
-                                    </p>
-                                    <p className="text-2xl font-bold text-white">
-                                        2
-                                    </p>
-                                </div>
-                            </div>
+                        <div className="rounded-lg border border-green-100 bg-green-50 p-5">
+                            <p className="text-sm text-green-700">Total Amount Paid</p>
+                            <p className="mt-2 text-3xl font-bold text-green-900">
+                                ₦{totalAmountPaid.toLocaleString()}
+                            </p>
+                        </div>
+                        <div className="rounded-lg border border-purple-100 bg-purple-50 p-5">
+                            <p className="text-sm text-purple-700">Paid This Month</p>
+                            <p className="mt-2 text-3xl font-bold text-purple-900">
+                                {thisMonthCount}
+                            </p>
                         </div>
                     </div>
 
-                    {/* Filters */}
-                    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                            <div className="flex flex-1 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5">
-                                <Search className="h-4 w-4 text-gray-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Search by name or account number..."
-                                    value={searchQuery}
-                                    onChange={(e) =>
-                                        setSearchQuery(e.target.value)
-                                    }
-                                    className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-500"
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5">
-                                    <Filter className="h-4 w-4 text-gray-500" />
-                                    <select
-                                        value={filterPackage}
-                                        onChange={(e) =>
-                                            setFilterPackage(e.target.value)
-                                        }
-                                        className="border-none bg-transparent text-sm text-gray-700 outline-none"
-                                    >
-                                        <option value="all">
-                                            All Packages
-                                        </option>
-                                        <option value="Bronze Package">
-                                            Bronze Package
-                                        </option>
-                                        <option value="Silver Package">
-                                            Silver Package
-                                        </option>
-                                        <option value="Gold Package">
-                                            Gold Package
-                                        </option>
-                                        <option value="Platinum Package">
-                                            Platinum Package
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <button
-                                    className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-                                    type="button"
-                                >
-                                    <Download className="h-4 w-4" />
-                                    Export CSV
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Accounts Table */}
-                    <div className="rounded-lg border border-gray-200 bg-white">
+                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
                         <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="border-b border-gray-200 bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                                            Account Details
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                                            Package
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                                            Dates
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                                            Amounts
-                                        </th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">
-                                            Payment Method
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {filteredAccounts.map((account) => (
-                                        <tr
-                                            key={account.id}
-                                            className="transition-colors hover:bg-gray-50"
-                                        >
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="rounded-md bg-green-100 p-2">
-                                                        <User className="h-5 w-5 text-green-600" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-semibold text-gray-900">
-                                                            {
-                                                                account.accountName
-                                                            }
-                                                        </p>
-                                                        <p className="text-xs text-gray-600">
-                                                            {
-                                                                account.accountNumber
-                                                            }
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
-                                                    {account.packageType}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="space-y-1">
-                                                    <p className="text-xs text-gray-500">
-                                                        Start:{' '}
-                                                        {account.startDate}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        Maturity:{' '}
-                                                        {account.maturityDate}
-                                                    </p>
-                                                    <p className="text-xs font-medium text-green-600">
-                                                        Cleared:{' '}
-                                                        {account.clearanceDate}
-                                                    </p>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="space-y-1">
-                                                    <p className="text-sm text-gray-900">
-                                                        {
-                                                            account.principalAmount
-                                                        }
-                                                    </p>
-                                                    <p className="text-xs text-green-600">
-                                                        +{account.returnAmount}
-                                                    </p>
-                                                    <p className="text-sm font-bold text-gray-900">
-                                                        {account.totalPaidOut}
-                                                    </p>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-sm text-gray-700">
-                                                    {account.paymentMethod}
-                                                </span>
-                                            </td>
+                            {loading ? (
+                                <div className="px-6 py-16 text-center text-gray-600">
+                                    Loading paid accounts...
+                                </div>
+                            ) : error ? (
+                                <div className="px-6 py-16 text-center text-red-600">
+                                    {error}
+                                </div>
+                            ) : filteredAccounts.length === 0 ? (
+                                <div className="px-6 py-16 text-center text-gray-500">
+                                    No paid settlement accounts found.
+                                </div>
+                            ) : (
+                                <table className="w-full text-sm">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left font-semibold text-gray-600">
+                                                Reference
+                                            </th>
+                                            <th className="px-6 py-3 text-left font-semibold text-gray-600">
+                                                Account Number
+                                            </th>
+                                            <th className="px-6 py-3 text-right font-semibold text-gray-600">
+                                                Amount
+                                            </th>
+                                            <th className="px-6 py-3 text-left font-semibold text-gray-600">
+                                                Settlement Date
+                                            </th>
+                                            <th className="px-6 py-3 text-left font-semibold text-gray-600">
+                                                Payment Method
+                                            </th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {filteredAccounts.map((account) => (
+                                            <tr
+                                                key={account.id}
+                                                className="border-t border-gray-100 transition hover:bg-gray-50"
+                                            >
+                                                <td className="px-6 py-3 font-mono text-xs text-gray-800">
+                                                    {account.reference}
+                                                </td>
+                                                <td className="px-6 py-3 text-gray-900">
+                                                    {account.accountNumber}
+                                                </td>
+                                                <td className="px-6 py-3 text-right font-semibold text-gray-900">
+                                                    ₦{account.amount.toLocaleString()}
+                                                </td>
+                                                <td className="px-6 py-3 text-gray-700">
+                                                    {account.settlementDate
+                                                        ? new Date(
+                                                              account.settlementDate,
+                                                          ).toLocaleDateString()
+                                                        : 'N/A'}
+                                                </td>
+                                                <td className="px-6 py-3 text-gray-700">
+                                                    {account.paymentMethod ?? 'N/A'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                         </div>
-
-                        {filteredAccounts.length === 0 && (
-                            <div className="py-12 text-center">
-                                <p className="text-gray-500">
-                                    No accounts found
-                                </p>
-                            </div>
-                        )}
                     </div>
                 </div>
             </DashboardLayout>

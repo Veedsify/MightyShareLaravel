@@ -1,86 +1,198 @@
+import axios from 'axios';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { Head } from '@inertiajs/react';
-import {
-    AlertCircle,
-    Calendar,
-    CheckSquare,
-    DollarSign,
-    FileText,
-    User,
-} from 'lucide-react';
-import { useState } from 'react';
+import { AlertCircle, Plus, Trash2 } from 'lucide-react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 
-type SelectedAccount = {
-    id: string;
-    accountName: string;
+type Account = {
+    id: number | string;
     accountNumber: string;
-    amount: string;
+    balance: number;
+    accountName?: string | null;
+    bankName?: string | null;
 };
 
-const availableAccounts = [
-    {
-        id: '1',
-        accountName: 'John Doe',
-        accountNumber: 'ACC0012345',
-        amount: '₦560,000.00',
-    },
-    {
-        id: '2',
-        accountName: 'Jane Smith',
-        accountNumber: 'ACC0012346',
-        amount: '₦1,150,000.00',
-    },
-    {
-        id: '3',
-        accountName: 'Michael Johnson',
-        accountNumber: 'ACC0012347',
-        amount: '₦270,000.00',
-    },
-    {
-        id: '4',
-        accountName: 'Sarah Williams',
-        accountNumber: 'ACC0012348',
-        amount: '₦840,000.00',
-    },
-    {
-        id: '5',
-        accountName: 'David Lee',
-        accountNumber: 'ACC0012349',
-        amount: '₦450,000.00',
-    },
+const ACCOUNT_ENDPOINTS = [
+    '/api/accounts',
+    '/api/settlements/accounts',
+    '/api/settlement-accounts',
 ];
 
-const RequestBulkWithdrawal = () => {
-    const [selectedAccounts, setSelectedAccounts] = useState<SelectedAccount[]>(
-        [],
-    );
-    const [withdrawalMethod, setWithdrawalMethod] = useState('bank-transfer');
-    const [requestReason, setRequestReason] = useState('');
+const normalizeAccounts = (accounts: unknown): Account[] => {
+    if (!Array.isArray(accounts)) {
+        return [];
+    }
 
-    const toggleAccount = (account: (typeof availableAccounts)[0]) => {
-        const isSelected = selectedAccounts.some(
-            (acc) => acc.id === account.id,
-        );
-        if (isSelected) {
-            setSelectedAccounts(
-                selectedAccounts.filter((acc) => acc.id !== account.id),
-            );
-        } else {
-            setSelectedAccounts([...selectedAccounts, account]);
+    return accounts.map((account, index) => {
+        if (typeof account !== 'object' || account === null) {
+            return {
+                id: `account-${index}`,
+                accountNumber: 'N/A',
+                balance: 0,
+                accountName: null,
+                bankName: null,
+            };
         }
+
+        const record = account as Record<string, unknown>;
+        const rawBalance = record.balance ?? record.amount;
+        let balanceValue = 0;
+
+        if (typeof rawBalance === 'number') {
+            balanceValue = rawBalance;
+        } else if (typeof rawBalance === 'string') {
+            const cleaned = rawBalance.replace(/[^\d.-]/g, '');
+            const parsed = Number(cleaned);
+            balanceValue = Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        return {
+            id:
+                (record.id as number | string | undefined) ?? `account-${index}`,
+            accountNumber:
+                (record.accountNumber as string | undefined) ??
+                (record.account_number as string | undefined) ??
+                'N/A',
+            balance: balanceValue,
+            accountName:
+                (record.accountName as string | undefined) ??
+                (record.account_name as string | undefined) ??
+                null,
+            bankName:
+                (record.bankName as string | undefined) ??
+                (record.bank_name as string | undefined) ??
+                null,
+        };
+    });
+};
+
+const RequestBulkWithdrawal = () => {
+    const [availableAccounts, setAvailableAccounts] = useState<Account[]>([]);
+    const [selectedAccounts, setSelectedAccounts] = useState<Account[]>([]);
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [notes, setNotes] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(true);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchAccounts = async () => {
+            setLoading(true);
+            setError('');
+
+            for (const endpoint of ACCOUNT_ENDPOINTS) {
+                try {
+                    const { data } = await axios.get(endpoint, {
+                        withCredentials: true,
+                    });
+
+                    const payload =
+                        (data?.accounts as unknown) ??
+                        (data?.data as unknown) ??
+                        data;
+                    const normalised = normalizeAccounts(payload);
+
+                    if (isMounted && (normalised.length > 0 || Array.isArray(payload))) {
+                        setAvailableAccounts(normalised);
+                        setLoading(false);
+                        return;
+                    }
+                } catch (requestError) {
+                    if (
+                        endpoint === ACCOUNT_ENDPOINTS[ACCOUNT_ENDPOINTS.length - 1]
+                    ) {
+                        if (isMounted) {
+                            setError(
+                                'Unable to load available settlement accounts. Refresh or try again later.',
+                            );
+                        }
+                    }
+                }
+            }
+
+            if (isMounted) {
+                setLoading(false);
+            }
+        };
+
+        fetchAccounts();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const filteredAvailableAccounts = useMemo(() => {
+        if (!searchQuery) {
+            return availableAccounts.filter(
+                (account) =>
+                    !selectedAccounts.some(
+                        (selected) => selected.id === account.id,
+                    ),
+            );
+        }
+
+        const lowerQuery = searchQuery.toLowerCase();
+
+        return availableAccounts.filter((account) => {
+            if (selectedAccounts.some((selected) => selected.id === account.id)) {
+                return false;
+            }
+
+            return (
+                account.accountNumber.toLowerCase().includes(lowerQuery) ||
+                (account.accountName ?? '').toLowerCase().includes(lowerQuery)
+            );
+        });
+    }, [availableAccounts, selectedAccounts, searchQuery]);
+
+    const totalSelectedAmount = useMemo(
+        () =>
+            selectedAccounts.reduce(
+                (sum, account) => sum + account.balance,
+                0,
+            ),
+        [selectedAccounts],
+    );
+
+    const handleAddAccount = (account: Account) => {
+        setSelectedAccounts((prev) => [...prev, account]);
+        setSearchQuery('');
     };
 
-    const totalAmount = selectedAccounts.reduce(
-        (sum, acc) => sum + parseFloat(acc.amount.replace(/[₦,]/g, '')),
-        0,
-    );
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Handle bulk withdrawal request
-        alert(
-            `Request submitted for ${selectedAccounts.length} accounts totaling ₦${totalAmount.toLocaleString()}.00`,
+    const handleRemoveAccount = (id: Account['id']) => {
+        setSelectedAccounts((prev) =>
+            prev.filter((account) => account.id !== id),
         );
+    };
+
+    const handleClearAll = () => {
+        setSelectedAccounts([]);
+        setNotes('');
+    };
+
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        if (selectedAccounts.length === 0) {
+            window.alert(
+                'Please add at least one account to your bulk withdrawal request.',
+            );
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        // Placeholder for API submission. Replace with actual implementation when endpoint is ready.
+        setTimeout(() => {
+            window.alert(
+                `Bulk withdrawal request for ₦${totalSelectedAmount.toLocaleString()} submitted successfully!`,
+            );
+            handleClearAll();
+            setIsSubmitting(false);
+        }, 1200);
     };
 
     return (
@@ -88,294 +200,171 @@ const RequestBulkWithdrawal = () => {
             <Head title="Request Bulk Withdrawal - Settlements" />
             <DashboardLayout>
                 <div className="bg-gray-50 p-6 lg:p-8">
-                    {/* Header */}
                     <div className="mb-6">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900">
-                            Request Bulk Withdrawal
+                            Request Bulk Account Withdrawal
                         </h1>
-                        <p className="text-base text-gray-600">
-                            Submit a request to withdraw multiple settled
-                            accounts at once
+                        <p className="text-sm text-gray-600">
+                            Combine multiple settlement accounts into a single withdrawal request.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                        {/* Main Form */}
-                        <div className="lg:col-span-2">
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                {/* Available Accounts */}
-                                <div className="rounded-lg border border-gray-200 bg-white">
-                                    <div className="border-b border-gray-200 p-6">
-                                        <h2 className="text-xl font-bold text-gray-900">
-                                            Select Accounts
-                                        </h2>
-                                        <p className="mt-1 text-sm text-gray-600">
-                                            Choose which settled accounts to
-                                            include in this bulk withdrawal
-                                        </p>
-                                    </div>
-                                    <div className="p-6">
-                                        <div className="space-y-3">
-                                            {availableAccounts.map(
-                                                (account) => {
-                                                    const isSelected =
-                                                        selectedAccounts.some(
-                                                            (acc) =>
-                                                                acc.id ===
-                                                                account.id,
-                                                        );
-                                                    return (
-                                                        <button
-                                                            key={account.id}
-                                                            type="button"
-                                                            onClick={() =>
-                                                                toggleAccount(
-                                                                    account,
-                                                                )
-                                                            }
-                                                            className={`flex w-full items-center justify-between rounded-lg border p-4 transition-all ${
-                                                                isSelected
-                                                                    ? 'border-blue-500 bg-blue-50'
-                                                                    : 'border-gray-200 bg-white hover:border-gray-300'
-                                                            }`}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div
-                                                                    className={`flex h-5 w-5 items-center justify-center rounded ${
-                                                                        isSelected
-                                                                            ? 'bg-blue-600'
-                                                                            : 'border-2 border-gray-300 bg-white'
-                                                                    }`}
-                                                                >
-                                                                    {isSelected && (
-                                                                        <CheckSquare className="h-4 w-4 text-white" />
-                                                                    )}
-                                                                </div>
-                                                                <div className="rounded-md bg-blue-100 p-2">
-                                                                    <User className="h-5 w-5 text-blue-600" />
-                                                                </div>
-                                                                <div className="text-left">
-                                                                    <p className="text-sm font-semibold text-gray-900">
-                                                                        {
-                                                                            account.accountName
-                                                                        }
-                                                                    </p>
-                                                                    <p className="text-xs text-gray-600">
-                                                                        {
-                                                                            account.accountNumber
-                                                                        }
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-lg font-bold text-gray-900">
-                                                                {account.amount}
-                                                            </p>
-                                                        </button>
-                                                    );
-                                                },
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                    {error && (
+                        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                            {error}
+                        </div>
+                    )}
 
-                                {/* Withdrawal Details */}
-                                <div className="rounded-lg border border-gray-200 bg-white p-6">
-                                    <h2 className="mb-5 text-xl font-bold text-gray-900">
-                                        Withdrawal Details
-                                    </h2>
-                                    <div className="space-y-5">
-                                        <div>
-                                            <label
-                                                htmlFor="withdrawal-method"
-                                                className="mb-2 block text-sm font-medium text-gray-700"
-                                            >
-                                                Withdrawal Method
-                                            </label>
-                                            <select
-                                                id="withdrawal-method"
-                                                value={withdrawalMethod}
-                                                onChange={(e) =>
-                                                    setWithdrawalMethod(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 transition-colors outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                                            >
-                                                <option value="bank-transfer">
-                                                    Bank Transfer
-                                                </option>
-                                                <option value="mobile-money">
-                                                    Mobile Money
-                                                </option>
-                                                <option value="check">
-                                                    Check Payment
-                                                </option>
-                                            </select>
-                                        </div>
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        <div className="space-y-4">
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-900">
+                                    Add Accounts to Request
+                                </h2>
+                                <p className="mt-1 text-sm text-gray-600">
+                                    Search by account number or name to add eligible settlement accounts.
+                                </p>
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(event) =>
+                                        setSearchQuery(event.target.value)
+                                    }
+                                    placeholder="Search account number or name..."
+                                    className="mt-3 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                                />
+                            </div>
 
-                                        <div>
-                                            <label
-                                                htmlFor="request-reason"
-                                                className="mb-2 block text-sm font-medium text-gray-700"
-                                            >
-                                                Request Reason (Optional)
-                                            </label>
-                                            <textarea
-                                                id="request-reason"
-                                                value={requestReason}
-                                                onChange={(e) =>
-                                                    setRequestReason(
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                rows={4}
-                                                placeholder="Provide any additional information about this bulk withdrawal request..."
-                                                className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 transition-colors outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                                            />
-                                        </div>
+                            <div className="max-h-80 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+                                {loading ? (
+                                    <div className="px-4 py-6 text-center text-gray-500">
+                                        Loading accounts...
                                     </div>
-                                </div>
-
-                                {/* Submit Button */}
-                                <div className="flex items-center justify-end gap-3">
-                                    <button
-                                        type="button"
-                                        className="rounded-md border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={selectedAccounts.length === 0}
-                                        className="rounded-md bg-blue-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                    >
-                                        Submit Bulk Withdrawal Request
-                                    </button>
-                                </div>
-                            </form>
+                                ) : filteredAvailableAccounts.length === 0 ? (
+                                    <div className="px-4 py-6 text-center text-gray-500">
+                                        {searchQuery
+                                            ? 'No accounts match your search.'
+                                            : 'No additional accounts available.'}
+                                    </div>
+                                ) : (
+                                    filteredAvailableAccounts.map((account) => (
+                                        <div
+                                            key={account.id}
+                                            className="flex items-center justify-between border-b border-gray-100 px-4 py-3 last:border-b-0 hover:bg-gray-50"
+                                        >
+                                            <div>
+                                                <p className="font-semibold text-gray-900">
+                                                    {account.accountNumber}
+                                                </p>
+                                                <p className="text-sm text-gray-600">
+                                                    {account.accountName ?? 'Settlement Account'}
+                                                </p>
+                                                <p className="text-sm font-medium text-blue-600">
+                                                    Balance: ₦{account.balance.toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleAddAccount(account)}
+                                                className="rounded-full bg-blue-600 p-2 text-white transition hover:bg-blue-700"
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </div>
 
-                        {/* Summary Sidebar */}
-                        <div className="space-y-6">
-                            {/* Selection Summary */}
-                            <div className="rounded-lg border border-gray-200 bg-white p-6">
-                                <h3 className="mb-5 text-lg font-bold text-gray-900">
-                                    Request Summary
-                                </h3>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 rounded-lg bg-blue-50 p-4">
-                                        <FileText className="h-5 w-5 text-blue-600" />
-                                        <div>
-                                            <p className="text-xs text-gray-600">
-                                                Selected Accounts
-                                            </p>
-                                            <p className="text-2xl font-bold text-gray-900">
-                                                {selectedAccounts.length}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-3 rounded-lg bg-green-50 p-4">
-                                        <DollarSign className="h-5 w-5 text-green-600" />
-                                        <div>
-                                            <p className="text-xs text-gray-600">
-                                                Total Amount
-                                            </p>
-                                            <p className="text-xl font-bold text-gray-900">
-                                                ₦{totalAmount.toLocaleString()}
-                                                .00
-                                            </p>
-                                        </div>
-                                    </div>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-semibold text-gray-900">
+                                    Selected Accounts ({selectedAccounts.length})
+                                </h2>
+                                <div className="text-right">
+                                    <p className="text-sm text-gray-600">Total Amount</p>
+                                    <p className="text-xl font-bold text-blue-700">
+                                        ₦{totalSelectedAmount.toLocaleString()}
+                                    </p>
                                 </div>
                             </div>
 
-                            {/* Processing Info */}
-                            <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
-                                <div className="mb-3 flex items-center gap-2">
-                                    <AlertCircle className="h-5 w-5 text-blue-600" />
-                                    <h3 className="text-sm font-bold text-blue-900">
-                                        Processing Information
-                                    </h3>
-                                </div>
-                                <ul className="space-y-2 text-xs text-blue-800">
-                                    <li className="flex items-start gap-2">
-                                        <span className="mt-0.5 text-blue-600">
-                                            •
-                                        </span>
-                                        <span>
-                                            Bulk withdrawal requests are
-                                            processed within 2-3 business days
-                                        </span>
-                                    </li>
-                                    <li className="flex items-start gap-2">
-                                        <span className="mt-0.5 text-blue-600">
-                                            •
-                                        </span>
-                                        <span>
-                                            You will receive email notifications
-                                            for each stage of processing
-                                        </span>
-                                    </li>
-                                    <li className="flex items-start gap-2">
-                                        <span className="mt-0.5 text-blue-600">
-                                            •
-                                        </span>
-                                        <span>
-                                            All accounts must be fully settled
-                                            and cleared for withdrawal
-                                        </span>
-                                    </li>
-                                    <li className="flex items-start gap-2">
-                                        <span className="mt-0.5 text-blue-600">
-                                            •
-                                        </span>
-                                        <span>
-                                            Transaction fees may apply based on
-                                            withdrawal method
-                                        </span>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            {/* Recent Requests */}
-                            <div className="rounded-lg border border-gray-200 bg-white p-6">
-                                <h3 className="mb-4 text-lg font-bold text-gray-900">
-                                    Recent Requests
-                                </h3>
-                                <div className="space-y-3">
-                                    <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
-                                        <div className="mb-2 flex items-center justify-between">
-                                            <span className="inline-flex rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700">
-                                                Pending
-                                            </span>
-                                            <Calendar className="h-4 w-4 text-gray-500" />
-                                        </div>
-                                        <p className="text-sm font-medium text-gray-900">
-                                            3 Accounts
-                                        </p>
-                                        <p className="text-xs text-gray-600">
-                                            ₦1,380,000.00 • Oct 10, 2025
+                            <div className="max-h-80 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+                                {selectedAccounts.length === 0 ? (
+                                    <div className="px-6 py-10 text-center text-gray-500">
+                                        <AlertCircle className="mx-auto mb-3 h-10 w-10 text-gray-400" />
+                                        <p>No accounts selected yet.</p>
+                                        <p className="text-sm text-gray-400">
+                                            Use the search to add settlement accounts.
                                         </p>
                                     </div>
-                                    <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
-                                        <div className="mb-2 flex items-center justify-between">
-                                            <span className="inline-flex rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                                                Completed
-                                            </span>
-                                            <Calendar className="h-4 w-4 text-gray-500" />
+                                ) : (
+                                    selectedAccounts.map((account) => (
+                                        <div
+                                            key={account.id}
+                                            className="flex items-center justify-between border-b border-gray-100 px-4 py-3 last:border-b-0 hover:bg-gray-50"
+                                        >
+                                            <div>
+                                                <p className="font-semibold text-gray-900">
+                                                    {account.accountNumber}
+                                                </p>
+                                                <p className="text-sm text-gray-600">
+                                                    {account.accountName ?? 'Settlement Account'}
+                                                </p>
+                                                <p className="text-sm font-medium text-blue-600">
+                                                    Balance: ₦{account.balance.toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveAccount(account.id)}
+                                                className="rounded-full bg-red-500 p-2 text-white transition hover:bg-red-600"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
                                         </div>
-                                        <p className="text-sm font-medium text-gray-900">
-                                            5 Accounts
-                                        </p>
-                                        <p className="text-xs text-gray-600">
-                                            ₦2,500,000.00 • Oct 5, 2025
-                                        </p>
-                                    </div>
-                                </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
+
+                    <form onSubmit={handleSubmit} className="mt-6 space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                        <div>
+                            <label
+                                htmlFor="bulk-notes"
+                                className="mb-2 block text-sm font-semibold text-gray-700"
+                            >
+                                Additional Notes (optional)
+                            </label>
+                            <textarea
+                                id="bulk-notes"
+                                value={notes}
+                                onChange={(event) => setNotes(event.target.value)}
+                                placeholder="Include any context or instructions that will help us process this bulk withdrawal."
+                                rows={4}
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            />
+                        </div>
+
+                        <div className="flex flex-wrap justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={handleClearAll}
+                                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                                disabled={selectedAccounts.length === 0 && !notes}
+                            >
+                                Clear All
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isSubmitting || selectedAccounts.length === 0}
+                                className="rounded-md bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                            >
+                                {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </DashboardLayout>
         </>

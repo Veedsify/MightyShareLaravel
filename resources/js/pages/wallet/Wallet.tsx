@@ -294,65 +294,71 @@ const Wallet = () => {
                         </div>
                         <div className="space-y-3">
                             {walletData.accounts.length > 0 ? (
-                                walletData.accounts.map((account) => {
-                                    const accountBalance = `₦${(account.balance / 100).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
-                                    return (
-                                        <div
-                                            key={account.id}
-                                            className="flex items-center justify-between rounded-lg border border-gray-200 p-4"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div
-                                                    className={cn(
-                                                        'rounded-md p-2',
-                                                        account.is_paid
-                                                            ? 'bg-green-100'
-                                                            : 'bg-orange-100',
-                                                    )}
-                                                >
-                                                    <CreditCard
+                                walletData.accounts.map(
+                                    (account, idx: number) => {
+                                        const accountBalance = `₦${(account.balance / 100).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+                                        return (
+                                            <div
+                                                key={account.id}
+                                                className="flex items-center justify-between rounded-lg border border-gray-200 p-4"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div
                                                         className={cn(
-                                                            'h-5 w-5',
+                                                            'rounded-md p-2',
                                                             account.is_paid
-                                                                ? 'text-green-600'
-                                                                : 'text-orange-600',
+                                                                ? 'bg-green-100'
+                                                                : 'bg-orange-100',
                                                         )}
-                                                    />
+                                                    >
+                                                        <CreditCard
+                                                            className={cn(
+                                                                'h-5 w-5',
+                                                                account.is_paid
+                                                                    ? 'text-green-600'
+                                                                    : 'text-orange-600',
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900">
+                                                            {
+                                                                account.account_number
+                                                            }
+                                                        </p>
+                                                        <p className="text-sm text-gray-600">
+                                                            Balance:{' '}
+                                                            {accountBalance}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-900">
-                                                        {account.account_number}
-                                                    </p>
-                                                    <p className="text-sm text-gray-600">
-                                                        Balance:{' '}
-                                                        {accountBalance}
-                                                    </p>
+                                                <div className="flex items-center gap-2">
+                                                    {!account.is_paid && (
+                                                        <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
+                                                            Unpaid
+                                                        </span>
+                                                    )}
+                                                    {account.is_paid && (
+                                                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                                            Active
+                                                        </span>
+                                                    )}
+                                                    {idx === 0 && (
+                                                        <button
+                                                            onClick={() =>
+                                                                handleTopup()
+                                                            }
+                                                            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                                                            type="button"
+                                                        >
+                                                            Top Up
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                {!account.is_paid && (
-                                                    <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
-                                                        Unpaid
-                                                    </span>
-                                                )}
-                                                {account.is_paid && (
-                                                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                                                        Active
-                                                    </span>
-                                                )}
-                                                <button
-                                                    onClick={() =>
-                                                        handleTopup()
-                                                    }
-                                                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-                                                    type="button"
-                                                >
-                                                    Top Up
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })
+                                        );
+                                    },
+                                )
                             ) : (
                                 <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
                                     <p className="text-gray-600">
