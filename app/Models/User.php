@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'role',
         'referral_id',
         'plan_start_date',
         'registration_paid',
@@ -65,6 +66,15 @@ class User extends Authenticatable
             'marketing_emails' => 'boolean',
             'notifications' => 'array',
         ];
+    }
+
+    /**
+     * Check if the user is an admin
+     *
+     * @return bool
+     */    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 
     /**

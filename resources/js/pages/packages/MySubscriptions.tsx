@@ -19,57 +19,16 @@ type Subscription = {
     totalContributed: string;
     expectedReturn: string;
     totalPayout: string;
-    status: 'active' | 'completed' | 'pending';
+    status: 'active' | 'completed' | 'pending' | string;
     daysRemaining: number;
     progress: number;
 };
 
-const subscriptions: Subscription[] = [
-    {
-        id: '1',
-        packageName: 'Gold Thrift Package',
-        packageTier: 'Gold',
-        startDate: '2025-04-13',
-        maturityDate: '2025-10-13',
-        monthlyContribution: '₦100,000.00',
-        totalContributed: '₦600,000.00',
-        expectedReturn: '₦72,000.00',
-        totalPayout: '₦672,000.00',
-        status: 'active',
-        daysRemaining: 0,
-        progress: 100,
-    },
-    {
-        id: '2',
-        packageName: 'Platinum Thrift Package',
-        packageTier: 'Platinum',
-        startDate: '2025-06-01',
-        maturityDate: '2026-06-01',
-        monthlyContribution: '₦200,000.00',
-        totalContributed: '₦1,000,000.00',
-        expectedReturn: '₦180,000.00',
-        totalPayout: '₦1,180,000.00',
-        status: 'active',
-        daysRemaining: 231,
-        progress: 42,
-    },
-    {
-        id: '3',
-        packageName: 'Silver Thrift Package',
-        packageTier: 'Silver',
-        startDate: '2024-12-01',
-        maturityDate: '2025-06-01',
-        monthlyContribution: '₦50,000.00',
-        totalContributed: '₦300,000.00',
-        expectedReturn: '₦24,000.00',
-        totalPayout: '₦324,000.00',
-        status: 'completed',
-        daysRemaining: 0,
-        progress: 100,
-    },
-];
+interface MySubscriptionsProps {
+    subscriptions: Subscription[];
+}
 
-const MySubscriptions = () => {
+const MySubscriptions = ({ subscriptions }: MySubscriptionsProps) => {
     const activeSubscriptions = subscriptions.filter(
         (sub) => sub.status === 'active',
     );
