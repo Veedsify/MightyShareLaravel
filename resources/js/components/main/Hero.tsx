@@ -1,7 +1,7 @@
 import { Container } from '@/components/sub/Container';
 import { Button } from '@/components/ui/Button';
 import { Link } from '@inertiajs/react';
-import { ArrowRight, Users } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export const Hero = () => {
     return (
@@ -89,16 +89,11 @@ export const Hero = () => {
                     <div className="relative">
                         <div className="relative aspect-square overflow-hidden rounded-2xl border border-cyan-400/20 bg-blue-800/50 shadow-2xl shadow-cyan-400/10 backdrop-blur-xl">
                             {/* Placeholder for image */}
-                            <div className="flex h-full items-center justify-center">
-                                <div className="text-center">
-                                    <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-cyan-400/20 backdrop-blur-sm">
-                                        <Users className="h-12 w-12 text-cyan-400" />
-                                    </div>
-                                    <p className="text-lg font-semibold text-white">
-                                        Community Together
-                                    </p>
-                                </div>
-                            </div>
+                            <img
+                                src="/images/hero.jpg"
+                                alt="Community gathering"
+                                className="h-full w-full object-cover"
+                            />
                         </div>
                         {/* Decorative elements */}
                         <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-cyan-400/30 blur-xl" />

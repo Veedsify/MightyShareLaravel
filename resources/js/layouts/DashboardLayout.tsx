@@ -105,8 +105,8 @@ const navigationItems: NavigationItem[] = [
         href: '/notifications',
     },
     {
-        title: 'Settings',
-        icon: Settings,
+        title: 'Profile',
+        icon: User,
         href: '/settings',
     },
 ];
@@ -546,7 +546,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     )}
                 </div>
 
-                <main className="min-h-screen">{children}</main>
+                <main className="container mx-auto min-h-screen">
+                    {children}
+                </main>
             </div>
         </div>
     );

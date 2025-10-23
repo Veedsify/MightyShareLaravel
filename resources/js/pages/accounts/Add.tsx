@@ -150,11 +150,11 @@ const AddAccount = ({
                 <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6 lg:p-8">
                     <div className="space-y-6">
                         {/* Header Section */}
-                        <div className="overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white shadow-lg">
+                        <div className="overflow-hidden  bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white shadow-lg">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="mb-3 flex items-center gap-3">
-                                        <div className="rounded-lg bg-white/20 p-3 backdrop-blur-sm">
+                                        <div className="bg-white/20 p-3 backdrop-blur-sm">
                                             <UserPlus className="h-6 w-6" />
                                         </div>
                                         <div>
@@ -172,7 +172,7 @@ const AddAccount = ({
 
                             {/* Package Info Cards */}
                             <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-                                <div className="rounded-lg bg-white/10 p-4 backdrop-blur-sm">
+                                <div className="bg-white/10 p-4 backdrop-blur-sm">
                                     <p className="text-sm text-blue-100">
                                         Package
                                     </p>
@@ -180,7 +180,7 @@ const AddAccount = ({
                                         {packageName}
                                     </p>
                                 </div>
-                                <div className="rounded-lg bg-white/10 p-4 backdrop-blur-sm">
+                                <div className="bg-white/10 p-4 backdrop-blur-sm">
                                     <p className="text-sm text-blue-100">
                                         Current
                                     </p>
@@ -188,7 +188,7 @@ const AddAccount = ({
                                         {currentCount}
                                     </p>
                                 </div>
-                                <div className="rounded-lg bg-white/10 p-4 backdrop-blur-sm">
+                                <div className="bg-white/10 p-4 backdrop-blur-sm">
                                     <p className="text-sm text-blue-100">
                                         Min Required
                                     </p>
@@ -196,7 +196,7 @@ const AddAccount = ({
                                         {limits.minAccountLimit}
                                     </p>
                                 </div>
-                                <div className="rounded-lg bg-white/10 p-4 backdrop-blur-sm">
+                                <div className="bg-white/10 p-4 backdrop-blur-sm">
                                     <p className="text-sm text-blue-100">
                                         Max Allowed
                                     </p>
@@ -223,7 +223,7 @@ const AddAccount = ({
                         </div>
 
                         {/* Form Section */}
-                        <div className="mb-16 overflow-hidden rounded-xl bg-white shadow-lg">
+                        <div className="mb-16 overflow-hidden  bg-white shadow-lg">
                             <div className="border-b border-gray-200 bg-gradient-to-r from-pink-50 to-blue-50 p-6">
                                 <h2 className="text-xl font-bold text-gray-900">
                                     Create New Accounts
@@ -248,13 +248,13 @@ const AddAccount = ({
                                             onChange={(e) =>
                                                 setQty(Number(e.target.value))
                                             }
-                                            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg font-medium transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
+                                            className="w-full border-2 border-gray-300 px-4 py-3 text-lg font-medium transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
                                             required
                                             disabled={remaining <= 0}
                                             placeholder="Enter quantity"
                                         />
                                         <div className="mt-3 space-y-2">
-                                            <div className="flex items-center justify-between rounded-lg bg-blue-50 p-3 text-sm">
+                                            <div className="flex items-center justify-between bg-blue-50 p-3 text-sm">
                                                 <span className="text-gray-600">
                                                     Available slots
                                                 </span>
@@ -263,7 +263,7 @@ const AddAccount = ({
                                                 </span>
                                             </div>
                                             {needsMore > 0 && (
-                                                <div className="flex items-start gap-2 rounded-lg bg-orange-50 p-3 text-sm">
+                                                <div className="flex items-start gap-2 bg-orange-50 p-3 text-sm">
                                                     <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white">
                                                         !
                                                     </div>
@@ -291,7 +291,7 @@ const AddAccount = ({
                                             {meetsMinimum &&
                                                 currentCount <
                                                     limits.maxAccountLimit && (
-                                                    <div className="flex items-start gap-2 rounded-lg bg-green-50 p-3 text-sm">
+                                                    <div className="flex items-start gap-2 bg-green-50 p-3 text-sm">
                                                         <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-500 text-white">
                                                             ✓
                                                         </div>
@@ -316,14 +316,14 @@ const AddAccount = ({
                                     </div>
 
                                     {error && (
-                                        <div className="rounded-lg bg-red-50 p-4">
+                                        <div className="bg-red-50 p-4">
                                             <p className="text-sm font-medium text-red-800">
                                                 {error}
                                             </p>
                                         </div>
                                     )}
                                     {successMsg && (
-                                        <div className="rounded-lg bg-green-50 p-4">
+                                        <div className="bg-green-50 p-4">
                                             <p className="text-sm font-medium text-green-800">
                                                 {successMsg}
                                             </p>
@@ -334,7 +334,7 @@ const AddAccount = ({
                                         <button
                                             type="submit"
                                             disabled={busy || remaining <= 0}
-                                            className="flex-1 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-xl disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-500"
+                                            className="flex-1 bg-gradient-to-r from-pink-500 to-pink-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-xl disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-500"
                                         >
                                             {busy
                                                 ? 'Creating Accounts...'
@@ -347,7 +347,7 @@ const AddAccount = ({
                                             onClick={() =>
                                                 router.visit('/dashboard')
                                             }
-                                            className="rounded-lg border-2 border-gray-300 bg-white px-6 py-3.5 font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
+                                            className="border-2 border-gray-300 bg-white px-6 py-3.5 font-semibold text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
                                         >
                                             Cancel
                                         </button>
@@ -358,7 +358,7 @@ const AddAccount = ({
                     </div>
 
                     {/* Account List Section */}
-                    <div className="overflow-hidden rounded-xl bg-white shadow-lg">
+                    <div className="overflow-hidden  bg-white shadow-lg">
                         <div className="flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-blue-50 to-pink-50 p-6">
                             <div>
                                 <h2 className="text-xl font-bold text-gray-900">
@@ -406,7 +406,7 @@ const AddAccount = ({
                                             (a: Account, idx: number) => (
                                                 <div
                                                     key={`${a.accountNumber || a.id}-${idx}`}
-                                                    className="group flex items-center justify-between rounded-lg border-2 border-gray-200 p-4 transition-all hover:border-blue-500 hover:shadow-md"
+                                                    className="group flex items-center justify-between border-2 border-gray-200 p-4 transition-all hover:border-blue-500 hover:shadow-md"
                                                 >
                                                     <div className="flex items-center gap-4">
                                                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-pink-600 text-lg font-bold text-white shadow-md">
@@ -447,7 +447,7 @@ const AddAccount = ({
                                     </div>
 
                                     {/* Package Limits Info */}
-                                    <div className="mt-6 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-4">
+                                    <div className="mt-6 border-2 border-dashed border-gray-300 bg-gray-50 p-4">
                                         <div className="flex items-center justify-between text-sm">
                                             <div>
                                                 <p className="font-semibold text-gray-700">
@@ -490,7 +490,7 @@ const AddAccount = ({
                                         Create your first account to get started
                                     </p>
                                     {needsMore > 0 && (
-                                        <div className="mx-auto mt-4 max-w-md rounded-lg bg-orange-50 p-4">
+                                        <div className="mx-auto mt-4 max-w-md bg-orange-50 p-4">
                                             <p className="text-sm font-medium text-orange-900">
                                                 ⚠️ Create at least{' '}
                                                 <b>{needsMore}</b> account(s) to
@@ -558,7 +558,7 @@ const AddAccount = ({
                                                 your package.
                                             </p>
 
-                                            <div className="mb-4 rounded-lg bg-gray-50 p-4">
+                                            <div className="mb-4 bg-gray-50 p-4">
                                                 <div className="space-y-2 text-sm">
                                                     <div className="flex justify-between">
                                                         <span className="text-gray-600">
@@ -610,7 +610,7 @@ const AddAccount = ({
                                             onClick={() =>
                                                 setShowLimitModal(false)
                                             }
-                                            className="w-full transform rounded-xl bg-red-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl"
+                                            className="w-full transform  bg-red-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl"
                                         >
                                             Close
                                         </button>

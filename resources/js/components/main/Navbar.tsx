@@ -42,9 +42,11 @@ export const Navbar = () => {
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
                     <Link href="/" className="flex items-center space-x-2">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-400 text-blue-900 shadow-lg shadow-cyan-400/20">
-                            <span className="text-xl font-bold">M</span>
-                        </div>
+                        <img
+                            src="/images/logo.jpg"
+                            alt="MightyShare Logo"
+                            className="h-12 w-12 rounded-full"
+                        />
                         <span
                             className={cn(
                                 'text-xl font-bold transition-colors',
@@ -56,8 +58,8 @@ export const Navbar = () => {
                                 className={cn(
                                     'transition-colors',
                                     isScrolled
-                                        ? 'text-cyan-400'
-                                        : 'text-cyan-400',
+                                        ? 'text-pink-500'
+                                        : 'text-cyan-500',
                                 )}
                             >
                                 Share

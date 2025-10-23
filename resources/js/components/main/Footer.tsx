@@ -17,11 +17,14 @@ export const Footer = () => {
                     {/* Brand */}
                     <div className="space-y-4">
                         <Link href="/" className="flex items-center space-x-2">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-900 text-white">
-                                <span className="text-xl font-bold">M</span>
-                            </div>
+                            <img
+                                src="/images/logo.jpg"
+                                alt="MightyShare Logo"
+                                className="h-12 w-12 rounded-full"
+                            />
                             <span className="text-xl font-bold">
-                                Mighty<span className="text-pink-500">Share</span>
+                                Mighty
+                                <span className="text-pink-500">Share</span>
                             </span>
                         </Link>
                         <p className="text-sm text-muted-foreground">
@@ -58,7 +61,7 @@ export const Footer = () => {
 
                     {/* Quick Links */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
+                        <h3 className="mb-4 text-sm font-semibold tracking-wider uppercase">
                             Quick Links
                         </h3>
                         <ul className="space-y-2">
@@ -99,7 +102,7 @@ export const Footer = () => {
 
                     {/* Support */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
+                        <h3 className="mb-4 text-sm font-semibold tracking-wider uppercase">
                             Support
                         </h3>
                         <ul className="space-y-2">
@@ -140,7 +143,7 @@ export const Footer = () => {
 
                     {/* Contact */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
+                        <h3 className="mb-4 text-sm font-semibold tracking-wider uppercase">
                             Contact Us
                         </h3>
                         <ul className="space-y-3">

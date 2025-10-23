@@ -10,14 +10,34 @@ import { Testimonials } from '@/components/main/Testimonials';
 import { WhyJoin } from '@/components/main/WhyJoin';
 import { ScrollToTop } from '@/components/sub/ScrollToTop';
 
-const Home = () => {
+interface ThriftPackage {
+    id: number;
+    name: string;
+    price: number;
+    duration: number;
+    profitPercentage: number;
+    description: string;
+    terms: string;
+    isActive: boolean;
+    minContribution: number;
+    maxContribution: number;
+    features: string[];
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+interface HomeProps {
+    thriftPackages: ThriftPackage[];
+}
+
+const Home = ({ thriftPackages }: HomeProps) => {
     return (
         <div className="min-h-screen">
             <Navbar />
             <main>
                 <Hero />
                 <About />
-                <Membership />
+                <Membership packages={thriftPackages} />
                 <Features />
                 <WhyJoin />
                 <Testimonials />

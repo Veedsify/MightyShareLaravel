@@ -28,6 +28,11 @@ class User extends Authenticatable
         'registration_paid',
         'notifications',
         'last_activity',
+        'date_of_birth',
+        'email_notifications',
+        'sms_notifications',
+        'transaction_alerts',
+        'marketing_emails',
     ];
 
     /**
@@ -51,8 +56,13 @@ class User extends Authenticatable
     {
         return [
             'plan_start_date' => 'datetime',
+            'date_of_birth' => 'date',
             'password' => 'hashed',
             'registration_paid' => 'boolean',
+            'email_notifications' => 'boolean',
+            'sms_notifications' => 'boolean',
+            'transaction_alerts' => 'boolean',
+            'marketing_emails' => 'boolean',
             'notifications' => 'array',
         ];
     }
@@ -135,6 +145,17 @@ class User extends Authenticatable
     public function staticAccount()
     {
         return $this->hasOne(StaticAccount::class);
+    }
+
+    /**
+     * Get the notifications for the user.
+     */
+    public function userNotifications()
+    {
+        return $this->belongsToMany(Notification::class, 'notification_user')
+            ->withPivot('read', 'read_at')
+            ->withTimestamps()
+            ->orderBy('created_at', 'desc');
     }
 
     /**

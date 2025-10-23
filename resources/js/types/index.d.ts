@@ -41,3 +41,19 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface ThriftPackage {
+    id: number;
+    name: string;
+    price: number;
+    duration: number;
+    profitPercentage: number;
+    description: string;
+    terms: string;
+    isActive: boolean;
+    minContribution: number;
+    maxContribution: number;
+    features: string[];
+    createdAt?: string;
+    updatedAt?: string;
+}

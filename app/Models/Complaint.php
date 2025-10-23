@@ -21,6 +21,7 @@ class Complaint extends Model
         'status',
         'priority',
         'resolution',
+        'ticket_number',
         'resolved_at',
         'user_id',
     ];
@@ -40,5 +41,32 @@ class Complaint extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get all replies for this complaint
+     */
+    public function replies()
+    {
+        return $this->hasMany(ComplaintReply::class)->orderBy('created_at', 'asc');
+    }
+
+    /**
+     * Get the latest reply for this complaint
+     */
+    public function latestReply()
+    {
+        return $this->hasOne(ComplaintReply::class)->latestOfMany();
+    }
+
+    /**
+     * Generate a unique ticket number
+     */
+    public static function generateTicketNumber(): string
+    {
+        do {
+            $ticketNumber = 'TKT-' . str_pad(mt_rand(0, 9999999), 7, '0', STR_PAD_LEFT);
+        } while (self::where('ticket_number', $ticketNumber)->exists());
+        return $ticketNumber;
     }
 }

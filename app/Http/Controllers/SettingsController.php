@@ -26,6 +26,13 @@ class SettingsController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'bvn' => $user->bvn ?? null,
+                'date_of_birth' => $user->date_of_birth,
+            ],
+            'notifications' => [
+                'email_notifications' => $user->email_notifications ?? true,
+                'sms_notifications' => $user->sms_notifications ?? true,
+                'transaction_alerts' => $user->transaction_alerts ?? true,
+                'marketing_emails' => $user->marketing_emails ?? false,
             ],
             'staticAccount' => $staticAccount ? [
                 'account_number' => $staticAccount->account_number,
@@ -160,6 +167,39 @@ class SettingsController extends Controller
             
             return back()->withErrors([
                 'otp' => 'An error occurred. Please try again later.'
+            ]);
+        }
+    }
+
+    public function updateNotifications(Request $request)
+    {
+        $validated = $request->validate([
+            'email_notifications' => 'boolean',
+            'sms_notifications' => 'boolean',
+            'transaction_alerts' => 'boolean',
+            'marketing_emails' => 'boolean',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        try {
+            $user->update([
+                'email_notifications' => $validated['email_notifications'] ?? false,
+                'sms_notifications' => $validated['sms_notifications'] ?? false,
+                'transaction_alerts' => $validated['transaction_alerts'] ?? false,
+                'marketing_emails' => $validated['marketing_emails'] ?? false,
+            ]);
+
+            return back()->with('success', 'Notification preferences updated successfully!');
+        } catch (\Exception $e) {
+            Log::error('Notification Update Error', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+            ]);
+
+            return back()->withErrors([
+                'notifications' => 'Failed to update preferences. Please try again.'
             ]);
         }
     }

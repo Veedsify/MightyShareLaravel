@@ -94,14 +94,18 @@ const RequestBulkWithdrawal = () => {
                         data;
                     const normalised = normalizeAccounts(payload);
 
-                    if (isMounted && (normalised.length > 0 || Array.isArray(payload))) {
+                    if (
+                        isMounted &&
+                        (normalised.length > 0 || Array.isArray(payload))
+                    ) {
                         setAvailableAccounts(normalised);
                         setLoading(false);
                         return;
                     }
-                } catch (requestError) {
+                } catch {
                     if (
-                        endpoint === ACCOUNT_ENDPOINTS[ACCOUNT_ENDPOINTS.length - 1]
+                        endpoint ===
+                        ACCOUNT_ENDPOINTS[ACCOUNT_ENDPOINTS.length - 1]
                     ) {
                         if (isMounted) {
                             setError(

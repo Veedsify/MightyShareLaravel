@@ -31,6 +31,12 @@ export const FeaturedMember = () => {
                     <div className="grid gap-0 md:grid-cols-2">
                         {/* Image Section */}
                         <div className="relative bg-blue-900">
+                            <div className="pointer-events-none absolute inset-0">
+                                <div className="absolute -top-40 -right-32 h-72 w-72 rounded-full bg-cyan-400/40 blur-3xl" />
+                                <div className="absolute top-10 left-16 h-52 w-52 rounded-full bg-pink-500/30 blur-3xl" />
+                                <div className="absolute right-1/4 bottom-0 h-80 w-80 rounded-full bg-blue-500/30 blur-3xl" />
+                                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:72px_72px]" />
+                            </div>
                             <div className="flex h-full min-h-[400px] items-center justify-center p-8">
                                 <div className="text-center">
                                     <div className="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-cyan-400 shadow-2xl ring-4 shadow-cyan-400/30 ring-blue-800">

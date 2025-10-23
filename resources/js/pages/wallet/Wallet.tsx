@@ -193,7 +193,7 @@ const Wallet = () => {
 
                     {/* Unpaid Accounts Alert */}
                     {walletData.unpaidAccountsCount > 0 && (
-                        <div className="mb-6 rounded-lg border border-orange-200 bg-orange-50 p-4">
+                        <div className="mb-6 border border-orange-200 bg-orange-50 p-4">
                             <div className="flex items-start gap-3">
                                 <AlertCircle className="mt-0.5 h-5 w-5 text-orange-600" />
                                 <div className="flex-1">
@@ -227,7 +227,7 @@ const Wallet = () => {
                     )}
 
                     {/* Balance Card */}
-                    <div className="mb-6 rounded-lg bg-blue-600 p-8 text-white shadow-lg">
+                    <div className="mb-6 bg-blue-600 p-8 text-white shadow-lg">
                         <div className="mb-6 flex items-center justify-between">
                             <div>
                                 <p className="mb-2 text-sm text-blue-100">
@@ -267,7 +267,7 @@ const Wallet = () => {
                                 key={action.label}
                                 href={action.href}
                                 className={cn(
-                                    'flex flex-col items-center justify-center rounded-lg p-6 text-white shadow-md transition-all duration-200 hover:shadow-lg',
+                                    'flex flex-col items-center justify-center p-6 text-white shadow-md transition-all duration-200 hover:shadow-lg',
                                     action.color,
                                 )}
                             >
@@ -280,7 +280,7 @@ const Wallet = () => {
                     </div>
 
                     {/* My Accounts - Replace Linked Accounts */}
-                    <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                    <div className="mt-6 border border-gray-200 bg-white p-6 shadow-sm">
                         <div className="mb-4 flex items-center justify-between">
                             <h3 className="text-lg font-semibold text-gray-900">
                                 My Accounts
@@ -300,7 +300,7 @@ const Wallet = () => {
                                         return (
                                             <div
                                                 key={account.id}
-                                                className="flex items-center justify-between rounded-lg border border-gray-200 p-4"
+                                                className="flex items-center justify-between border border-gray-200 p-4"
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <div
@@ -360,7 +360,7 @@ const Wallet = () => {
                                     },
                                 )
                             ) : (
-                                <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center">
+                                <div className="border border-dashed border-gray-300 p-8 text-center">
                                     <p className="text-gray-600">
                                         No accounts found. Create your first
                                         account to get started.
@@ -378,7 +378,7 @@ const Wallet = () => {
                     </div>
 
                     {/* Recent Transactions */}
-                    <div className="mt-6 rounded-lg border border-gray-200 bg-white shadow-sm">
+                    <div className="mt-6 border border-gray-200 bg-white shadow-sm">
                         <div className="flex items-center justify-between border-b border-gray-200 p-6">
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900">
@@ -465,11 +465,11 @@ const Wallet = () => {
                     {/* Top-up Modal */}
                     {showTopupModal && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                            <div className="w-full max-w-md bg-white p-6 shadow-xl">
                                 <h3 className="mb-4 text-xl font-bold text-gray-900">
                                     Top Up Wallet
                                 </h3>
-                                <div className="mb-4 rounded-lg bg-gray-50 p-4">
+                                <div className="mb-4 bg-gray-50 p-4">
                                     <p className="text-sm text-gray-600">
                                         Static Account Number
                                     </p>

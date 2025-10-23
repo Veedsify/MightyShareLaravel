@@ -109,6 +109,7 @@ Route::middleware(['auth', 'verified'])->prefix("dashboard")->group(function () 
     Route::prefix('complaints')->name('complaints.')->group(function () {
         Route::get('/', [ComplaintsController::class, 'index'])->name('index');
         Route::post('store', [ComplaintsController::class, 'store'])->name('store');
+        Route::post('{id}/reply', [ComplaintsController::class, 'addReply'])->name('reply');
     });
 
     // Notifications
@@ -128,6 +129,9 @@ Route::middleware(['auth', 'verified'])->prefix("dashboard")->group(function () 
 
         // Password management
         Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+
+        // Notifications management
+        Route::put('notifications', [SettingsController::class, 'updateNotifications'])->name('notifications.update');
 
         // Two-factor authentication
         Route::post('two-factor-authentication', [TwoFactorAuthenticationController::class, 'store'])->name('two-factor.enable');
@@ -177,7 +181,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Notification API endpoints
     Route::prefix('api/notifications')->name('api.notifications.')->group(function () {
-        Route::get('/', [NotificationsController::class, 'index'])->name('index');
         Route::post('{id}/read', [NotificationsController::class, 'markAsRead'])->name('mark-read');
+        Route::post('read-all', [NotificationsController::class, 'markAllAsRead'])->name('mark-all-read');
     });
 });

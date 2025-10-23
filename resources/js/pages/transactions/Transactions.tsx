@@ -192,12 +192,15 @@ const Transactions = () => {
                         data;
                     const normalised = normalizeTransactions(payload);
 
-                    if (isMounted && (normalised.length > 0 || Array.isArray(payload))) {
+                    if (
+                        isMounted &&
+                        (normalised.length > 0 || Array.isArray(payload))
+                    ) {
                         setTransactions(normalised);
                         setLoading(false);
                         return;
                     }
-                } catch (requestError) {
+                } catch {
                     if (
                         endpoint ===
                         TRANSACTION_ENDPOINTS[TRANSACTION_ENDPOINTS.length - 1]
