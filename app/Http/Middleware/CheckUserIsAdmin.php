@@ -17,7 +17,7 @@ class CheckUserIsAdmin
     {
 
         if (!$request->user() || !$request->user()->isAdmin()) {
-            return response()->json(['message' => 'Forbidden'], 403);
+            return abort(403, 'Unauthorized access. Admins only.');
         }
 
         return $next($request);

@@ -174,7 +174,7 @@ const Settings = () => {
                         <div className="flex items-end gap-6">
                             {/* Profile Avatar */}
                             <div className="relative">
-                                <div className="flex h-24 w-24 items-center justify-center border-2 border-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                                <div className="flex h-24 w-24 rounded-full items-center justify-center border-2 border-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
                                     <User className="h-12 w-12 text-white" />
                                 </div>
                                 <div className="absolute right-0 bottom-0 h-7 w-7 rounded-full border-2 border-white bg-green-500"></div>

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Test User',
                 'phone' => '+2348000000000',
                 'password' => Hash::make('password'),
+                'role' => 'admin',
                 'referral_id' => 'REF-TEST-001',
                 'registration_paid' => true,
                 'email_verified_at' => now(),

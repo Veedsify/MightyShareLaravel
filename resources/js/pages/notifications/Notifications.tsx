@@ -83,7 +83,7 @@ const Notifications = ({ notifications }: Props) => {
                     </div>
 
                     {notifications.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white py-12">
+                        <div className="flex flex-col items-center justify-center border border-gray-200 bg-white py-12">
                             <Bell className="mb-4 h-16 w-16 text-gray-300" />
                             <p className="text-lg font-semibold text-gray-900">
                                 No notifications yet
@@ -100,7 +100,7 @@ const Notifications = ({ notifications }: Props) => {
                                     <div
                                         key={notification.id}
                                         className={cn(
-                                            'cursor-pointer rounded-lg border p-6 transition-all hover:shadow-md',
+                                            'cursor-pointer border p-6 transition-all hover:shadow-md',
                                             notification.read
                                                 ? 'border-gray-200 bg-white'
                                                 : 'border-blue-200 bg-blue-50',

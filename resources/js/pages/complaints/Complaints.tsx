@@ -95,7 +95,7 @@ const Complaints = ({ complaints }: Props) => {
                     </div>
 
                     {showForm && (
-                        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                        <div className="mb-6 border border-gray-200 bg-white p-6 shadow-sm">
                             <h3 className="mb-4 text-lg font-semibold text-gray-900">
                                 Submit a Complaint
                             </h3>
@@ -170,7 +170,7 @@ const Complaints = ({ complaints }: Props) => {
 
                     <div className="space-y-4">
                         {complaints.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white py-12">
+                            <div className="flex flex-col items-center justify-center border border-gray-200 bg-white py-12">
                                 <AlertCircle className="mb-4 h-16 w-16 text-gray-300" />
                                 <p className="text-lg font-semibold text-gray-900">
                                     No complaints yet
@@ -184,7 +184,7 @@ const Complaints = ({ complaints }: Props) => {
                             complaints.map((complaint) => (
                                 <div
                                     key={complaint.id}
-                                    className="rounded-lg border border-gray-200 bg-white shadow-sm"
+                                    className="border border-gray-200 bg-white shadow-sm"
                                 >
                                     <div
                                         className="cursor-pointer p-6"

@@ -19,7 +19,7 @@ import {
     Wallet,
     X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 type SubNavigationItem = {
     title: string;
@@ -143,6 +143,54 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
     const [selectedAccount, setSelectedAccount] = useState(accounts[0] || null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<{
+        transactions: unknown[];
+        pages: unknown[];
+    }>({ transactions: [], pages: [] });
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleSearch = async (query: string) => {
+        setSearchQuery(query);
+
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        if (query.length < 2) {
+            setSearchResults({ transactions: [], pages: [] });
+            setShowSearchDropdown(false);
+            return;
+        }
+
+        setSearchLoading(true);
+        setShowSearchDropdown(true);
+
+        searchTimeoutRef.current = setTimeout(async () => {
+            try {
+                const response = await fetch(
+                    `/api/search/${encodeURIComponent(query)}`,
+                );
+                const data = await response.json();
+                setSearchResults(data);
+            } catch (error) {
+                console.error('Search error:', error);
+                setSearchResults({ transactions: [], pages: [] });
+            } finally {
+                setSearchLoading(false);
+            }
+        }, 300);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -157,14 +205,25 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             {/* Sidebar */}
             <div
                 className={cn(
-                    'fixed inset-y-0 left-0 z-50 w-64 transform border-r border-blue-200 bg-blue-600 shadow-lg transition-transform duration-300 ease-in-out lg:translate-x-0',
+                    'fixed inset-y-0 left-0 z-50 w-64 transform border-r border-blue-200 bg-blue-700 shadow-lg transition-transform duration-300 ease-in-out lg:translate-x-0',
                     sidebarOpen ? 'translate-x-0' : '-translate-x-full',
                 )}
             >
+                <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10">
+                    <div className="absolute -top-40 -right-32 h-72 w-72 rounded-full bg-cyan-400/40 blur-3xl" />
+                    <div className="absolute top-10 left-16 h-52 w-52 rounded-full bg-pink-500/30 blur-3xl" />
+                    <div className="absolute right-1/4 bottom-0 h-80 w-80 rounded-full bg-blue-500/30 blur-3xl" />
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:72px_72px]" />
+                </div>
                 <div className="flex h-full flex-col">
                     {/* Logo/Brand with close button on mobile */}
-                    <div className="flex h-16 items-center justify-between border-b border-blue-500 bg-blue-700 px-4">
-                        <h1 className="text-2xl font-bold tracking-wide text-white">
+                    <div className="flex h-16 items-center gap-4 border-b border-blue-500 bg-blue-700 px-4">
+                        <img
+                            src="/images/logo.jpg"
+                            alt="MightyShare Logo"
+                            className="h-12 w-12 rounded-full"
+                        />
+                        <h1 className="hidden text-2xl font-bold text-white md:block">
                             MightyShare
                         </h1>
                         <button
@@ -317,13 +376,199 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             </button>
 
                             {/* Search Bar */}
-                            <div className="hidden w-96 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5 md:flex">
-                                <Search className="h-4 w-4 text-gray-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Search transactions, accounts..."
-                                    className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-500"
-                                />
+                            <div className="relative hidden w-96 md:block">
+                                <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5">
+                                    <Search className="h-4 w-4 text-gray-500" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search transactions, pages..."
+                                        value={searchQuery}
+                                        onChange={(e) =>
+                                            handleSearch(e.target.value)
+                                        }
+                                        onFocus={() =>
+                                            searchQuery.length >= 2 &&
+                                            setShowSearchDropdown(true)
+                                        }
+                                        className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-500"
+                                    />
+                                </div>
+
+                                {/* Search Results Dropdown */}
+                                {showSearchDropdown && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-10"
+                                            onClick={() =>
+                                                setShowSearchDropdown(false)
+                                            }
+                                        />
+                                        <div className="absolute top-full right-0 left-0 z-20 mt-2 max-h-96 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                                            {searchLoading && (
+                                                <div className="px-4 py-8 text-center text-gray-500">
+                                                    Searching...
+                                                </div>
+                                            )}
+
+                                            {!searchLoading &&
+                                                searchResults.pages.length ===
+                                                    0 &&
+                                                searchResults.transactions
+                                                    .length === 0 && (
+                                                    <div className="px-4 py-8 text-center text-gray-500">
+                                                        No results found
+                                                    </div>
+                                                )}
+
+                                            {/* Pages */}
+                                            {!searchLoading &&
+                                                searchResults.pages.length >
+                                                    0 && (
+                                                    <>
+                                                        <div className="border-b border-gray-200 px-4 py-2">
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase">
+                                                                Pages
+                                                            </p>
+                                                        </div>
+                                                        {(
+                                                            searchResults.pages as unknown[]
+                                                        ).map(
+                                                            (
+                                                                page: unknown,
+                                                                idx: number,
+                                                            ) => {
+                                                                const p =
+                                                                    page as {
+                                                                        title: string;
+                                                                        url: string;
+                                                                        icon?: string;
+                                                                    };
+                                                                return (
+                                                                    <Link
+                                                                        key={
+                                                                            idx
+                                                                        }
+                                                                        href={
+                                                                            p.url
+                                                                        }
+                                                                        onClick={() => {
+                                                                            setShowSearchDropdown(
+                                                                                false,
+                                                                            );
+                                                                            setSearchQuery(
+                                                                                '',
+                                                                            );
+                                                                        }}
+                                                                        className="flex items-center gap-3 border-b border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50"
+                                                                    >
+                                                                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-100">
+                                                                            <span className="text-xs font-semibold text-blue-600">
+                                                                                {p
+                                                                                    .icon?.[0] ||
+                                                                                    '📄'}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="text-sm font-medium text-gray-900">
+                                                                                {
+                                                                                    p.title
+                                                                                }
+                                                                            </p>
+                                                                            <p className="text-xs text-gray-500">
+                                                                                {
+                                                                                    p.url
+                                                                                }
+                                                                            </p>
+                                                                        </div>
+                                                                    </Link>
+                                                                );
+                                                            },
+                                                        )}
+                                                    </>
+                                                )}
+
+                                            {/* Transactions */}
+                                            {!searchLoading &&
+                                                searchResults.transactions
+                                                    .length > 0 && (
+                                                    <>
+                                                        <div className="border-b border-gray-200 px-4 py-2">
+                                                            <p className="text-xs font-semibold text-gray-500 uppercase">
+                                                                Transactions
+                                                            </p>
+                                                        </div>
+                                                        {(
+                                                            searchResults.transactions as unknown[]
+                                                        ).map(
+                                                            (
+                                                                txn: unknown,
+                                                                idx: number,
+                                                            ) => {
+                                                                const t =
+                                                                    txn as {
+                                                                        id: string;
+                                                                        title: string;
+                                                                        subtitle?: string;
+                                                                        amount?: string;
+                                                                        date?: string;
+                                                                        url?: string;
+                                                                    };
+                                                                return (
+                                                                    <Link
+                                                                        key={
+                                                                            idx
+                                                                        }
+                                                                        href={
+                                                                            t.url ||
+                                                                            '/dashboard/transactions'
+                                                                        }
+                                                                        onClick={() => {
+                                                                            setShowSearchDropdown(
+                                                                                false,
+                                                                            );
+                                                                            setSearchQuery(
+                                                                                '',
+                                                                            );
+                                                                        }}
+                                                                        className="flex items-center justify-between border-b border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50"
+                                                                    >
+                                                                        <div>
+                                                                            <p className="text-sm font-medium text-gray-900">
+                                                                                {
+                                                                                    t.title
+                                                                                }
+                                                                            </p>
+                                                                            {t.subtitle && (
+                                                                                <p className="text-xs text-gray-500">
+                                                                                    {
+                                                                                        t.subtitle
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                            {t.date && (
+                                                                                <p className="text-xs text-gray-400">
+                                                                                    {
+                                                                                        t.date
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                        {t.amount && (
+                                                                            <p className="text-sm font-semibold text-green-600">
+                                                                                {
+                                                                                    t.amount
+                                                                                }
+                                                                            </p>
+                                                                        )}
+                                                                    </Link>
+                                                                );
+                                                            },
+                                                        )}
+                                                    </>
+                                                )}
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             <button
@@ -534,13 +779,151 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     {/* Mobile Search */}
                     {searchOpen && (
                         <div className="border-t border-gray-200 px-4 py-3 md:hidden">
-                            <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5">
-                                <Search className="h-4 w-4 text-gray-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Search..."
-                                    className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-500"
-                                />
+                            <div className="relative">
+                                <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2.5">
+                                    <Search className="h-4 w-4 text-gray-500" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search transactions, pages..."
+                                        value={searchQuery}
+                                        onChange={(e) =>
+                                            handleSearch(e.target.value)
+                                        }
+                                        onFocus={() =>
+                                            searchQuery.length >= 2 &&
+                                            setShowSearchDropdown(true)
+                                        }
+                                        className="w-full border-none bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-500"
+                                    />
+                                </div>
+
+                                {/* Mobile Search Results Dropdown */}
+                                {showSearchDropdown && (
+                                    <div className="absolute top-full right-0 left-0 z-20 mt-2 max-h-72 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                                        {searchLoading && (
+                                            <div className="px-4 py-8 text-center text-gray-500">
+                                                Searching...
+                                            </div>
+                                        )}
+
+                                        {!searchLoading &&
+                                            searchResults.pages.length === 0 &&
+                                            searchResults.transactions
+                                                .length === 0 && (
+                                                <div className="px-4 py-8 text-center text-gray-500">
+                                                    No results found
+                                                </div>
+                                            )}
+
+                                        {/* Pages */}
+                                        {!searchLoading &&
+                                            searchResults.pages.length > 0 && (
+                                                <>
+                                                    <div className="border-b border-gray-200 px-4 py-2">
+                                                        <p className="text-xs font-semibold text-gray-500 uppercase">
+                                                            Pages
+                                                        </p>
+                                                    </div>
+                                                    {(
+                                                        searchResults.pages as unknown[]
+                                                    ).map(
+                                                        (
+                                                            page: unknown,
+                                                            idx: number,
+                                                        ) => {
+                                                            const p = page as {
+                                                                title: string;
+                                                                url: string;
+                                                            };
+                                                            return (
+                                                                <Link
+                                                                    key={idx}
+                                                                    href={p.url}
+                                                                    onClick={() => {
+                                                                        setShowSearchDropdown(
+                                                                            false,
+                                                                        );
+                                                                        setSearchQuery(
+                                                                            '',
+                                                                        );
+                                                                        setSearchOpen(
+                                                                            false,
+                                                                        );
+                                                                    }}
+                                                                    className="block border-b border-gray-100 px-4 py-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50"
+                                                                >
+                                                                    {p.title}
+                                                                </Link>
+                                                            );
+                                                        },
+                                                    )}
+                                                </>
+                                            )}
+
+                                        {/* Transactions */}
+                                        {!searchLoading &&
+                                            searchResults.transactions.length >
+                                                0 && (
+                                                <>
+                                                    <div className="border-b border-gray-200 px-4 py-2">
+                                                        <p className="text-xs font-semibold text-gray-500 uppercase">
+                                                            Transactions
+                                                        </p>
+                                                    </div>
+                                                    {(
+                                                        searchResults.transactions as unknown[]
+                                                    ).map(
+                                                        (
+                                                            txn: unknown,
+                                                            idx: number,
+                                                        ) => {
+                                                            const t = txn as {
+                                                                id: string;
+                                                                title: string;
+                                                                subtitle?: string;
+                                                                amount?: string;
+                                                                url?: string;
+                                                            };
+                                                            return (
+                                                                <Link
+                                                                    key={idx}
+                                                                    href={
+                                                                        t.url ||
+                                                                        '/dashboard/transactions'
+                                                                    }
+                                                                    onClick={() => {
+                                                                        setShowSearchDropdown(
+                                                                            false,
+                                                                        );
+                                                                        setSearchQuery(
+                                                                            '',
+                                                                        );
+                                                                        setSearchOpen(
+                                                                            false,
+                                                                        );
+                                                                    }}
+                                                                    className="block border-b border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50"
+                                                                >
+                                                                    <p className="text-sm font-medium text-gray-900">
+                                                                        {
+                                                                            t.title
+                                                                        }
+                                                                    </p>
+                                                                    {t.subtitle && (
+                                                                        <p className="text-xs text-gray-500">
+                                                                            {
+                                                                                t.subtitle
+                                                                            }
+                                                                        </p>
+                                                                    )}
+                                                                </Link>
+                                                            );
+                                                        },
+                                                    )}
+                                                </>
+                                            )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}

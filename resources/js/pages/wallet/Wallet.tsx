@@ -4,7 +4,6 @@ import type { SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
-    ArrowDownLeft,
     ArrowUpRight,
     CreditCard,
     Eye,
@@ -38,15 +37,6 @@ type WalletData = {
 interface WalletPageProps extends SharedData {
     walletData: WalletData;
 }
-
-type Transaction = {
-    id: string;
-    type: 'credit' | 'debit';
-    description: string;
-    amount: string;
-    date: string;
-    status: 'completed' | 'pending' | 'failed';
-};
 
 const Wallet = () => {
     const { walletData } = usePage<WalletPageProps>().props;
@@ -111,49 +101,6 @@ const Wallet = () => {
             },
         );
     };
-
-    const recentTransactions: Transaction[] = [
-        {
-            id: '1',
-            type: 'credit',
-            description: 'Deposit from Access Bank',
-            amount: '₦50,000.00',
-            date: '2 hours ago',
-            status: 'completed',
-        },
-        {
-            id: '2',
-            type: 'debit',
-            description: 'Withdrawal to GTBank',
-            amount: '₦25,000.00',
-            date: '5 hours ago',
-            status: 'pending',
-        },
-        {
-            id: '3',
-            type: 'credit',
-            description: 'Thrift package return',
-            amount: '₦100,000.00',
-            date: '1 day ago',
-            status: 'completed',
-        },
-        {
-            id: '4',
-            type: 'debit',
-            description: 'Package subscription',
-            amount: '₦15,000.00',
-            date: '2 days ago',
-            status: 'completed',
-        },
-        {
-            id: '5',
-            type: 'credit',
-            description: 'Deposit from Zenith Bank',
-            amount: '₦75,000.00',
-            date: '3 days ago',
-            status: 'completed',
-        },
-    ];
 
     const quickActions = [
         {
@@ -227,7 +174,13 @@ const Wallet = () => {
                     )}
 
                     {/* Balance Card */}
-                    <div className="mb-6 bg-blue-600 p-8 text-white shadow-lg">
+                    <div className="relative mb-6 bg-blue-600 p-8 text-white shadow-lg overflow-hidden">
+                        <div className="pointer-events-none absolute inset-0">
+                            <div className="absolute -top-40 -right-32 h-72 w-72 rounded-full bg-cyan-400/40 blur-3xl" />
+                            <div className="absolute top-10 left-16 h-52 w-52 rounded-full bg-pink-500/30 blur-3xl" />
+                            <div className="absolute right-1/4 bottom-0 h-80 w-80 rounded-full bg-blue-500/30 blur-3xl" />
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:72px_72px]" />
+                        </div>
                         <div className="mb-6 flex items-center justify-between">
                             <div>
                                 <p className="mb-2 text-sm text-blue-100">
@@ -374,91 +327,6 @@ const Wallet = () => {
                                     </Link>
                                 </div>
                             )}
-                        </div>
-                    </div>
-
-                    {/* Recent Transactions */}
-                    <div className="mt-6 border border-gray-200 bg-white shadow-sm">
-                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900">
-                                    Recent Transactions
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-600">
-                                    Your latest wallet activities
-                                </p>
-                            </div>
-                            <Link
-                                href="/transactions"
-                                className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                            >
-                                View All
-                            </Link>
-                        </div>
-
-                        <div className="divide-y divide-gray-200">
-                            {recentTransactions.map((transaction) => (
-                                <div
-                                    key={transaction.id}
-                                    className="flex items-center justify-between p-6 transition-colors hover:bg-gray-50"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div
-                                            className={cn(
-                                                'rounded-full p-3',
-                                                transaction.type === 'credit'
-                                                    ? 'bg-green-100 text-green-600'
-                                                    : 'bg-red-100 text-red-600',
-                                            )}
-                                        >
-                                            {transaction.type === 'credit' ? (
-                                                <ArrowDownLeft className="h-5 w-5" />
-                                            ) : (
-                                                <ArrowUpRight className="h-5 w-5" />
-                                            )}
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900">
-                                                {transaction.description}
-                                            </p>
-                                            <p className="text-sm text-gray-600">
-                                                {transaction.date}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p
-                                            className={cn(
-                                                'text-lg font-semibold',
-                                                transaction.type === 'credit'
-                                                    ? 'text-green-600'
-                                                    : 'text-red-600',
-                                            )}
-                                        >
-                                            {transaction.type === 'credit'
-                                                ? '+'
-                                                : '-'}
-                                            {transaction.amount}
-                                        </p>
-                                        <span
-                                            className={cn(
-                                                'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
-                                                transaction.status ===
-                                                    'completed' &&
-                                                    'bg-green-100 text-green-700',
-                                                transaction.status ===
-                                                    'pending' &&
-                                                    'bg-yellow-100 text-yellow-700',
-                                                transaction.status ===
-                                                    'failed' &&
-                                                    'bg-red-100 text-red-700',
-                                            )}
-                                        >
-                                            {transaction.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
                         </div>
                     </div>
 

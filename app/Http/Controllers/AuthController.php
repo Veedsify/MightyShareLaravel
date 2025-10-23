@@ -122,6 +122,11 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            if (Auth::user()->isAdmin()) {
+                redirect('/admin')->with('success', 'Login successful!');
+                return;
+            }
+
             // Redirect to dashboard on successful login
             return redirect()->intended('dashboard')->with('success', 'Login successful!');
         }

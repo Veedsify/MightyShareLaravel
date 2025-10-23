@@ -140,7 +140,7 @@ const Transactions = ({ transactions }: { transactions: Transaction[] }) => {
                     </div>
 
                     <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-                        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                        <div className="border border-gray-200 bg-white p-6 shadow-sm">
                             <div className="flex items-center justify-between">
                                 <p className="text-sm text-gray-600">
                                     Total Credits
@@ -151,7 +151,7 @@ const Transactions = ({ transactions }: { transactions: Transaction[] }) => {
                                 ₦{totalCredits.toLocaleString()}
                             </p>
                         </div>
-                        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                        <div className="border border-gray-200 bg-white p-6 shadow-sm">
                             <div className="flex items-center justify-between">
                                 <p className="text-sm text-gray-600">
                                     Total Debits
@@ -162,7 +162,7 @@ const Transactions = ({ transactions }: { transactions: Transaction[] }) => {
                                 ₦{totalDebits.toLocaleString()}
                             </p>
                         </div>
-                        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                        <div className="border border-gray-200 bg-white p-6 shadow-sm">
                             <p className="text-sm text-gray-600">
                                 Total Transactions
                             </p>
@@ -172,7 +172,7 @@ const Transactions = ({ transactions }: { transactions: Transaction[] }) => {
                         </div>
                     </div>
 
-                    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                    <div className="mb-6 border border-gray-200 bg-white p-6 shadow-sm">
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                             <div className="md:col-span-2">
                                 <label
@@ -240,7 +240,7 @@ const Transactions = ({ transactions }: { transactions: Transaction[] }) => {
                         </div>
                     </div>
 
-                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+                    <div className="border border-gray-200 bg-white shadow-sm">
                         <div className="overflow-x-auto">
                             {filteredTransactions.length === 0 ? (
                                 <div className="px-6 py-16 text-center text-gray-500">

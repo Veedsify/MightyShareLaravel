@@ -3,12 +3,15 @@
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\AlatPayController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\ComplaintsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PackagesController;
 use App\Http\Controllers\PaymentRegistrationController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SettlementsController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Settings\PasswordController;
@@ -37,6 +40,12 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthController::class, "login"])->name('login.user');
     Route::get('register', [AuthController::class, "registerPage"])->name('register');
     Route::post('register', [AuthController::class, "register"])->name('register.user');
+
+    // Password Reset Routes
+    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {
@@ -154,6 +163,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [AccountsController::class, 'index'])->name('index');
         Route::post('/', [AccountsController::class, 'store'])->name('store');
     });
+
+    // Search API endpoint
+    Route::get('api/search/{query}', [SearchController::class, 'search'])->name('api.search');
 
     // Transaction API endpoints
     Route::prefix('api/transactions')->name('api.transactions.')->group(function () {

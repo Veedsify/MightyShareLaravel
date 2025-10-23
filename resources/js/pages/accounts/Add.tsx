@@ -150,7 +150,13 @@ const AddAccount = ({
                 <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6 lg:p-8">
                     <div className="space-y-6">
                         {/* Header Section */}
-                        <div className="overflow-hidden  bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white shadow-lg">
+                        <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white shadow-lg">
+                            <div className="pointer-events-none absolute inset-0">
+                                <div className="absolute -top-40 -right-32 h-72 w-72 rounded-full bg-cyan-400/40 blur-3xl" />
+                                <div className="absolute top-10 left-16 h-52 w-52 rounded-full bg-pink-500/30 blur-3xl" />
+                                <div className="absolute right-1/4 bottom-0 h-80 w-80 rounded-full bg-blue-500/30 blur-3xl" />
+                                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:72px_72px]" />
+                            </div>
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="mb-3 flex items-center gap-3">
@@ -223,7 +229,7 @@ const AddAccount = ({
                         </div>
 
                         {/* Form Section */}
-                        <div className="mb-16 overflow-hidden  bg-white shadow-lg">
+                        <div className="relative mb-16 overflow-hidden bg-white shadow-lg">
                             <div className="border-b border-gray-200 bg-gradient-to-r from-pink-50 to-blue-50 p-6">
                                 <h2 className="text-xl font-bold text-gray-900">
                                     Create New Accounts
@@ -358,7 +364,7 @@ const AddAccount = ({
                     </div>
 
                     {/* Account List Section */}
-                    <div className="overflow-hidden  bg-white shadow-lg">
+                    <div className="relative overflow-hidden bg-white shadow-lg">
                         <div className="flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-blue-50 to-pink-50 p-6">
                             <div>
                                 <h2 className="text-xl font-bold text-gray-900">
@@ -610,7 +616,7 @@ const AddAccount = ({
                                             onClick={() =>
                                                 setShowLimitModal(false)
                                             }
-                                            className="w-full transform  bg-red-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl"
+                                            className="relative w-full transform bg-red-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl"
                                         >
                                             Close
                                         </button>
