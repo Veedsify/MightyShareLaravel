@@ -42,6 +42,11 @@ const navigationItems: NavigationItem[] = [
         current: true,
     },
     {
+        title: 'Profile',
+        icon: User,
+        href: '/settings',
+    },
+    {
         title: 'Add Account',
         icon: UserPlus,
         href: '/accounts/add',
@@ -103,11 +108,6 @@ const navigationItems: NavigationItem[] = [
         title: 'Notifications',
         icon: Bell,
         href: '/notifications',
-    },
-    {
-        title: 'Profile',
-        icon: User,
-        href: '/settings',
     },
 ];
 

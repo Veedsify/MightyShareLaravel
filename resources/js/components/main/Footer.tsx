@@ -150,21 +150,22 @@ export const Footer = () => {
                             <li className="flex items-start space-x-3">
                                 <MapPin className="mt-1 h-5 w-5 text-muted-foreground" />
                                 <span className="text-sm text-muted-foreground">
-                                    123 Charity Street
+                                    No 2 Ifoshi Road, Iyana Ejigbo, Inside Morouf Filling Station
                                     <br />
-                                    City, State 12345
+                                    Lagos, Nigeria
                                 </span>
                             </li>
                             <li className="flex items-center space-x-3">
                                 <Phone className="h-5 w-5 text-muted-foreground" />
                                 <span className="text-sm text-muted-foreground">
-                                    +1 (555) 123-4567
+                                    +234 810 420 8361 <br /> +234 913 762 3758
                                 </span>
                             </li>
                             <li className="flex items-center space-x-3">
                                 <Mail className="h-5 w-5 text-muted-foreground" />
                                 <span className="text-sm text-muted-foreground">
-                                    info@mightyshare.org
+                                    info@mightyshare.com <br />
+                                    support@mightyshare.com
                                 </span>
                             </li>
                         </ul>

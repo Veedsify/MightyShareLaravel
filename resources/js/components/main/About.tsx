@@ -75,7 +75,7 @@ export const About = () => {
                                         Financial Empowerment
                                     </h4>
                                     <p className="text-sm text-muted-foreground">
-                                        Access to emergency funds, savings
+                                        Access to savings
                                         plans, and thrift services that help you
                                         build financial security.
                                     </p>

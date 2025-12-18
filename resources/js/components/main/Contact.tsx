@@ -31,7 +31,7 @@ export const Contact = () => {
     };
 
     return (
-        <Section id="contact" className="bg-blue-900 relative overflow-hidden">
+        <Section id="contact" className="relative overflow-hidden bg-blue-900">
             <div className="pointer-events-none absolute inset-0">
                 <div className="absolute -top-40 -right-32 h-72 w-72 rounded-full bg-cyan-400/40 blur-3xl" />
                 <div className="absolute top-10 left-16 h-52 w-52 rounded-full bg-pink-500/30 blur-3xl" />
@@ -71,11 +71,10 @@ export const Contact = () => {
                                         Visit Us
                                     </h4>
                                     <p className="text-sm text-blue-100">
-                                        123 Charity Street
+                                        No 2 Ifoshi Road, Iyana Ejigbo, Inside
+                                        Morouf Filling Station
                                         <br />
-                                        City, State 12345
-                                        <br />
-                                        United States
+                                        Lagos, Nigeria
                                     </p>
                                 </div>
                             </div>
@@ -89,9 +88,9 @@ export const Contact = () => {
                                         Call Us
                                     </h4>
                                     <p className="text-sm text-blue-100">
-                                        +1 (555) 123-4567
+                                        +234 810 420 8361 <br /> +234 913 762
+                                        3758
                                         <br />
-                                        Mon-Fri: 9AM - 6PM EST
                                     </p>
                                 </div>
                             </div>
@@ -105,9 +104,8 @@ export const Contact = () => {
                                         Email Us
                                     </h4>
                                     <p className="text-sm text-blue-100">
-                                        info@mightyshare.org
-                                        <br />
-                                        support@mightyshare.org
+                                        info@mightyshare.com <br />
+                                        support@mightyshare.com
                                     </p>
                                 </div>
                             </div>

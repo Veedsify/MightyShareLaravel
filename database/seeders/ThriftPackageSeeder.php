@@ -15,8 +15,8 @@ class ThriftPackageSeeder extends Seeder
         $packages = [
             [
                 'name' => 'Option A',
-                'price' => 2500, // ₦2,500 monthly
-                'duration' => 12, // 3 months in weeks
+                'price' => 2400, // ₦2,500 monthly
+                'duration' => 30, // 3 months in weeks
                 'profit_percentage' => 5, // 5% returns
                 'description' => 'Perfect for beginners looking to start their thrift journey. Affordable monthly contributions with steady returns.',
                 'terms' => 'Monthly contribution of ₦2,500 for 3 months. Maximum of 100 accounts can be managed. 5% profit on successful completion. Early withdrawal penalties may apply.',
@@ -28,16 +28,14 @@ class ThriftPackageSeeder extends Seeder
                 'features' => [
                     'Monthly contribution plan',
                     'Up to 100 accounts',
-                    '5% profit returns',
-                    '3 months duration',
-                    'Basic customer support',
-                    'Mobile app access'
+                    '30 weeks duration',
+                    'Customer support',
                 ]
             ],
             [
                 'name' => 'Option B',
-                'price' => 2500, // ₦10,000 monthly
-                'duration' => 24, // 6 months in weeks
+                'price' => 10000, // ₦10,000 monthly
+                'duration' => 28, // 6 months in weeks
                 'profit_percentage' => 8, // 8% returns
                 'description' => 'Ideal for regular savers who want better returns and can manage more accounts. Enhanced features and support.',
                 'terms' => 'Monthly contribution of ₦10,000 for 6 months. Maximum of 500 accounts can be managed. 8% profit on successful completion. Priority customer support included.',
@@ -49,17 +47,13 @@ class ThriftPackageSeeder extends Seeder
                 'features' => [
                     'Monthly contribution plan',
                     'Up to 500 accounts',
-                    '8% profit returns',
-                    '6 months duration',
-                    'Priority customer support',
-                    'Advanced analytics dashboard',
-                    'Mobile app access',
-                    'SMS notifications'
+                    '7 months duration',
+                    'Customer support',
                 ]
             ],
             [
                 'name' => 'Option C',
-                'price' => 25000, // ₦70,000 one-time
+                'price' => 70000, // ₦70,000 one-time
                 'duration' => 24, // 6 months in weeks
                 'profit_percentage' => 12, // 12% returns
                 'description' => 'Premium package for serious investors. One-time payment with highest returns and maximum account management capacity.',
@@ -72,23 +66,29 @@ class ThriftPackageSeeder extends Seeder
                 'features' => [
                     'One-time payment plan',
                     'Up to 1000 accounts',
-                    '12% profit returns',
                     '6 months duration',
                     'Premium 24/7 support',
-                    'Advanced analytics dashboard',
-                    'Mobile app access',
-                    'SMS & Email notifications',
-                    'Dedicated account manager',
-                    'Early withdrawal flexibility',
-                    'Bonus referral rewards'
+                    'Cash Back of 120,000 in 6 months, food stuff worth 30,000',
                 ]
             ]
         ];
 
         foreach ($packages as $package) {
-            ThriftPackage::updateOrCreate(
-                ['name' => $package['name']],
-                $package
+            ThriftPackage::create(
+                [
+                    'name' => $package['name'],
+                    'price' => $package['price'],
+                    'duration' => $package['duration'],
+                    'profit_percentage' => $package['profit_percentage'],
+                    'description' => $package['description'],
+                    'terms' => $package['terms'],
+                    'is_active' => $package['is_active'],
+                    'min_number_of_accounts' => $package['min_number_of_accounts'],
+                    'number_of_accounts' => $package['number_of_accounts'],
+                    'min_contribution' => $package['min_contribution'],
+                    'max_contribution' => $package['max_contribution'],
+                    'features' => $package['features'],
+                ],
             );
         }
     }

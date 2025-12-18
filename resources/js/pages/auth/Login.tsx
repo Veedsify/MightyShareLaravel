@@ -77,7 +77,7 @@ const Login = () => {
                                     </h3>
                                 </div>
                                 <p className="text-blue-100">
-                                    Earn up to 15% annual returns on your
+                                    Earn returns on your
                                     savings with our premium packages
                                 </p>
                             </div>

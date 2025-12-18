@@ -177,7 +177,10 @@ const Dashboard = () => {
                     {/* Welcome Header */}
                     <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900">
-                            Welcome back, {firstName}! 👋
+                            Welcome back, MightyShare{' '}
+                            <span className="text-blue-500">
+                                {firstName}! 👋
+                            </span>
                         </h1>
                         <p className="text-base text-gray-600">
                             Here's what's happening with your accounts today.

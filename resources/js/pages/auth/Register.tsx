@@ -93,7 +93,7 @@ const Register = ({ packages }: RegisterProps) => {
     const packageOptions = packages.map((pkg) => ({
         id: pkg.id,
         name: pkg.name,
-        description: `₦${pkg.price.toLocaleString()} • ${pkg.profitPercentage}% Returns • ${pkg.duration} Months`,
+        description: `₦${pkg.price.toLocaleString()} • ${pkg.duration} Weeks`,
         color:
             packageColors[pkg.name as keyof typeof packageColors] ||
             'from-blue-400 to-blue-600',
@@ -155,7 +155,6 @@ const Register = ({ packages }: RegisterProps) => {
                                 {[
                                     'Secure and regulated platform',
                                     'Flexible packages for all budgets',
-                                    'Up to 15% annual returns',
                                     '24/7 customer support',
                                     'Easy withdrawals anytime',
                                 ].map((benefit, i) => (
@@ -447,7 +446,7 @@ const Register = ({ packages }: RegisterProps) => {
 
                                                                     {data.package_id ===
                                                                         pkg.id.toString() && (
-                                                                        <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
+                                                                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/20">
                                                                             <Check className="h-4 w-4 text-white" />
                                                                         </div>
                                                                     )}

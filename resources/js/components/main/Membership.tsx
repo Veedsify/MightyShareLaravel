@@ -114,11 +114,6 @@ export const Membership = ({ packages }: MembershipProps) => {
                                             /{formatDuration(pkg.duration)}
                                         </span>
                                     </div>
-                                    <div className="mt-2">
-                                        <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-                                            {pkg.profitPercentage}% Returns
-                                        </span>
-                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     <ul className="space-y-3">
