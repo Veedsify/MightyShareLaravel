@@ -53,12 +53,7 @@ export const Membership = ({ packages }: MembershipProps) => {
         return `${weeks} week${weeks > 1 ? 's' : ''}`;
     };
 
-    // Determine which package is most popular (highest profit percentage)
-    const mostPopularPackage = packages.reduce(
-        (prev, current) =>
-            current.profitPercentage > prev.profitPercentage ? current : prev,
-        packages[0],
-    );
+   
 
     return (
         <Section
@@ -81,24 +76,12 @@ export const Membership = ({ packages }: MembershipProps) => {
                 />
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {packages.map((pkg) => {
-                        const isPopular = pkg.id === mostPopularPackage?.id;
 
                         return (
                             <Card
                                 key={pkg.id}
-                                className={
-                                    isPopular
-                                        ? 'relative border-primary shadow-lg'
-                                        : ''
-                                }
+                                className={'relative border-primary shadow-lg'}
                             >
-                                {isPopular && (
-                                    <div className="absolute -top-3 right-0 left-0 flex justify-center">
-                                        <span className="rounded-full bg-primary px-4 py-1 text-xs font-semibold text-primary-foreground">
-                                            Most Popular
-                                        </span>
-                                    </div>
-                                )}
                                 <CardHeader className="text-center">
                                     <CardTitle className="text-2xl">
                                         {pkg.name}
@@ -133,9 +116,7 @@ export const Membership = ({ packages }: MembershipProps) => {
                                 <CardFooter>
                                     <Button
                                         className="w-full"
-                                        variant={
-                                            isPopular ? 'default' : 'outline'
-                                        }
+                                        variant={'default'}
                                         asChild
                                     >
                                         <Link href="/register">

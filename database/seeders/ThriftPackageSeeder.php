@@ -18,7 +18,7 @@ class ThriftPackageSeeder extends Seeder
                 'price' => 2400, // NGN2,500 monthly
                 'duration' => 30, // 3 months in weeks
                 'profit_percentage' => 5, // 5% returns
-                'description' => 'Perfect for beginners looking to start their thrift journey. Affordable monthly contributions with steady returns.',
+                'description' => 'Contribute 2,400 weekly for 30 weeks and get Cash back of 120,000 with foodstuff worth 25,000.',
                 'terms' => 'Monthly contribution of NGN2,500 for 3 months. Maximum of 100 accounts can be managed. 5% profit on successful completion. Early withdrawal penalties may apply.',
                 'is_active' => true,
                 'min_number_of_accounts' => 1,
@@ -30,6 +30,7 @@ class ThriftPackageSeeder extends Seeder
                     'Up to 100 accounts',
                     '30 weeks duration',
                     'Customer support',
+                    'Cash Back of 120,000 in 30 weeks, food stuff worth 25,000',
                 ]
             ],
             [
@@ -37,7 +38,7 @@ class ThriftPackageSeeder extends Seeder
                 'price' => 10000, // NGN10,000 monthly
                 'duration' => 28, // 6 months in weeks
                 'profit_percentage' => 8, // 8% returns
-                'description' => 'Ideal for regular savers who want better returns and can manage more accounts. Enhanced features and support.',
+                'description' => 'Contribute 10,000 monthly for 7 months and get Cash back of 120,000 with foodstuff worth 30,000.',
                 'terms' => 'Monthly contribution of NGN10,000 for 6 months. Maximum of 500 accounts can be managed. 8% profit on successful completion. Priority customer support included.',
                 'is_active' => true,
                 'min_number_of_accounts' => 1,
@@ -49,6 +50,7 @@ class ThriftPackageSeeder extends Seeder
                     'Up to 500 accounts',
                     '7 months duration',
                     'Customer support',
+                    'Cash Back of 120,000 in 7 months, food stuff worth 30,000',
                 ]
             ],
             [
@@ -56,7 +58,7 @@ class ThriftPackageSeeder extends Seeder
                 'price' => 70000, // NGN70,000 one-time
                 'duration' => 24, // 6 months in weeks
                 'profit_percentage' => 12, // 12% returns
-                'description' => 'Premium package for serious investors. One-time payment with highest returns and maximum account management capacity.',
+                'description' => 'Contribute 70,000  once and get Cash back of 120,000 in 6 months with foodstuff worth 30,000.',
                 'terms' => 'One-time payment of NGN70,000 for 6 months access. Maximum of 1000 accounts can be managed. 12% profit on successful completion. Premium support and exclusive features included.',
                 'is_active' => true,
                 'min_number_of_accounts' => 10,
