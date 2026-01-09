@@ -27,11 +27,13 @@ class UserRegistrationService
             // Generate referral ID if not provided
             $referralId = $data['referralId'] ?? $this->generateReferralId();
 
+            $e164 = PhoneService::normalize($data['phone'], "NG");
+
             // Create the user
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'phone' => $data['phone'],
+            'phone' => $e164,
                 'password' => Hash::make($data['password']),
                 'referral_id' => $referralId,
                 'registration_paid' => false,

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Services\PhoneService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\UserRegistrationRequest;
@@ -113,18 +115,29 @@ class AuthController extends Controller
     {
         // Validate the request
         $request->validate([
-            'email' => ['required', 'email'],
+            'phone' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->only('phone', 'password');
 
-        if (Auth::attempt($credentials)) {
+        $user = PhoneService::findUser($credentials['phone']);
+
+        if(!$user) {
+            return back()->withErrors([
+                'phone' => 'User not found'
+            ])->onlyInput('phone');
+        }
+
+        $verifyMatch = password_verify($credentials['password'], $user->password);
+
+
+        if ($verifyMatch) {
+            Auth::login($user);
             $request->session()->regenerate();
 
             if (Auth::user()->isAdmin()) {
                 redirect('/admin')->with('success', 'Login successful!');
-                return;
             }
 
             // Redirect to dashboard on successful login

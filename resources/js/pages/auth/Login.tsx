@@ -14,7 +14,7 @@ import { FormEventHandler, useState } from 'react';
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
-        email: '',
+        phone: '',
         password: '',
         remember: false,
     });
@@ -77,8 +77,8 @@ const Login = () => {
                                     </h3>
                                 </div>
                                 <p className="text-blue-100">
-                                    Earn returns on your
-                                    savings with our premium packages
+                                    Earn returns on your savings with our
+                                    premium packages
                                 </p>
                             </div>
 
@@ -130,9 +130,16 @@ const Login = () => {
                     <div className="w-full max-w-md">
                         {/* Mobile Logo */}
                         <div className="mb-10 text-center lg:hidden">
-                            <div className="mb-4 inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-4">
-                                <Sparkles className="h-8 w-8 text-white" />
-                            </div>
+                            <Link
+                                href="/"
+                                className="mb-4 inline-flex items-center justify-center p-4"
+                            >
+                                <img
+                                    src="/images/logo.jpg"
+                                    alt="MightyShare Logo"
+                                    className="h-14 w-14 rounded-full"
+                                />
+                            </Link>
                             <h1 className="mb-2 bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-4xl font-bold text-transparent">
                                 MightyShare
                             </h1>
@@ -158,30 +165,30 @@ const Login = () => {
                                 {/* Email Field */}
                                 <div>
                                     <label
-                                        htmlFor="email"
+                                        htmlFor="phone"
                                         className="mb-2 block text-sm font-semibold text-gray-700"
                                     >
-                                        Email Address
+                                        Phone Numbers
                                     </label>
                                     <div className="group relative">
                                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 transition-colors">
                                             <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-blue-600" />
                                         </div>
                                         <input
-                                            id="email"
-                                            type="email"
-                                            value={data.email}
+                                            id="phone"
+                                            type="phone"
+                                            value={data.phone}
                                             onChange={(e) =>
-                                                setData('email', e.target.value)
+                                                setData('phone', e.target.value)
                                             }
                                             className="w-full rounded-xl border-2 border-gray-200 bg-gray-50 py-3.5 pr-4 pl-12 text-gray-900 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-                                            placeholder="you@example.com"
+                                            placeholder="+234 000 000 0000"
                                             required
                                         />
                                     </div>
-                                    {errors.email && (
+                                    {errors.phone && (
                                         <p className="mt-2 text-sm text-red-600">
-                                            {errors.email}
+                                            {errors.phone}
                                         </p>
                                     )}
                                 </div>
