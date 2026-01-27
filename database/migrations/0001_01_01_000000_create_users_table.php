@@ -30,6 +30,8 @@ return new class extends Migration
             $table->json('notifications')->default('[]');
             $table->string('last_activity')->nullable();
             $table->text('two_factor_secret')->nullable();
+            $table->string('avatar')->nullable();
+            $table->string('next_of_kin')->nullable();
             $table->text('two_factor_recovery_codes')->nullable();
             $table->timestamp('two_factor_confirmed_at')->nullable();
             $table->rememberToken();

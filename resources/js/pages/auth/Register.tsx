@@ -50,9 +50,10 @@ interface ThriftPackage {
 
 interface RegisterProps {
     packages: ThriftPackage[];
+    packageId?: string;
 }
 
-const Register = ({ packages }: RegisterProps) => {
+const Register = ({ packages, packageId }: RegisterProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isPackageDropdownOpen, setIsPackageDropdownOpen] = useState(false);
@@ -62,7 +63,7 @@ const Register = ({ packages }: RegisterProps) => {
         name: '',
         email: '',
         phone: '',
-        package_id: '',
+        package_id: packageId || '',
         password: '',
         password_confirmation: '',
         terms: false,

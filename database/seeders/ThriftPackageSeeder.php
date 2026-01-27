@@ -15,7 +15,7 @@ class ThriftPackageSeeder extends Seeder
         $packages = [
             [
                 'name' => 'Option A',
-                'price' => 2400, // NGN2,500 monthly
+                'price' => 2500, // NGN2,500 monthly
                 'duration' => 30, // 3 months in weeks
                 'profit_percentage' => 5, // 5% returns
                 'description' => 'Contribute 2,400 weekly for 30 weeks and get Cash back of 120,000 with foodstuff worth 25,000.',
@@ -35,11 +35,11 @@ class ThriftPackageSeeder extends Seeder
             ],
             [
                 'name' => 'Option B',
-                'price' => 10000, // NGN10,000 monthly
+                'price' => 2500, // NGN10,000 monthly
                 'duration' => 28, // 6 months in weeks
                 'profit_percentage' => 8, // 8% returns
                 'description' => 'Contribute 10,000 monthly for 7 months and get Cash back of 120,000 with foodstuff worth 30,000.',
-                'terms' => 'Monthly contribution of NGN10,000 for 6 months. Maximum of 500 accounts can be managed. 8% profit on successful completion. Priority customer support included.',
+                'terms' => 'Monthly contribution of NGN10,000 for 6 months. Maximum of 500 accounts can be managed. Priority customer support included.',
                 'is_active' => true,
                 'min_number_of_accounts' => 1,
                 'number_of_accounts' => 500,
@@ -55,7 +55,7 @@ class ThriftPackageSeeder extends Seeder
             ],
             [
                 'name' => 'Option C',
-                'price' => 70000, // NGN70,000 one-time
+                'price' => 2500, // NGN70,000 one-time
                 'duration' => 24, // 6 months in weeks
                 'profit_percentage' => 12, // 12% returns
                 'description' => 'Contribute 70,000  once and get Cash back of 120,000 in 6 months with foodstuff worth 30,000.',

@@ -35,6 +35,26 @@ class ProfileController extends Controller
             $request->user()->email_verified_at = null;
         }
 
+        if ($request->next_of_kin_name && $request->user()->nextOfKin) {
+            $request->user()->nextOfKin()->update([
+                'name' => $request->next_of_kin_name,
+                'phone' => $request->next_of_kin_phone,
+                'gender' => $request->next_of_kin_gender,
+                'date_of_birth' => $request->next_of_kin_date_of_birth,
+                'relationship' => $request->next_of_kin_relationship,
+                'address' => $request->next_of_kin_address,
+            ]);
+        } else if ($request->next_of_kin_name && !$request->user()->nextOfKin) {
+            $request->user()->nextOfKin()->create([
+                'name' => $request->next_of_kin_name,
+                'phone' => $request->next_of_kin_phone,
+                'gender' => $request->next_of_kin_gender,
+                'date_of_birth' => $request->next_of_kin_date_of_birth,
+                'relationship' => $request->next_of_kin_relationship,
+                'address' => $request->next_of_kin_address,
+            ]);
+        }
+
         $request->user()->save();
 
         return back()->with('success', 'Profile updated successfully!');

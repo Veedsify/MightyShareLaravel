@@ -119,7 +119,9 @@ export const Membership = ({ packages }: MembershipProps) => {
                                         variant={'default'}
                                         asChild
                                     >
-                                        <Link href="/register">
+                                        <Link
+                                            href={`/register?package=${pkg.id}`}
+                                        >
                                             Get Started
                                         </Link>
                                     </Button>

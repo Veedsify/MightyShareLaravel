@@ -14,6 +14,14 @@ import {
 import { useState } from 'react';
 
 interface SettingsPageProps extends SharedData {
+    nextOfKin: {
+        name: string;
+        phone: string;
+        gender: string;
+        date_of_birth: string;
+        relationship: string;
+        address: string;
+    };
     user: {
         name: string;
         email: string;
@@ -36,7 +44,7 @@ interface SettingsPageProps extends SharedData {
 }
 
 const Settings = () => {
-    const { user, staticAccount, notifications } =
+    const { user, staticAccount, notifications, nextOfKin } =
         usePage<SettingsPageProps>().props;
     const [showOtpModal, setShowOtpModal] = useState(false);
     const [otp, setOtp] = useState('');
@@ -51,6 +59,12 @@ const Settings = () => {
         email: user.email,
         phone: user.phone,
         date_of_birth: user.date_of_birth || '',
+        next_of_kin_name: nextOfKin?.name || '',
+        next_of_kin_phone: nextOfKin?.phone || '',
+        next_of_kin_gender: nextOfKin?.gender || '',
+        next_of_kin_date_of_birth: nextOfKin?.date_of_birth || '',
+        next_of_kin_relationship: nextOfKin?.relationship || '',
+        next_of_kin_address: nextOfKin?.address || '',
     });
 
     // Password form
@@ -174,7 +188,7 @@ const Settings = () => {
                         <div className="flex items-end gap-6">
                             {/* Profile Avatar */}
                             <div className="relative">
-                                <div className="flex h-24 w-24 rounded-full items-center justify-center border-2 border-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                                <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
                                     <User className="h-12 w-12 text-white" />
                                 </div>
                                 <div className="absolute right-0 bottom-0 h-7 w-7 rounded-full border-2 border-white bg-green-500"></div>
@@ -233,7 +247,9 @@ const Settings = () => {
                                                         Bank Name
                                                     </p>
                                                     <p className="mt-2 text-lg font-bold text-gray-900">
-                                                        {staticAccount.bank_name}
+                                                        {
+                                                            staticAccount.bank_name
+                                                        }
                                                     </p>
                                                 </div>
                                                 <div className="border border-green-200 bg-white p-4">
@@ -276,10 +292,10 @@ const Settings = () => {
                                                     How to use this account
                                                 </p>
                                                 <p className="mt-1 text-sm text-blue-800">
-                                                    Transfer funds to your static
-                                                    account number above to
-                                                    instantly fund your MightyShare
-                                                    wallet.
+                                                    Transfer funds to your
+                                                    static account number above
+                                                    to instantly fund your
+                                                    MightyShare wallet.
                                                 </p>
                                             </div>
                                         </div>
@@ -291,11 +307,11 @@ const Settings = () => {
                                                 Get Your Dedicated Bank Account
                                             </p>
                                             <p className="mt-2 text-sm text-blue-800">
-                                                Create a dedicated static account to
-                                                fund your MightyShare wallet. You'll
-                                                receive a unique account number that
-                                                you can use for deposits from any
-                                                bank.
+                                                Create a dedicated static
+                                                account to fund your MightyShare
+                                                wallet. You'll receive a unique
+                                                account number that you can use
+                                                for deposits from any bank.
                                             </p>
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-6">
@@ -319,14 +335,17 @@ const Settings = () => {
                                             />
                                             <p className="mt-2 text-xs text-gray-600">
                                                 Your BVN is required for account
-                                                verification and security. This is
-                                                an 11-digit number.
+                                                verification and security. This
+                                                is an 11-digit number.
                                             </p>
                                         </div>
                                         <Button
-                                            onClick={handleGenerateStaticAccount}
+                                            onClick={
+                                                handleGenerateStaticAccount
+                                            }
                                             disabled={
-                                                isGenerating || bvn.length !== 11
+                                                isGenerating ||
+                                                bvn.length !== 11
                                             }
                                             className="w-full bg-blue-600 py-3 font-bold text-white hover:bg-blue-700 disabled:bg-gray-300"
                                         >
@@ -439,7 +458,8 @@ const Settings = () => {
                                             <input
                                                 type="date"
                                                 value={
-                                                    profileForm.data.date_of_birth
+                                                    profileForm.data
+                                                        .date_of_birth
                                                 }
                                                 onChange={(e) =>
                                                     profileForm.setData(
@@ -450,11 +470,239 @@ const Settings = () => {
                                                 className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                                                 disabled={!editMode}
                                             />
-                                            {profileForm.errors.date_of_birth && (
+                                            {profileForm.errors
+                                                .date_of_birth && (
                                                 <p className="mt-1 text-xs text-red-600">
                                                     {
                                                         profileForm.errors
                                                             .date_of_birth
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {editMode && (
+                                        <Button
+                                            type="submit"
+                                            disabled={profileForm.processing}
+                                            className="w-full bg-blue-600 py-3 font-bold text-white hover:bg-blue-700 disabled:bg-gray-300"
+                                        >
+                                            {profileForm.processing
+                                                ? 'Saving...'
+                                                : 'Save Changes'}
+                                        </Button>
+                                    )}
+                                </form>
+                            </div>
+                        </div>
+                        <div className="grid xl:grid-cols-1 xl:gap-8">
+                            {/* Profile Settings */}
+                            <div className="border border-gray-200 bg-white p-8">
+                                <div className="mb-6 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-purple-100 p-3">
+                                            <User className="h-5 w-5 text-purple-600" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-gray-900">
+                                                Next Of Kin Information
+                                            </h2>
+                                            <p className="text-sm text-gray-500">
+                                                Your next of kin details
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditMode(!editMode)}
+                                        className="border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                                    >
+                                        {editMode ? 'Cancel' : 'Edit'}
+                                    </button>
+                                </div>
+                                <form
+                                    onSubmit={handleProfileUpdate}
+                                    className="space-y-6"
+                                >
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Full Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={
+                                                    profileForm.data
+                                                        .next_of_kin_name
+                                                }
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'next_of_kin_name',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            />
+                                            {profileForm.errors
+                                                .next_of_kin_name && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_name
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Gender
+                                            </label>
+                                            <select
+                                                value={
+                                                    profileForm.data
+                                                        .next_of_kin_gender
+                                                }
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'next_of_kin_gender',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            >
+                                                <option value="male">
+                                                    Male
+                                                </option>
+                                                <option value="female">
+                                                    Female
+                                                </option>
+                                                <option value="other">
+                                                    Other
+                                                </option>
+                                            </select>
+                                            {profileForm.errors
+                                                .next_of_kin_phone && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_phone
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Phone Number
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                value={
+                                                    profileForm.data
+                                                        .next_of_kin_phone
+                                                }
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'next_of_kin_phone',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            />
+                                            {profileForm.errors
+                                                .next_of_kin_gender && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_gender
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Date of Birth
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={
+                                                    profileForm.data
+                                                        .next_of_kin_date_of_birth
+                                                }
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'next_of_kin_date_of_birth',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            />
+                                            {profileForm.errors
+                                                .next_of_kin_date_of_birth && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_date_of_birth
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Relationship
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={
+                                                    profileForm.data
+                                                        .next_of_kin_relationship
+                                                }
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'next_of_kin_relationship',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            />
+                                            {profileForm.errors
+                                                .next_of_kin_relationship && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_relationship
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Address
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={
+                                                    profileForm.data
+                                                        .next_of_kin_address
+                                                }
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'next_of_kin_address',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            />
+                                            {profileForm.errors
+                                                .next_of_kin_address && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_address
                                                     }
                                                 </p>
                                             )}

@@ -38,6 +38,7 @@ class User extends Authenticatable implements FilamentUser
         'notifications',
         'last_activity',
         'date_of_birth',
+        'avatar',
         'email_notifications',
         'sms_notifications',
         'transaction_alerts',
@@ -256,6 +257,12 @@ class User extends Authenticatable implements FilamentUser
     public function getRegistrationPaidAttribute($value)
     {
         return (bool) $value;
+    }
+
+    /**  Get the next of kin for the user. */
+    public function nextOfKin()
+    {
+        return $this->hasOne(NextOfKin::class);
     }
 
     /**

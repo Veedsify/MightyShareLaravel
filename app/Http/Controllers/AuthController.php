@@ -18,8 +18,16 @@ class AuthController extends Controller
     {
         return inertia('auth/Login');
     }
-    public function registerPage()
+    public function registerPage(Request $request)
     {
+        $packageId = $request->input('package') ?? null;
+        if ($packageId) {
+            $package = ThriftPackage::find($packageId);
+            if (!$package) {
+                return redirect()->route('register')->with('error', 'Selected package does not exist');
+            }
+        }
+
         // Load ThriftPackages for the registration form
         $packages = ThriftPackage::where('is_active', true)->get()->map(function ($package) {
             return [
@@ -38,7 +46,8 @@ class AuthController extends Controller
         });
 
         return inertia('auth/Register', [
-            'packages' => $packages
+            'packages' => $packages,
+            'packageId' => $packageId
         ]);
     }
     /**

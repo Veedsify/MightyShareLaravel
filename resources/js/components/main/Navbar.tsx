@@ -34,7 +34,7 @@ export const Navbar = () => {
             className={cn(
                 'fixed top-0 z-50 w-full transition-all duration-300',
                 isScrolled
-                    ? 'border-b border-cyan-400/20 bg-white/95 shadow-lg backdrop-blur-md supports-[backdrop-filter]:bg-white/90'
+                    ? 'border-b border-cyan-400/20 bg-white/95 shadow-lg backdrop-blur-md supports-backdrop-filter:bg-white/90'
                     : 'bg-blue-900/80 backdrop-blur-sm',
             )}
         >
