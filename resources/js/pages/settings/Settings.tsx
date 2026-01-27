@@ -7,6 +7,7 @@ import {
     CheckCircle,
     CreditCard,
     Lock,
+    Pencil,
     Shield,
     User,
     Wallet,
@@ -207,6 +208,158 @@ const Settings = () => {
                     <div className="space-y-8">
                         {/* Static Account Section */}
                         <div className="grid xl:grid-cols-2 xl:gap-8">
+                            {/* Profile Settings */}
+                            <div className="border border-gray-200 bg-white p-8">
+                                <div className="mb-6 flex items-center justify-end">
+                                    <button
+                                        onClick={() => setEditMode(!editMode)}
+                                        className="border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                                    >
+                                        {editMode ? 'Cancel' : 'Edit'}
+                                    </button>
+                                </div>
+                                <form
+                                    onSubmit={handleProfileUpdate}
+                                    className="space-y-6"
+                                >
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <div className="col-span-full flex items-center gap-3">
+                                            <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-gray-300">
+                                                <img
+                                                    src="/images/logo.jpg"
+                                                    alt="MightyShare Logo"
+                                                    className="h-20 w-20"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-gray-900">
+                                                    {user.name}
+                                                </p>
+                                                <p className="text-sm text-gray-500">
+                                                    {user.email}
+                                                </p>
+                                                <button
+                                                    onClick={(e) =>
+                                                        e.preventDefault()
+                                                    }
+                                                    className="flex cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-3 py-1"
+                                                >
+                                                    <Pencil className="h-3 w-3 text-gray-500" />
+                                                    <span className="text-xs font-bold text-gray-500">
+                                                        Edit
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Full Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={profileForm.data.name}
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'name',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            />
+                                            {profileForm.errors.name && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {profileForm.errors.name}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Email Address
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={profileForm.data.email}
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'email',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            />
+                                            {profileForm.errors.email && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {profileForm.errors.email}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Phone Number
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                value={profileForm.data.phone}
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'phone',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            />
+                                            {profileForm.errors.phone && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {profileForm.errors.phone}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="border border-gray-200 bg-gray-50 p-4">
+                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
+                                                Date of Birth
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={
+                                                    profileForm.data
+                                                        .date_of_birth
+                                                }
+                                                onChange={(e) =>
+                                                    profileForm.setData(
+                                                        'date_of_birth',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                                disabled={!editMode}
+                                            />
+                                            {profileForm.errors
+                                                .date_of_birth && (
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .date_of_birth
+                                                    }
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {editMode && (
+                                        <Button
+                                            type="submit"
+                                            disabled={profileForm.processing}
+                                            className="w-full bg-blue-600 py-3 font-bold text-white hover:bg-blue-700 disabled:bg-gray-300"
+                                        >
+                                            {profileForm.processing
+                                                ? 'Saving...'
+                                                : 'Save Changes'}
+                                        </Button>
+                                    )}
+                                </form>
+                            </div>
                             <div className="border border-gray-200 bg-white p-8">
                                 <div className="mb-6 flex items-center gap-3">
                                     <div className="bg-blue-100 p-3">
@@ -355,144 +508,6 @@ const Settings = () => {
                                         </Button>
                                     </div>
                                 )}
-                            </div>
-
-                            {/* Profile Settings */}
-                            <div className="border border-gray-200 bg-white p-8">
-                                <div className="mb-6 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-purple-100 p-3">
-                                            <User className="h-5 w-5 text-purple-600" />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-2xl font-bold text-gray-900">
-                                                Profile Information
-                                            </h2>
-                                            <p className="text-sm text-gray-500">
-                                                Your personal details
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setEditMode(!editMode)}
-                                        className="border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                                    >
-                                        {editMode ? 'Cancel' : 'Edit'}
-                                    </button>
-                                </div>
-                                <form
-                                    onSubmit={handleProfileUpdate}
-                                    className="space-y-6"
-                                >
-                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                        <div className="border border-gray-200 bg-gray-50 p-4">
-                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
-                                                Full Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={profileForm.data.name}
-                                                onChange={(e) =>
-                                                    profileForm.setData(
-                                                        'name',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                                disabled={!editMode}
-                                            />
-                                            {profileForm.errors.name && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {profileForm.errors.name}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="border border-gray-200 bg-gray-50 p-4">
-                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
-                                                Email Address
-                                            </label>
-                                            <input
-                                                type="email"
-                                                value={profileForm.data.email}
-                                                onChange={(e) =>
-                                                    profileForm.setData(
-                                                        'email',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                                disabled={!editMode}
-                                            />
-                                            {profileForm.errors.email && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {profileForm.errors.email}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="border border-gray-200 bg-gray-50 p-4">
-                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
-                                                Phone Number
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                value={profileForm.data.phone}
-                                                onChange={(e) =>
-                                                    profileForm.setData(
-                                                        'phone',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                                disabled={!editMode}
-                                            />
-                                            {profileForm.errors.phone && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {profileForm.errors.phone}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="border border-gray-200 bg-gray-50 p-4">
-                                            <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
-                                                Date of Birth
-                                            </label>
-                                            <input
-                                                type="date"
-                                                value={
-                                                    profileForm.data
-                                                        .date_of_birth
-                                                }
-                                                onChange={(e) =>
-                                                    profileForm.setData(
-                                                        'date_of_birth',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full border border-gray-300 bg-white px-4 py-2.5 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                                disabled={!editMode}
-                                            />
-                                            {profileForm.errors
-                                                .date_of_birth && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {
-                                                        profileForm.errors
-                                                            .date_of_birth
-                                                    }
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {editMode && (
-                                        <Button
-                                            type="submit"
-                                            disabled={profileForm.processing}
-                                            className="w-full bg-blue-600 py-3 font-bold text-white hover:bg-blue-700 disabled:bg-gray-300"
-                                        >
-                                            {profileForm.processing
-                                                ? 'Saving...'
-                                                : 'Save Changes'}
-                                        </Button>
-                                    )}
-                                </form>
                             </div>
                         </div>
                         <div className="grid xl:grid-cols-1 xl:gap-8">

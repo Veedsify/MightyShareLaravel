@@ -425,7 +425,7 @@ const AddAccount = ({
                                                         <div>
                                                             <p className="font-semibold text-gray-900">
                                                                 {idx === 0
-                                                                    ? 'Default Account'
+                                                                    ? 'Primary Account'
                                                                     : `Sub Account ${idx}`}
                                                             </p>
                                                             <p className="text-sm text-gray-600">

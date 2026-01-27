@@ -473,15 +473,7 @@ const Dashboard = () => {
                                                                     .package
                                                                     ?.name ||
                                                                     'Package'}
-                                                            </h4>
-                                                            <p className="text-sm text-gray-600">
-                                                                {
-                                                                    subscription
-                                                                        .package
-                                                                        ?.profitPercentage
-                                                                }
-                                                                % returns
-                                                            </p>
+                                                            </h4>   
                                                         </div>
                                                         <div className="text-right">
                                                             <p className="font-semibold text-gray-900">
@@ -492,8 +484,7 @@ const Dashboard = () => {
                                                                     ? (
                                                                           subscription
                                                                               .package
-                                                                              .price /
-                                                                          100
+                                                                              .price 
                                                                       ).toLocaleString()
                                                                     : '0'}
                                                             </p>

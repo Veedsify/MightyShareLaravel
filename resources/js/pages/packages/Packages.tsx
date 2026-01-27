@@ -95,7 +95,7 @@ const Packages = ({
                                     <div className="flex items-center gap-2">
                                         <Clock className="h-4 w-4 text-gray-400" />
                                         <span className="text-gray-700">
-                                            Duration: {pkg.duration}
+                                            Duration: {pkg.duration} weeks
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
