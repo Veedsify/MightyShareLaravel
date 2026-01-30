@@ -9,7 +9,6 @@ import { Navbar } from '@/components/main/Navbar';
 import { Testimonials } from '@/components/main/Testimonials';
 import { WhyJoin } from '@/components/main/WhyJoin';
 import { ScrollToTop } from '@/components/sub/ScrollToTop';
-import { Head } from '@inertiajs/react';
 
 interface ThriftPackage {
     id: number;
@@ -34,7 +33,6 @@ interface HomeProps {
 const Home = ({ thriftPackages }: HomeProps) => {
     return (
         <>
-            <Head title="Mightyshare Charity Foundation" />
             <div className="min-h-screen">
                 <Navbar />
                 <main>

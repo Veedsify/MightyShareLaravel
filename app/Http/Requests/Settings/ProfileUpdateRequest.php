@@ -31,6 +31,13 @@ class ProfileUpdateRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
 
             'date_of_birth' => ['nullable', 'date', 'before_or_equal:today'],
+
+            'next_of_kin_name' => ['nullable', 'string', 'max:255'],
+            'next_of_kin_phone' => ['nullable', 'string', 'max:20'],
+            'next_of_kin_gender' => ['nullable', 'string', 'max:20'],
+            'next_of_kin_date_of_birth' => ['nullable', 'date', 'before_or_equal:today'],
+            'next_of_kin_relationship' => ['nullable', 'string', 'max:255'],
+            'next_of_kin_address' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

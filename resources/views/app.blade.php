@@ -31,10 +31,18 @@
         </style>
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <meta name="description" content="MightyShare Charity Foundation is a non-profit organization that provides financial assistance to individuals and families in need.">
+        <meta name="keywords" content="MightyShare, Charity, Foundation, Financial Assistance, Individuals, Families, Need">
+        <meta name="author" content="MightyShare Charity Foundation">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="robots" content="index, follow">
+        <meta name="googlebot" content="index, follow">
+        <meta name="bingbot" content="index, follow">
+        <meta name="yandexbot" content="index, follow">
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="icon" href="/images/logo.jpg" sizes="any">
+        <link rel="icon" href="/images/logo.jpg" type="image/jpg">
+        <link rel="apple-touch-icon" href="/images/logo.jpg">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />

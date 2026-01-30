@@ -56,6 +56,23 @@ export const Footer = () => {
                             >
                                 <Linkedin className="h-5 w-5" />
                             </a>
+                            <a
+                                href="#"
+                                className="text-muted-foreground transition-colors hover:text-pink-500"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="#000000"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
+                                </svg>
+                            </a>
                         </div>
                     </div>
 
@@ -150,7 +167,8 @@ export const Footer = () => {
                             <li className="flex items-start space-x-3">
                                 <MapPin className="mt-1 h-5 w-5 text-muted-foreground" />
                                 <span className="text-sm text-muted-foreground">
-                                    No 2 Ifoshi Road, Iyana Ejigbo, Inside Morouf Filling Station
+                                    No 2 Ifoshi Road, Iyana Ejigbo, Inside
+                                    Morouf Filling Station
                                     <br />
                                     Lagos, Nigeria
                                 </span>

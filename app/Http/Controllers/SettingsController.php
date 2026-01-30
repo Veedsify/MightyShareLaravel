@@ -15,10 +15,21 @@ class SettingsController extends Controller
     public function index(): Response
     {
         /** @var \App\Models\User $user */
-        $user = Auth::user();
+        $user = Auth::user()->load('nextOfKin');
         
         // Load static account
         $staticAccount = $user->staticAccount;
+        $nextOfKin = $user->nextOfKin;
+        if ($nextOfKin) {
+            $nextOfKin = [
+                'name' => $nextOfKin->name,
+                'phone' => $nextOfKin->phone ?? null,
+                'gender' => $nextOfKin->gender ?? null,
+                'date_of_birth' => $nextOfKin->date_of_birth ?? null,
+                'relationship' => $nextOfKin->relationship ?? null,
+                'address' => $nextOfKin->address ?? null,
+            ];
+        }
         
         return Inertia::render('settings/Settings', [
             'user' => [
@@ -28,6 +39,7 @@ class SettingsController extends Controller
                 'bvn' => $user->bvn ?? null,
                 'date_of_birth' => $user->date_of_birth,
             ],
+            'nextOfKin' => $nextOfKin ?? null,
             'notifications' => [
                 'email_notifications' => $user->email_notifications ?? true,
                 'sms_notifications' => $user->sms_notifications ?? true,
