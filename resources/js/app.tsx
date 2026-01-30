@@ -2,6 +2,7 @@ import '@fontsource-variable/geist';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
+import { Toaster } from 'react-hot-toast';
 import '../css/app.css';
 import { Helmet } from 'react-helmet';
 
@@ -25,6 +26,7 @@ createInertiaApp({
                         content="MightyShare Charity Foundation is a non-profit organization that provides financial assistance to individuals and families in need."
                     />
                 </Helmet>
+                <Toaster />
                 <App {...props} />
             </>,
         );

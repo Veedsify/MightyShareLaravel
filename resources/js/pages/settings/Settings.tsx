@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/Button';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import type { SharedData } from '@/types';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import axios, { AxiosError } from 'axios';
+import toast from 'react-hot-toast';
 import {
     Bell,
     CheckCircle,
@@ -50,6 +52,7 @@ const Settings = () => {
     const [showOtpModal, setShowOtpModal] = useState(false);
     const [otp, setOtp] = useState('');
     const [walletId, setWalletId] = useState('');
+    const [trackingId, setTrackingId] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [bvn, setBvn] = useState('');
     const [editMode, setEditMode] = useState(false);
@@ -91,54 +94,63 @@ const Settings = () => {
 
         setIsGenerating(true);
 
-        router.post(
-            '/dashboard/settings/static-account/create',
-            { bvn },
-            {
-                onSuccess: (response) => {
-                    const data = response.props as { walletId?: string };
-                    if (data.walletId) {
-                        setWalletId(data.walletId);
-                        setShowOtpModal(true);
-                    }
+        axios
+            .post('/dashboard/settings/static-account/create', { bvn })
+            .then((response) => {
+                // For inertia, response data may be in response.data.props or directly in response.data
+                console.log(response);
+                const data =
+                    response.data && response.data.props
+                        ? response.data.props
+                        : response.data;
+                if (data.walletId) {
+                    setWalletId(data.walletId);
+                    setTrackingId(data.trackingId);
+                    setShowOtpModal(true);
+                }
+                toast.loading('Generating static account...');
+                setIsGenerating(false);
+            })
+            .catch((error) => {
+                toast.dismiss();
+                if (error instanceof AxiosError) {
                     setIsGenerating(false);
-                },
-                onError: () => {
-                    setIsGenerating(false);
-                    alert(
+                    toast.error(
                         'Failed to initiate wallet creation. Please try again.',
                     );
-                },
-            },
-        );
+                }
+            });
     };
 
     const handleVerifyOtp = () => {
         if (!otp || otp.length !== 6) {
-            alert('Please enter a valid 6-digit OTP');
+            toast.dismiss();
+            toast.error('Please enter a valid 6-digit OTP');
             return;
         }
 
         setIsGenerating(true);
 
-        router.post(
-            '/dashboard/settings/static-account/verify',
-            { walletId, otp },
-            {
-                onSuccess: () => {
-                    setShowOtpModal(false);
-                    setOtp('');
-                    setWalletId('');
-                    setBvn('');
-                    setIsGenerating(false);
-                    alert('Static account created successfully!');
-                },
-                onError: () => {
-                    setIsGenerating(false);
-                    alert('OTP verification failed. Please try again.');
-                },
-            },
-        );
+        axios
+            .post('/dashboard/settings/static-account/verify', {
+                walletId,
+                otp,
+                trackingId,
+            })
+            .then(() => {
+                setShowOtpModal(false);
+                setOtp('');
+                setWalletId('');
+                setBvn('');
+                setIsGenerating(false);
+                toast.dismiss();
+                toast.success('Static account created successfully!');
+            })
+            .catch(() => {
+                setIsGenerating(false);
+                toast.dismiss();
+                toast.error('OTP verification failed. Please try again.');
+            });
     };
 
     const handleProfileUpdate = (e: React.FormEvent) => {
@@ -146,10 +158,12 @@ const Settings = () => {
         profileForm.put('/dashboard/settings/profile', {
             onSuccess: () => {
                 setEditMode(false);
-                alert('Profile updated successfully!');
+                toast.dismiss();
+                toast.success('Profile updated successfully!');
             },
             onError: () => {
-                alert('Failed to update profile. Please try again.');
+                toast.dismiss();
+                toast.error('Failed to update profile. Please try again.');
             },
         });
     };

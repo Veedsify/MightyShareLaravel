@@ -41,6 +41,8 @@ return [
         'subscription_key' => env('ALATPAY_SUBSCRIPTION_KEY'),
         'business_id' => env('ALATPAY_BUSINESS_ID', '27a4ed9c-e6db-490e-1495-08ddfceabbff'),
         'base_url' => env('ALATPAY_BASE_URL', 'https://apibox.alatpay.ng'),
+        'email' => env('ALATPAY_EMAIL', 'info@mightyshare.com'),
+        'password' => env('ALATPAY_PASSWORD', 'MightyShare@2025'),
     ],
 
 ];
