@@ -17,8 +17,11 @@ class StaticAccount extends Model
     protected $fillable = [
         'account_number',
         'bank_name',
+        'account_name',
         'balance',
         'user_id',
+        'is_verified',
+        'static_account_id',
     ];
 
     /**
