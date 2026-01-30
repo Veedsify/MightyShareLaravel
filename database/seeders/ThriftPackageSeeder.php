@@ -15,7 +15,7 @@ class ThriftPackageSeeder extends Seeder
         $packages = [
             [
                 'name' => 'Option A',
-                'price' => 2500, // NGN2,500 monthly
+                'price' => 2400, // NGN2,500 monthly
                 'duration' => 30, // 3 months in weeks
                 'profit_percentage' => 5, // 5% returns
                 'description' => 'Contribute 2,400 weekly for 30 weeks and get Cash back of 120,000 with foodstuff worth 25,000.',
@@ -35,7 +35,7 @@ class ThriftPackageSeeder extends Seeder
             ],
             [
                 'name' => 'Option B',
-                'price' => 2500, // NGN10,000 monthly
+                'price' => 10000, // NGN10,000 monthly
                 'duration' => 28, // 6 months in weeks
                 'profit_percentage' => 8, // 8% returns
                 'description' => 'Contribute 10,000 monthly for 7 months and get Cash back of 120,000 with foodstuff worth 30,000.',
@@ -44,7 +44,7 @@ class ThriftPackageSeeder extends Seeder
                 'min_number_of_accounts' => 1,
                 'number_of_accounts' => 500,
                 'min_contribution' => 10000,
-                'max_contribution' => 500000, // 500 account limit * NGN1,000 average
+                'max_contribution' => 700000, // 500 account limit * NGN1,000 average
                 'features' => [
                     'Monthly contribution plan',
                     'Up to 500 accounts',
@@ -55,7 +55,7 @@ class ThriftPackageSeeder extends Seeder
             ],
             [
                 'name' => 'Option C',
-                'price' => 2500, // NGN70,000 one-time
+                'price' => 70000, // NGN70,000 one-time
                 'duration' => 24, // 6 months in weeks
                 'profit_percentage' => 12, // 12% returns
                 'description' => 'Contribute 70,000  once and get Cash back of 120,000 in 6 months with foodstuff worth 30,000.',
@@ -63,8 +63,8 @@ class ThriftPackageSeeder extends Seeder
                 'is_active' => true,
                 'min_number_of_accounts' => 10,
                 'number_of_accounts' => 1000,
-                'min_contribution' => 70000,
-                'max_contribution' => 1000000, // 1000 account limit * NGN1,000 average
+                'min_contribution' => 100000,
+                'max_contribution' => 700000, // 1000 account limit * NGN1,000 average
                 'features' => [
                     'One-time payment plan',
                     'Up to 1000 accounts',

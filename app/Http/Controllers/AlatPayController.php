@@ -39,7 +39,7 @@ class AlatPayController extends Controller
                 return response()->json(['error' => 'Not authenticated'], 401);
             }
 
-            $amount = $request->amount;
+            $amount = $request->amount < 2500 ? 2500 : $request->amount;
             $currency = $request->currency;
             $description = $request->description;
 

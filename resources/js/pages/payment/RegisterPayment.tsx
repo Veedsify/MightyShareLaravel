@@ -12,14 +12,6 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import BankModal from '../../components/BankModal';
-import { Button } from '../../components/ui/Button';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '../../components/ui/Card';
-
 // Types
 type PaymentProvider = 'alatpay';
 type MessageType = 'idle' | 'success' | 'error' | 'info';
@@ -181,7 +173,7 @@ export default function RegisterPayment({ user }: RegisterPaymentProps) {
                 const response = await axios.post<PaymentResponse>(
                     '/alatpay/initialize',
                     {
-                        amount: fee,
+                        amount: 2500,
                         currency: 'NGN',
                         description: 'MightyShare Registration Fee',
                     },
@@ -415,10 +407,7 @@ export default function RegisterPayment({ user }: RegisterPaymentProps) {
                                                         Registration Fee
                                                     </p>
                                                     <p className="mt-1 text-3xl font-bold text-gray-900">
-                                                        ₦
-                                                        {Number(
-                                                            fee,
-                                                        ).toLocaleString()}
+                                                        ₦ 2,500
                                                     </p>
                                                 </div>
                                                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600">
