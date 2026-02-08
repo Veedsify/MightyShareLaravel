@@ -74,7 +74,6 @@ RUN php artisan filament:assets
 
 # Configure Apache
 RUN a2enmod rewrite
-COPY ./docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 
 # Expose port
 EXPOSE 80
