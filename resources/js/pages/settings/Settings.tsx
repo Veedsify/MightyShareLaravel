@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import {
     Bell,
     CheckCircle,
+    Copy,
     CreditCard,
     Lock,
     Pencil,
@@ -14,7 +15,7 @@ import {
     User,
     Wallet,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SettingsPageProps extends SharedData {
     nextOfKin: {
@@ -31,6 +32,7 @@ interface SettingsPageProps extends SharedData {
         phone: string;
         date_of_birth?: string;
         bvn?: string;
+        avatar?: string | null;
     };
     notifications: {
         email_notifications: boolean;
@@ -58,11 +60,13 @@ const Settings = () => {
     const [editMode, setEditMode] = useState(false);
 
     // Profile form
+    const avatarInputRef = useRef<HTMLInputElement>(null);
     const profileForm = useForm({
         name: user.name,
         email: user.email,
         phone: user.phone,
         date_of_birth: user.date_of_birth || '',
+        avatar: null as File | null,
         next_of_kin_name: nextOfKin?.name || '',
         next_of_kin_phone: nextOfKin?.phone || '',
         next_of_kin_gender: nextOfKin?.gender || '',
@@ -70,6 +74,33 @@ const Settings = () => {
         next_of_kin_relationship: nextOfKin?.relationship || '',
         next_of_kin_address: nextOfKin?.address || '',
     });
+
+    const avatarUrl = user.avatar ? `/storage/${user.avatar}` : null;
+    const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(
+        null,
+    );
+
+    useEffect(() => {
+        if (profileForm.data.avatar instanceof File) {
+            const url = URL.createObjectURL(profileForm.data.avatar);
+            setAvatarPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        }
+        setAvatarPreviewUrl(null);
+        return () => { };
+    }, [profileForm.data.avatar]);
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            profileForm.setData('avatar', file);
+        }
+        e.target.value = '';
+    };
+
+    const openAvatarPicker = () => {
+        avatarInputRef.current?.click();
+    };
 
     // Password form
     const passwordForm = useForm({
@@ -87,18 +118,19 @@ const Settings = () => {
     });
 
     const handleGenerateStaticAccount = () => {
+        setIsGenerating(true);
+
         if (!bvn || bvn.length !== 11) {
-            alert('Please enter a valid 11-digit BVN');
+            toast.error('Please enter a valid 11-digit BVN');
             return;
         }
 
-        setIsGenerating(true);
+        toast.loading('Generating static account...');
 
         axios
             .post('/dashboard/settings/static-account/create', { bvn })
             .then((response) => {
                 // For inertia, response data may be in response.data.props or directly in response.data
-                console.log(response);
                 const data =
                     response.data && response.data.props
                         ? response.data.props
@@ -108,7 +140,8 @@ const Settings = () => {
                     setTrackingId(data.trackingId);
                     setShowOtpModal(true);
                 }
-                toast.loading('Generating static account...');
+                toast.dismiss();
+                toast.success('Static account generated successfully!');
                 setIsGenerating(false);
             })
             .catch((error) => {
@@ -144,6 +177,7 @@ const Settings = () => {
                 setBvn('');
                 setIsGenerating(false);
                 toast.dismiss();
+                window.location.reload();
                 toast.success('Static account created successfully!');
             })
             .catch(() => {
@@ -153,11 +187,28 @@ const Settings = () => {
             });
     };
 
+    const handleCopyToClipboard = async (text: string, label: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            toast.success(`${label} copied to clipboard!`);
+        } catch (error) {
+            toast.error(`Failed to copy ${label}`);
+        }
+    };
+
     const handleProfileUpdate = (e: React.FormEvent) => {
         e.preventDefault();
+        profileForm.transform((data) => {
+            const { avatar, ...rest } = data as typeof profileForm.data & {
+                avatar: File | null;
+            };
+            return avatar instanceof File ? { ...rest, avatar } : rest;
+        });
         profileForm.put('/dashboard/settings/profile', {
+            forceFormData: true,
             onSuccess: () => {
                 setEditMode(false);
+                profileForm.setData('avatar', null);
                 toast.dismiss();
                 toast.success('Profile updated successfully!');
             },
@@ -203,8 +254,22 @@ const Settings = () => {
                         <div className="flex items-end gap-6">
                             {/* Profile Avatar */}
                             <div className="relative">
-                                <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
-                                    <User className="h-12 w-12 text-white" />
+                                <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                                    {avatarPreviewUrl ? (
+                                        <img
+                                            src={avatarPreviewUrl}
+                                            alt="Preview"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : avatarUrl ? (
+                                        <img
+                                            src={avatarUrl}
+                                            alt={user.name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <User className="h-12 w-12 text-white" />
+                                    )}
                                 </div>
                                 <div className="absolute right-0 bottom-0 h-7 w-7 rounded-full border-2 border-white bg-green-500"></div>
                             </div>
@@ -236,14 +301,31 @@ const Settings = () => {
                                     onSubmit={handleProfileUpdate}
                                     className="space-y-6"
                                 >
+                                    <input
+                                        ref={avatarInputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/jpg,image/gif"
+                                        className="hidden"
+                                        onChange={handleAvatarChange}
+                                    />
                                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                         <div className="col-span-full flex items-center gap-3">
-                                            <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-gray-300">
-                                                <img
-                                                    src="/images/logo.jpg"
-                                                    alt="MightyShare Logo"
-                                                    className="h-20 w-20"
-                                                />
+                                            <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-300 bg-gray-100">
+                                                {avatarPreviewUrl ? (
+                                                    <img
+                                                        src={avatarPreviewUrl}
+                                                        alt="Preview"
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : avatarUrl ? (
+                                                    <img
+                                                        src={avatarUrl}
+                                                        alt={user.name}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <User className="h-12 w-12 text-gray-400" />
+                                                )}
                                             </div>
                                             <div>
                                                 <p className="text-sm font-bold text-gray-900">
@@ -253,16 +335,25 @@ const Settings = () => {
                                                     {user.email}
                                                 </p>
                                                 <button
-                                                    onClick={(e) =>
-                                                        e.preventDefault()
-                                                    }
-                                                    className="flex cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-3 py-1"
+                                                    type="button"
+                                                    onClick={openAvatarPicker}
+                                                    className="flex cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-3 py-1 hover:bg-gray-200"
                                                 >
                                                     <Pencil className="h-3 w-3 text-gray-500" />
                                                     <span className="text-xs font-bold text-gray-500">
-                                                        Edit
+                                                        {profileForm.data.avatar
+                                                            ? 'Change photo'
+                                                            : 'Update photo'}
                                                     </span>
                                                 </button>
+                                                {profileForm.errors.avatar && (
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            profileForm.errors
+                                                                .avatar
+                                                        }
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
@@ -352,26 +443,28 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .date_of_birth && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {
-                                                        profileForm.errors
-                                                            .date_of_birth
-                                                    }
-                                                </p>
-                                            )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            profileForm.errors
+                                                                .date_of_birth
+                                                        }
+                                                    </p>
+                                                )}
                                         </div>
                                     </div>
-                                    {editMode && (
-                                        <Button
-                                            type="submit"
-                                            disabled={profileForm.processing}
-                                            className="w-full bg-blue-600 py-3 font-bold text-white hover:bg-blue-700 disabled:bg-gray-300"
-                                        >
-                                            {profileForm.processing
-                                                ? 'Saving...'
-                                                : 'Save Changes'}
-                                        </Button>
-                                    )}
+                                    {(editMode ||
+                                        profileForm.data.avatar instanceof
+                                        File) && (
+                                            <Button
+                                                type="submit"
+                                                disabled={profileForm.processing}
+                                                className="w-full bg-blue-600 py-3 font-bold text-white hover:bg-blue-700 disabled:bg-gray-300"
+                                            >
+                                                {profileForm.processing
+                                                    ? 'Saving...'
+                                                    : 'Save Changes'}
+                                            </Button>
+                                        )}
                                 </form>
                             </div>
                             <div className="border border-gray-200 bg-white p-8">
@@ -400,9 +493,25 @@ const Settings = () => {
                                             </div>
                                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                                 <div className="border border-green-200 bg-white p-4">
-                                                    <p className="text-xs font-semibold text-green-700 uppercase">
-                                                        Account Number
-                                                    </p>
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="text-xs font-semibold text-green-700 uppercase">
+                                                            Account Number
+                                                        </p>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleCopyToClipboard(
+                                                                    staticAccount.account_number,
+                                                                    'Account number',
+                                                                )
+                                                            }
+                                                            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                                            title="Copy account number"
+                                                        >
+                                                            <Copy className="h-3.5 w-3.5" />
+                                                            Copy
+                                                        </button>
+                                                    </div>
                                                     <p className="mt-2 font-mono text-2xl font-bold text-gray-900">
                                                         {
                                                             staticAccount.account_number
@@ -410,9 +519,25 @@ const Settings = () => {
                                                     </p>
                                                 </div>
                                                 <div className="border border-green-200 bg-white p-4">
-                                                    <p className="text-xs font-semibold text-green-700 uppercase">
-                                                        Bank Name
-                                                    </p>
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="text-xs font-semibold text-green-700 uppercase">
+                                                            Bank Name
+                                                        </p>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleCopyToClipboard(
+                                                                    staticAccount.bank_name,
+                                                                    'Bank name',
+                                                                )
+                                                            }
+                                                            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                                                            title="Copy bank name"
+                                                        >
+                                                            <Copy className="h-3.5 w-3.5" />
+                                                            Copy
+                                                        </button>
+                                                    </div>
                                                     <p className="mt-2 text-lg font-bold text-gray-900">
                                                         {
                                                             staticAccount.bank_name
@@ -574,13 +699,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_name && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {
-                                                        profileForm.errors
-                                                            .next_of_kin_name
-                                                    }
-                                                </p>
-                                            )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            profileForm.errors
+                                                                .next_of_kin_name
+                                                        }
+                                                    </p>
+                                                )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -612,13 +737,13 @@ const Settings = () => {
                                             </select>
                                             {profileForm.errors
                                                 .next_of_kin_phone && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {
-                                                        profileForm.errors
-                                                            .next_of_kin_phone
-                                                    }
-                                                </p>
-                                            )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            profileForm.errors
+                                                                .next_of_kin_phone
+                                                        }
+                                                    </p>
+                                                )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -641,13 +766,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_gender && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {
-                                                        profileForm.errors
-                                                            .next_of_kin_gender
-                                                    }
-                                                </p>
-                                            )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            profileForm.errors
+                                                                .next_of_kin_gender
+                                                        }
+                                                    </p>
+                                                )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -670,13 +795,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_date_of_birth && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {
-                                                        profileForm.errors
-                                                            .next_of_kin_date_of_birth
-                                                    }
-                                                </p>
-                                            )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            profileForm.errors
+                                                                .next_of_kin_date_of_birth
+                                                        }
+                                                    </p>
+                                                )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -699,13 +824,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_relationship && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {
-                                                        profileForm.errors
-                                                            .next_of_kin_relationship
-                                                    }
-                                                </p>
-                                            )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            profileForm.errors
+                                                                .next_of_kin_relationship
+                                                        }
+                                                    </p>
+                                                )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -728,13 +853,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_address && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {
-                                                        profileForm.errors
-                                                            .next_of_kin_address
-                                                    }
-                                                </p>
-                                            )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            profileForm.errors
+                                                                .next_of_kin_address
+                                                        }
+                                                    </p>
+                                                )}
                                         </div>
                                     </div>
                                     {editMode && (
@@ -793,13 +918,13 @@ const Settings = () => {
                                             />
                                             {passwordForm.errors
                                                 .current_password && (
-                                                <p className="mt-1 text-xs text-red-600">
-                                                    {
-                                                        passwordForm.errors
-                                                            .current_password
-                                                    }
-                                                </p>
-                                            )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            passwordForm.errors
+                                                                .current_password
+                                                        }
+                                                    </p>
+                                                )}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -824,13 +949,13 @@ const Settings = () => {
                                                 />
                                                 {passwordForm.errors
                                                     .password && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            passwordForm.errors
-                                                                .password
-                                                        }
-                                                    </p>
-                                                )}
+                                                        <p className="mt-1 text-xs text-red-600">
+                                                            {
+                                                                passwordForm.errors
+                                                                    .password
+                                                            }
+                                                        </p>
+                                                    )}
                                             </div>
                                         </div>
                                         <div>
@@ -854,13 +979,13 @@ const Settings = () => {
                                                 />
                                                 {passwordForm.errors
                                                     .password_confirmation && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            passwordForm.errors
-                                                                .password_confirmation
-                                                        }
-                                                    </p>
-                                                )}
+                                                        <p className="mt-1 text-xs text-red-600">
+                                                            {
+                                                                passwordForm.errors
+                                                                    .password_confirmation
+                                                            }
+                                                        </p>
+                                                    )}
                                             </div>
                                         </div>
                                     </div>

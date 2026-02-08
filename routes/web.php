@@ -127,7 +127,7 @@ Route::middleware(['auth', 'verified'])->prefix("dashboard")->group(function () 
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
-        
+
         // Static Account routes
         Route::post('static-account/create', [SettingsController::class, 'createStaticAccount'])->name('static-account.create');
         Route::post('static-account/verify', [SettingsController::class, 'verifyStaticAccount'])->name('static-account.verify');

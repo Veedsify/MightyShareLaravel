@@ -32,6 +32,9 @@ class DashboardController extends Controller
                 },
                 'thriftSubscriptions' => function ($query) {
                     $query->with('package');
+                },
+                'staticAccount' => function ($query) {
+                    $query->select('id', 'user_id', 'balance');
                 }
             ])->find($user->id);
 
@@ -42,7 +45,7 @@ class DashboardController extends Controller
             }
 
             // Calculate dashboard statistics
-            $totalBalance = $userData->accounts->sum('balance');
+            $totalBalance = $userData->staticAccount->balance ?? 0;
             $totalTransactions = $userData->accounts->sum(function ($account) {
                 return $account->transactions->count();
             });
@@ -125,7 +128,7 @@ class DashboardController extends Controller
                     }),
                 ],
                 'dashboardStats' => [
-                    'totalBalance' => '₦' . number_format($totalBalance / 100, 2),
+                    'totalBalance' => '₦' . number_format($totalBalance, 2),
                     'totalTransactions' => $totalTransactions,
                     'totalContributions' => '₦' . number_format($totalContributions / 100, 2),
                     'totalRewards' => '₦' . number_format($totalRewards / 100, 2),

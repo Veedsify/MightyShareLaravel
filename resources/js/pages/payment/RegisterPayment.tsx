@@ -42,7 +42,7 @@ interface User {
     registration_paid: boolean;
     thrift_subscriptions?: Array<{
         status: string;
-        package: {
+        package: {  
             name: string;
             price: number;
         };
@@ -186,7 +186,6 @@ export default function RegisterPayment({ user }: RegisterPaymentProps) {
                 );
 
                 const data = response.data.data;
-                console.log(data);
 
                 if (data?.status && data.transactionId) {
                     setBankdata(data);

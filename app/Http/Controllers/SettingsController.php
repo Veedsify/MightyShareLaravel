@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\StaticAccount;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -16,7 +17,7 @@ class SettingsController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user()->load('nextOfKin');
-        
+
         // Load static account
         $staticAccount = $user->staticAccount;
         $nextOfKin = $user->nextOfKin;
@@ -30,7 +31,7 @@ class SettingsController extends Controller
                 'address' => $nextOfKin->address ?? null,
             ];
         }
-        
+
         return Inertia::render('settings/Settings', [
             'user' => [
                 'name' => $user->name,
@@ -38,6 +39,7 @@ class SettingsController extends Controller
                 'phone' => $user->phone,
                 'bvn' => $user->bvn ?? null,
                 'date_of_birth' => $user->date_of_birth,
+                'avatar' => $user->avatar,
             ],
             'nextOfKin' => $nextOfKin ?? null,
             'notifications' => [
@@ -54,23 +56,23 @@ class SettingsController extends Controller
             ] : null,
         ]);
     }
-    
+
     public function createStaticAccount(Request $request)
     {
         $validated = $request->validate([
             'bvn' => 'required|string|size:11',
         ]);
-        
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        
+
         // Check if user already has a static account
         if ($user->staticAccount) {
             return back()->withErrors([
                 'bvn' => 'You already have a static account.'
             ]);
         }
-        
+
         try {
             Log::info('Authenticating with AlatPay', [
                 'email' => config('services.alatpay.email'),
@@ -175,7 +177,6 @@ class SettingsController extends Controller
             return response()->json([
                 'error' => 'Failed to create wallet. Please try again.',
             ], 400);
-            
         } catch (\Exception $e) {
             Log::error('Static Account Creation Error', [
                 'error' => $e->getMessage(),
@@ -187,7 +188,7 @@ class SettingsController extends Controller
             ]);
         }
     }
-    
+
     public function verifyStaticAccount(Request $request)
     {
         $validated = $request->validate([
@@ -203,31 +204,31 @@ class SettingsController extends Controller
                 'error' => 'Failed to authenticate. Please try again.'
             ], 400);
         }
-        
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        
+
         // Check if user already has a static account
         if ($user->staticAccount) {
             return response()->json([
                 'error' => 'You already have a static account.'
             ], 400);
         }
-        
+
         try {
             // Step 2: Validate and Create Wallet
             $response = Http::withHeaders([
                 'Ocp-Apim-Subscription-Key' => config('services.alatpay.public_key'),
                 'Content-Type' => 'application/json',
             ])
-            ->withCookies($cookies, '.alatpay.ng')
-            ->post('https://apibox.alatpay.ng/alatpay-wallet/api/v1/staticaccount/validateAndCreate', [
-                'staticWalletId' => $validated['walletId'],
-                'businessId' => config('services.alatpay.business_id'),
-                'otp' => $validated['otp'],
-                'trackingId' => $validated['trackingId'],
-            ]);
-            
+                ->withCookies($cookies, '.alatpay.ng')
+                ->post('https://apibox.alatpay.ng/alatpay-wallet/api/v1/staticaccount/validateAndCreate', [
+                    'staticWalletId' => $validated['walletId'],
+                    'businessId' => config('services.alatpay.business_id'),
+                    'otp' => $validated['otp'],
+                    'trackingId' => $validated['trackingId'],
+                ]);
+
             if ($response->successful()) {
                 $data = $response->json();
                 Log::info('AlatPay Verify OTP Response', [
@@ -236,9 +237,9 @@ class SettingsController extends Controller
                 $accountNumber = $data['accountNumber'] ?? null;
                 $accountName = $data['accountName'] ?? null;
                 $bankName = 'Wema Bank';
-                
+
                 if ($accountNumber) {
-                    // Create static account record 
+                    // Create static account record
                     StaticAccount::create([
                         'account_number' => $accountNumber,
                         'bank_name' => $bankName,
@@ -248,28 +249,27 @@ class SettingsController extends Controller
                         'static_account_id' => $validated['walletId'],
                         'user_id' => $user->id,
                     ]);
-                    
+
                     return response()->json([
                         'success' => 'Static account created successfully!',
                     ], 200);
                 }
             }
-            
+
             Log::error('AlatPay Verify OTP Failed', [
                 'response' => $response->json(),
                 'status' => $response->status(),
             ]);
-            
+
             return response()->json([
                 'error' => 'OTP verification failed. Please try again.'
             ], 400);
-            
         } catch (\Exception $e) {
             Log::error('Static Account Verification Error', [
                 'error' => $e->getMessage(),
                 'user_id' => $user->id,
             ]);
-            
+
             return response()->json([
                 'error' => 'An error occurred. Please try again later.'
             ], 400);
@@ -306,6 +306,105 @@ class SettingsController extends Controller
             return back()->withErrors([
                 'notifications' => 'Failed to update preferences. Please try again.'
             ]);
+        }
+    }
+
+    // Static Account Callback
+    public function staticAccountCallback(Request $request)
+    {
+        try {
+            $data = $request->all();
+
+            Log::info('Received Static Account Callback', [
+                'data' => $data,
+            ]);
+
+            $transactionID = $data['Data']['Id'] ?? null;
+            $accountNumber = $data['Data']['StaticAccountResponse']['AccountNumber'] ?? null;
+            $accountEmail = $data['Data']['StaticAccountResponse']['Email'] ?? null;
+
+            if (!$transactionID || !$accountNumber || !$accountEmail) {
+                Log::error('Static Account Callback Missing Required Data', [
+                    'data' => $data,
+                ]);
+                return response()->json(['error' => 'Missing required data'], 400);
+            }
+
+            $user = User::where('email', $accountEmail)->first();
+
+            if (!$user) {
+                Log::error('Static Account Callback User Not Found', [
+                    'email' => $accountEmail,
+                    'data' => $data,
+                ]);
+                return response()->json(['error' => 'User not found'], 404);
+            }
+
+            $staticAccount = $user->staticAccount;
+
+            if ($staticAccount->account_number !== $accountNumber) {
+                Log::error('Static Account Callback Account Number Mismatch', [
+                    'expected_account_number' => $staticAccount->account_number,
+                    'received_account_number' => $accountNumber,
+                    'data' => $data,
+                ]);
+                return response()->json(['error' => 'Account number mismatch'], 400);
+            }
+
+            $verifyTransaction = Http::withHeaders([
+                'Ocp-Apim-Subscription-Key' => config('services.alatpay.public_key'),
+                'Content-Type' => 'application/json',
+            ])->get("https://apibox.alatpay.ng/alatpaytransaction/api/v1/transactions/{$transactionID}");
+
+            if ($verifyTransaction->failed()) {
+                Log::error('Static Account Callback Transaction Verification Failed', [
+                    'transaction_id' => $transactionID,
+                    'status' => $verifyTransaction->status(),
+                    'response' => $verifyTransaction->json(),
+                ]);
+                return response()->json(['error' => 'Failed to verify transaction'], 400);
+            }
+
+            $transactionData = $verifyTransaction->json();
+            $transactionStatus = $transactionData['status'] ?? null;
+            $transactionAmount = number_format($transactionData['data']['amount'] ?? 0, 2);
+
+            if ($transactionStatus === true) {
+                $staticAccount->balance += $transactionAmount;
+                $staticAccount->save();
+
+                $user->userNotifications()->create([
+                    'type' => 'transaction',
+                    'title' => 'Static Account Credited',
+                    'recipient_type' => 'specific_users',
+                    'user_ids' => [$user->id],
+                    'message' => "Your static account has been credited with ₦{$transactionAmount}. New balance: ₦{$staticAccount->balance}.",
+                ]);
+
+                $user->topUpTransactions()->create([
+                    'amount' => $transactionAmount,
+                    'status' => 'completed',
+                    'reference' => "Static Account Credit - Transaction ID: {$transactionID}",
+                    'transaction_id' => $transactionID,
+                    'payment_method' => 'AlatPay Static Account',
+                ]);
+
+                Log::info('Static Account Callback Processed Successfully', [
+                    'account_number' => $accountNumber,
+                    'transaction_id' => $transactionID,
+                    'amount' => $transactionAmount,
+                    'new_balance' => $staticAccount->balance,
+                ]);
+
+                return response()->json(['message' => 'Static account updated successfully']);
+            }
+        } catch (\Exception $e) {
+            Log::error('Static Account Callback Error', [
+                'error' => $e->getMessage(),
+                'request_data' => $request->all(),
+            ]);
+
+            return response()->json(['error' => 'An error occurred'], 500);
         }
     }
 }

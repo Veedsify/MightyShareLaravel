@@ -38,6 +38,8 @@ class ProfileUpdateRequest extends FormRequest
             'next_of_kin_date_of_birth' => ['nullable', 'date', 'before_or_equal:today'],
             'next_of_kin_relationship' => ['nullable', 'string', 'max:255'],
             'next_of_kin_address' => ['nullable', 'string', 'max:255'],
+
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ];
     }
 }

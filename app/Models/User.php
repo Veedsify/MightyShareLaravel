@@ -307,4 +307,9 @@ class User extends Authenticatable implements FilamentUser
             'updatedAt' => $this->updated_at?->toISOString(),
         ];
     }
+
+    public function topUpTransactions()
+    {
+        return $this->hasMany(TopUpTransactions::class);
+    }
 }

@@ -250,11 +250,13 @@ const AddAccount = ({
                                             type="number"
                                             min={1}
                                             max={Math.max(1, remaining)}
-                                            value={qty}
+                                            value={qty
+                                                <= 0 ? '' : qty
+                                            }
                                             onChange={(e) =>
                                                 setQty(Number(e.target.value))
                                             }
-                                            className="w-full border-2 border-gray-300 px-4 py-3 text-lg font-medium transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500"
+                                            className="w-full border-2 border-gray-300 px-4 py-3 text-lg font-medium transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-100 disabled:text-gray-500 text-black"
                                             required
                                             disabled={remaining <= 0}
                                             placeholder="Enter quantity"
@@ -296,7 +298,7 @@ const AddAccount = ({
                                             )}
                                             {meetsMinimum &&
                                                 currentCount <
-                                                    limits.maxAccountLimit && (
+                                                limits.maxAccountLimit && (
                                                     <div className="flex items-start gap-2 bg-green-50 p-3 text-sm">
                                                         <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-500 text-white">
                                                             ✓
@@ -345,8 +347,8 @@ const AddAccount = ({
                                             {busy
                                                 ? 'Creating Accounts...'
                                                 : remaining <= 0
-                                                  ? 'Maximum Limit Reached'
-                                                  : `Create ${qty} Account${qty > 1 ? 's' : ''}`}
+                                                    ? 'Maximum Limit Reached'
+                                                    : `Create ${qty} Account${qty > 1 ? 's' : ''}`}
                                         </button>
                                         <button
                                             type="button"
@@ -443,7 +445,7 @@ const AddAccount = ({
                                                             ₦
                                                             {Number(
                                                                 a.balance /
-                                                                    100 || 0,
+                                                                100 || 0,
                                                             ).toLocaleString()}
                                                         </p>
                                                     </div>

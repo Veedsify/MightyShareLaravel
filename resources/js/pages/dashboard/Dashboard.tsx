@@ -299,7 +299,7 @@ const Dashboard = () => {
                                 <div className="p-6">
                                     <div className="space-y-3">
                                         {recentTransactions &&
-                                        recentTransactions.length > 0 ? (
+                                            recentTransactions.length > 0 ? (
                                             recentTransactions.map(
                                                 (transaction) => (
                                                     <div
@@ -311,17 +311,17 @@ const Dashboard = () => {
                                                                 className={cn(
                                                                     'rounded-md p-3',
                                                                     transaction.type ===
-                                                                        'Deposit' &&
-                                                                        'bg-blue-100 text-blue-600',
+                                                                    'Deposit' &&
+                                                                    'bg-blue-100 text-blue-600',
                                                                     transaction.type ===
-                                                                        'Withdrawal' &&
-                                                                        'bg-pink-100 text-pink-600',
+                                                                    'Withdrawal' &&
+                                                                    'bg-pink-100 text-pink-600',
                                                                     transaction.type ===
-                                                                        'Transfer' &&
-                                                                        'bg-purple-100 text-purple-600',
+                                                                    'Transfer' &&
+                                                                    'bg-purple-100 text-purple-600',
                                                                     transaction.type ===
-                                                                        'Payment' &&
-                                                                        'bg-green-100 text-green-600',
+                                                                    'Payment' &&
+                                                                    'bg-green-100 text-green-600',
                                                                 )}
                                                             >
                                                                 <CreditCard className="h-5 w-5" />
@@ -353,14 +353,14 @@ const Dashboard = () => {
                                                                 className={cn(
                                                                     'mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
                                                                     transaction.status ===
-                                                                        'completed' &&
-                                                                        'bg-green-100 text-green-700',
+                                                                    'completed' &&
+                                                                    'bg-green-100 text-green-700',
                                                                     transaction.status ===
-                                                                        'pending' &&
-                                                                        'bg-yellow-100 text-yellow-700',
+                                                                    'pending' &&
+                                                                    'bg-yellow-100 text-yellow-700',
                                                                     transaction.status ===
-                                                                        'failed' &&
-                                                                        'bg-red-100 text-red-700',
+                                                                    'failed' &&
+                                                                    'bg-red-100 text-red-700',
                                                                 )}
                                                             >
                                                                 {
@@ -411,7 +411,7 @@ const Dashboard = () => {
                                         </p>
                                         <div className="mt-2 flex items-center gap-1 text-xs font-semibold text-blue-100">
                                             {dashboardStats?.totalRewards !==
-                                            '₦0.00' ? (
+                                                '₦0.00' ? (
                                                 <TrendingUp className="h-3.5 w-3.5" />
                                             ) : (
                                                 <TrendingDown className="h-3.5 w-3.5" />
@@ -429,7 +429,7 @@ const Dashboard = () => {
                                         </p>
                                         <div className="mt-2 flex items-center gap-1 text-xs font-semibold text-pink-100">
                                             {dashboardStats?.totalContributions !==
-                                            '₦0.00' ? (
+                                                '₦0.00' ? (
                                                 <TrendingUp className="h-3.5 w-3.5" />
                                             ) : (
                                                 <TrendingDown className="h-3.5 w-3.5" />
@@ -449,7 +449,7 @@ const Dashboard = () => {
 
                             {/* Active Packages */}
                             {user?.thriftSubscriptions &&
-                            user.thriftSubscriptions.length > 0 ? (
+                                user.thriftSubscriptions.length > 0 ? (
                                 <div className="rounded-lg border border-gray-200 bg-white">
                                     <div className="border-b border-gray-200 p-6">
                                         <h3 className="text-xl font-bold text-gray-900">
@@ -473,7 +473,7 @@ const Dashboard = () => {
                                                                     .package
                                                                     ?.name ||
                                                                     'Package'}
-                                                            </h4>   
+                                                            </h4>
                                                         </div>
                                                         <div className="text-right">
                                                             <p className="font-semibold text-gray-900">
@@ -482,24 +482,24 @@ const Dashboard = () => {
                                                                     .package
                                                                     ?.price
                                                                     ? (
-                                                                          subscription
-                                                                              .package
-                                                                              .price 
-                                                                      ).toLocaleString()
+                                                                        subscription
+                                                                            .package
+                                                                            .price
+                                                                    ).toLocaleString()
                                                                     : '0'}
                                                             </p>
                                                             <span
                                                                 className={cn(
                                                                     'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
                                                                     subscription.status ===
-                                                                        'active' &&
-                                                                        'bg-green-100 text-green-700',
+                                                                    'active' &&
+                                                                    'bg-green-100 text-green-700',
                                                                     subscription.status ===
-                                                                        'inactive' &&
-                                                                        'bg-gray-100 text-gray-700',
+                                                                    'inactive' &&
+                                                                    'bg-gray-100 text-gray-700',
                                                                     subscription.status ===
-                                                                        'expired' &&
-                                                                        'bg-red-100 text-red-700',
+                                                                    'expired' &&
+                                                                    'bg-red-100 text-red-700',
                                                                 )}
                                                             >
                                                                 {
@@ -510,14 +510,14 @@ const Dashboard = () => {
                                                     </div>
                                                     {subscription.amountInvested >
                                                         0 && (
-                                                        <div className="mt-2 text-sm text-gray-600">
-                                                            Invested: ₦
-                                                            {(
-                                                                subscription.amountInvested /
-                                                                100
-                                                            ).toLocaleString()}
-                                                        </div>
-                                                    )}
+                                                            <div className="mt-2 text-sm text-gray-600">
+                                                                Invested: ₦
+                                                                {(
+                                                                    subscription.amountInvested /
+                                                                    100
+                                                                ).toLocaleString()}
+                                                            </div>
+                                                        )}
                                                 </div>
                                             ),
                                         )}
