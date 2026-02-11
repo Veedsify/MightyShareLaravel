@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libicu-dev \
     zip \
     unzip \
     nodejs \
@@ -23,7 +24,7 @@ RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:$PATH"
 
 # Install PHP extensions for a normal Laravel app
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl
 
 # Configure PHP uploads
 RUN echo "upload_max_filesize=512M" > /usr/local/etc/php/conf.d/uploads.ini \
@@ -36,6 +37,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copy application files
 COPY . /var/www/html
+
+# Fix git dubious ownership issue
+RUN git config --global --add safe.directory /var/www/html
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
