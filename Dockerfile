@@ -64,6 +64,7 @@ RUN php artisan storage:link || true
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/public \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
 # Build Filament assets (no caching yet - needs runtime env vars)
