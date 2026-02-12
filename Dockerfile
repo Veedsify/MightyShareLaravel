@@ -43,7 +43,7 @@ COPY . /var/www/html
 RUN git config --global --add safe.directory /var/www/html
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --optimize-autoloader
 
 # Build assets
 RUN bun install && bun run build
