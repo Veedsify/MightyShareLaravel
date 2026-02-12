@@ -72,6 +72,9 @@ RUN php artisan filament:assets
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
+# Set ServerName to suppress warning
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
 # Configure Apache DocumentRoot
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
     && echo '<Directory /var/www/html/public>\n\
