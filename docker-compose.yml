@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "80:80"
+        volumes:
+            # Persistent storage for uploads and user-generated content
+            - uploads:/var/www/html/storage/app/public
+            - livewire_tmp:/var/www/html/storage/app/livewire-tmp
+
+            # Laravel framework storage (optional but recommended for persistence)
+            - cache:/var/www/html/storage/framework/cache
+            - views:/var/www/html/storage/framework/views
+            - sessions:/var/www/html/storage/framework/sessions
+
+            # Application logs
+            - logs:/var/www/html/storage/logs
+        restart: unless-stopped
+
+volumes:
+    # Application data volumes - these persist across rebuilds
+    uploads:
+        driver: local
+    livewire_tmp:
+        driver: local
+
+    # Laravel framework volumes
+    cache:
+        driver: local
+    views:
+        driver: local
+    sessions:
+        driver: local
+
+    # Logs volume
+    logs:
+        driver: local
