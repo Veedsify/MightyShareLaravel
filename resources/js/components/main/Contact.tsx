@@ -15,10 +15,52 @@ export const Contact = () => {
         message: '',
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+    const [submitMessage, setSubmitMessage] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle form submission
-        console.log('Form submitted:', formData);
+        setIsSubmitting(true);
+        setSubmitStatus('idle');
+
+        try {
+            const response = await fetch('/api/contacts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setSubmitStatus('success');
+                setSubmitMessage(data.message || 'Thank you for your message. We will get back to you soon.');
+                setFormData({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    message: '',
+                });
+            } else {
+                setSubmitStatus('error');
+                setSubmitMessage(data.message || 'Failed to submit your message. Please try again.');
+            }
+        } catch (error) {
+            setSubmitStatus('error');
+            setSubmitMessage('An error occurred while submitting your message. Please try again.');
+            console.error('Contact form error:', error);
+        } finally {
+            setIsSubmitting(false);
+            setTimeout(() => {
+                if (submitStatus !== 'idle') {
+                    setSubmitStatus('idle');
+                }
+            }, 5000);
+        }
     };
 
     const handleChange = (
@@ -126,6 +168,19 @@ export const Contact = () => {
                         <h3 className="mb-6 text-2xl font-bold text-blue-900">
                             Send Us a Message
                         </h3>
+
+                        {submitStatus === 'success' && (
+                            <div className="mb-6 rounded-lg bg-green-50 border border-green-200 p-4">
+                                <p className="text-green-800 font-medium">{submitMessage}</p>
+                            </div>
+                        )}
+
+                        {submitStatus === 'error' && (
+                            <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
+                                <p className="text-red-800 font-medium">{submitMessage}</p>
+                            </div>
+                        )}
+
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
                                 <label
@@ -141,6 +196,7 @@ export const Contact = () => {
                                     value={formData.name}
                                     onChange={handleChange}
                                     required
+                                    disabled={isSubmitting}
                                 />
                             </div>
 
@@ -159,6 +215,7 @@ export const Contact = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
+                                    disabled={isSubmitting}
                                 />
                             </div>
 
@@ -176,6 +233,7 @@ export const Contact = () => {
                                     placeholder="+1 (555) 123-4567"
                                     value={formData.phone}
                                     onChange={handleChange}
+                                    disabled={isSubmitting}
                                 />
                             </div>
 
@@ -194,14 +252,16 @@ export const Contact = () => {
                                     onChange={handleChange}
                                     rows={5}
                                     required
+                                    disabled={isSubmitting}
                                 />
                             </div>
 
                             <Button
                                 type="submit"
-                                className="w-full bg-pink-600 text-white shadow-lg shadow-pink-600/20 hover:bg-pink-700"
+                                className="w-full bg-pink-600 text-white shadow-lg shadow-pink-600/20 hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={isSubmitting}
                             >
-                                Send Message
+                                {isSubmitting ? 'Sending...' : 'Send Message'}
                             </Button>
                         </form>
                     </div>
