@@ -65,13 +65,14 @@ class UserRegistrationService
                 'actual_return' => 0,
             ]);
 
-            Notification::create([
+            $notification = Notification::create([
                 'title' => 'Registration Successful',
                 'message' => 'Your registration on MightyShare was successful, Welcome On Board',
                 'type' => 'system',
                 'recipient_type' => 'specific_users',
-                'user_ids' => [$user->id],
             ]);
+
+            $notification->users()->attach($user->id);
 
             // Load relationships for return
             $user->load(['accounts', 'thriftSubscriptions.package']);
