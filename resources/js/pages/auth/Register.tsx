@@ -407,28 +407,26 @@ const Register = ({ packages, packageId }: RegisterProps) => {
                                                                         false,
                                                                     );
                                                                 }}
-                                                                className={`group relative w-full rounded-lg p-4 text-left transition-all duration-200 ${
-                                                                    data.package_id ===
-                                                                    pkg.id.toString()
+                                                                className={`group relative w-full rounded-lg p-4 text-left transition-all duration-200 ${data.package_id ===
+                                                                        pkg.id.toString()
                                                                         ? 'bg-gradient-to-r ' +
-                                                                          pkg.color +
-                                                                          ' text-white'
+                                                                        pkg.color +
+                                                                        ' text-white'
                                                                         : 'hover:bg-gray-50'
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 <div className="flex items-start justify-between gap-3">
                                                                     <div className="flex items-start gap-3">
                                                                         <div
-                                                                            className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-all ${
-                                                                                data.package_id ===
-                                                                                pkg.id.toString()
+                                                                            className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-all ${data.package_id ===
+                                                                                    pkg.id.toString()
                                                                                     ? 'bg-white/20'
                                                                                     : 'bg-gradient-to-br ' +
-                                                                                      pkg.color
-                                                                            }`}
+                                                                                    pkg.color
+                                                                                }`}
                                                                         >
                                                                             {data.package_id ===
-                                                                            pkg.id.toString() ? (
+                                                                                pkg.id.toString() ? (
                                                                                 <Check className="h-6 w-6" />
                                                                             ) : (
                                                                                 <pkg.icon className="h-6 w-6" />
@@ -454,19 +452,19 @@ const Register = ({ packages, packageId }: RegisterProps) => {
 
                                                                     {data.package_id ===
                                                                         pkg.id.toString() && (
-                                                                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/20">
-                                                                            <Check className="h-4 w-4 text-white" />
-                                                                        </div>
-                                                                    )}
+                                                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/20">
+                                                                                <Check className="h-4 w-4 text-white" />
+                                                                            </div>
+                                                                        )}
                                                                 </div>
 
                                                                 {/* Hover Glow Effect */}
                                                                 {data.package_id !==
                                                                     pkg.id.toString() && (
-                                                                    <div
-                                                                        className={`absolute inset-0 -z-10 rounded-lg bg-gradient-to-r ${pkg.color} opacity-0 blur-xl transition-opacity group-hover:opacity-20`}
-                                                                    />
-                                                                )}
+                                                                        <div
+                                                                            className={`absolute inset-0 -z-10 rounded-lg bg-gradient-to-r ${pkg.color} opacity-0 blur-xl transition-opacity group-hover:opacity-20`}
+                                                                        />
+                                                                    )}
                                                             </button>
                                                         ),
                                                     )}

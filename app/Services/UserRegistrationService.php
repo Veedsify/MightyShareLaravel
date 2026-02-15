@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\Account;
+use App\Models\Notification;
 use App\Models\ThriftPackage;
 use App\Models\ThriftSubscription;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +34,7 @@ class UserRegistrationService
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-            'phone' => $e164,
+                'phone' => $e164,
                 'password' => Hash::make($data['password']),
                 'referral_id' => $referralId,
                 'registration_paid' => false,
@@ -62,6 +63,14 @@ class UserRegistrationService
                 'status' => 'active',
                 'expected_return' => 0,
                 'actual_return' => 0,
+            ]);
+
+            Notification::create([
+                'title' => 'Registration Successful',
+                'message' => 'Your registration on MightyShare was successful, Welcome On Board',
+                'type' => 'system',
+                'recipient_type' => 'specific_users',
+                'user_ids' => [$user->id],
             ]);
 
             // Load relationships for return
