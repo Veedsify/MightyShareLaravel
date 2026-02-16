@@ -69,6 +69,7 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # Build Filament assets (no caching yet - needs runtime env vars)
 RUN php artisan filament:assets
+RUN php artisan optimize
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite

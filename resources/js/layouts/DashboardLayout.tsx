@@ -38,33 +38,33 @@ const navigationItems: NavigationItem[] = [
     {
         title: 'Dashboard',
         icon: Home,
-        href: '/',
+        href: '/dashboard/',
         current: true,
     },
     {
         title: 'Profile',
         icon: User,
-        href: '/settings',
+        href: '/dashboard/settings',
     },
     {
         title: 'Add Account',
         icon: UserPlus,
-        href: '/accounts/add',
+        href: '/dashboard/accounts/add',
     },
     {
         title: 'Wallet',
         icon: Wallet,
-        href: '/wallet',
+        href: '/dashboard/wallet',
     },
     {
         title: 'Transactions',
         icon: Receipt,
-        href: '/transactions',
+        href: '/dashboard/transactions',
     },
     {
         title: 'Settlements',
         icon: CheckCircle,
-        href: '/settlements',
+        href: '/dashboard/settlements',
         subItems: [
             {
                 title: 'Due for Clearance',
@@ -87,7 +87,7 @@ const navigationItems: NavigationItem[] = [
     {
         title: 'Thrift Packages',
         icon: Package,
-        href: '/packages',
+        href: '/dashboard/packages',
         subItems: [
             {
                 title: 'Thrift Packages',
@@ -102,12 +102,12 @@ const navigationItems: NavigationItem[] = [
     {
         title: 'Complaints',
         icon: MessageSquare,
-        href: '/complaints',
+        href: '/dashboard/complaints',
     },
     {
         title: 'Notifications',
         icon: Bell,
-        href: '/notifications',
+        href: '/dashboard/notifications',
     },
 ];
 
@@ -239,7 +239,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     <nav className="flex-1 space-y-2 overflow-y-auto p-4">
                         {navigationItems.map((item) => {
                             const isActive =
-                                url === item.href || url.includes(item.href);
+                                url === item.href || url.startsWith(item.href.replace("/", ""));
 
                             if (item.subItems) {
                                 const isSettlements =
@@ -275,7 +275,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                                                 className={cn(
                                                     'h-4 w-4 transition-transform duration-200',
                                                     dropdownOpen &&
-                                                        'rotate-180',
+                                                    'rotate-180',
                                                 )}
                                             />
                                         </button>
@@ -316,7 +316,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             return (
                                 <Link
                                     key={item.title}
-                                    href={'/dashboard' + item.href}
+                                    href={item.href}
                                     onClick={() => setSidebarOpen(false)}
                                     className={cn(
                                         'flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200',
@@ -325,7 +325,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                                             : 'text-blue-50 hover:bg-blue-500 hover:text-white',
                                     )}
                                 >
-                                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                                    <item.icon className="h-5 w-5 shrink-0" />
                                     <span className="truncate">
                                         {item.title}
                                     </span>
@@ -412,7 +412,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
                                             {!searchLoading &&
                                                 searchResults.pages.length ===
-                                                    0 &&
+                                                0 &&
                                                 searchResults.transactions
                                                     .length === 0 && (
                                                     <div className="px-4 py-8 text-center text-gray-500">
@@ -423,7 +423,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                                             {/* Pages */}
                                             {!searchLoading &&
                                                 searchResults.pages.length >
-                                                    0 && (
+                                                0 && (
                                                     <>
                                                         <div className="border-b border-gray-200 px-4 py-2">
                                                             <p className="text-xs font-semibold text-gray-500 uppercase">
@@ -643,8 +643,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                                                                             }
                                                                         )
                                                                             ?.id ===
-                                                                            acc.id &&
-                                                                            'border-l-4 border-l-blue-600 bg-blue-50',
+                                                                        acc.id &&
+                                                                        'border-l-4 border-l-blue-600 bg-blue-50',
                                                                     )}
                                                                     type="button"
                                                                 >
@@ -742,17 +742,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                                                         referralId?: string;
                                                     }
                                                 )?.referralId && (
-                                                    <p className="mt-2 text-xs font-medium text-blue-600">
-                                                        Referral ID:{' '}
-                                                        {
-                                                            (
-                                                                auth?.user as {
-                                                                    referralId?: string;
-                                                                }
-                                                            )?.referralId
-                                                        }
-                                                    </p>
-                                                )}
+                                                        <p className="mt-2 text-xs font-medium text-blue-600">
+                                                            Referral ID:{' '}
+                                                            {
+                                                                (
+                                                                    auth?.user as {
+                                                                        referralId?: string;
+                                                                    }
+                                                                )?.referralId
+                                                            }
+                                                        </p>
+                                                    )}
                                             </div>
                                             <Link
                                                 href="/dashboard/settings"
@@ -863,7 +863,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                                         {/* Transactions */}
                                         {!searchLoading &&
                                             searchResults.transactions.length >
-                                                0 && (
+                                            0 && (
                                                 <>
                                                     <div className="border-b border-gray-200 px-4 py-2">
                                                         <p className="text-xs font-semibold text-gray-500 uppercase">
