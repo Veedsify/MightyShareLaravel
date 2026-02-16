@@ -239,7 +239,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     <nav className="flex-1 space-y-2 overflow-y-auto p-4">
                         {navigationItems.map((item) => {
                             const isActive =
-                                url === item.href || url.startsWith(item.href.replace("/", ""));
+                                url === item.href || url.startsWith(item.href);
 
                             if (item.subItems) {
                                 const isSettlements =
@@ -287,7 +287,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                                                             url ===
                                                             subItem.href;
                                                         return (
-                                                            <Link
+                                                            <a
                                                                 key={
                                                                     subItem.title
                                                                 }
@@ -303,7 +303,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                                                                 )}
                                                             >
                                                                 {subItem.title}
-                                                            </Link>
+                                                            </a>
                                                         );
                                                     },
                                                 )}
@@ -314,7 +314,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             }
 
                             return (
-                                <Link
+                                <a
                                     key={item.title}
                                     href={item.href}
                                     onClick={() => setSidebarOpen(false)}
@@ -329,7 +329,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                                     <span className="truncate">
                                         {item.title}
                                     </span>
-                                </Link>
+                                </a>
                             );
                         })}
                     </nav>

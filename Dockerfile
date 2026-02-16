@@ -69,7 +69,6 @@ RUN chown -R www-data:www-data /var/www/html \
 
 # Build Filament assets (no caching yet - needs runtime env vars)
 RUN php artisan filament:assets
-RUN php artisan optimize
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -98,10 +97,7 @@ RUN echo '#!/bin/bash\n\
     php artisan config:clear\n\
     php artisan cache:clear\n\
     php artisan config:cache\n\
-    php artisan route:cache\n\
-    php artisan view:cache\n\
-    php artisan filament:cache\n\
-    php artisan icon:cache\n\
+    php artisan optimize\n\
     composer dump-autoload -o\n\
     echo "Laravel application ready!"\n\
     echo "Starting Apache..."\n\
