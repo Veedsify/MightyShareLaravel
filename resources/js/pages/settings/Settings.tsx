@@ -9,10 +9,14 @@ import {
     CheckCircle,
     Copy,
     CreditCard,
+    Gift,
     Lock,
     Pencil,
+    Share2,
     Shield,
+    Star,
     User,
+    Users,
     Wallet,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -46,10 +50,23 @@ interface SettingsPageProps extends SharedData {
         balance: number;
         created_at: string;
     };
+    referral: {
+        code: string;
+        total_referrals: number;
+        total_points: number;
+        referrals: Array<{
+            id: number;
+            referred_name: string;
+            referred_email: string;
+            points_earned: number;
+            status: string;
+            created_at: string;
+        }>;
+    };
 }
 
 const Settings = () => {
-    const { user, staticAccount, notifications, nextOfKin } =
+    const { user, staticAccount, notifications, nextOfKin, referral } =
         usePage<SettingsPageProps>().props;
     const [showOtpModal, setShowOtpModal] = useState(false);
     const [otp, setOtp] = useState('');
@@ -443,28 +460,28 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .date_of_birth && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            profileForm.errors
-                                                                .date_of_birth
-                                                        }
-                                                    </p>
-                                                )}
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .date_of_birth
+                                                    }
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     {(editMode ||
                                         profileForm.data.avatar instanceof
-                                        File) && (
-                                            <Button
-                                                type="submit"
-                                                disabled={profileForm.processing}
-                                                className="w-full bg-blue-600 py-3 font-bold text-white hover:bg-blue-700 disabled:bg-gray-300"
-                                            >
-                                                {profileForm.processing
-                                                    ? 'Saving...'
-                                                    : 'Save Changes'}
-                                            </Button>
-                                        )}
+                                            File) && (
+                                        <Button
+                                            type="submit"
+                                            disabled={profileForm.processing}
+                                            className="w-full bg-blue-600 py-3 font-bold text-white hover:bg-blue-700 disabled:bg-gray-300"
+                                        >
+                                            {profileForm.processing
+                                                ? 'Saving...'
+                                                : 'Save Changes'}
+                                        </Button>
+                                    )}
                                 </form>
                             </div>
                             <div className="border border-gray-200 bg-white p-8">
@@ -699,13 +716,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_name && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            profileForm.errors
-                                                                .next_of_kin_name
-                                                        }
-                                                    </p>
-                                                )}
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_name
+                                                    }
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -737,13 +754,13 @@ const Settings = () => {
                                             </select>
                                             {profileForm.errors
                                                 .next_of_kin_phone && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            profileForm.errors
-                                                                .next_of_kin_phone
-                                                        }
-                                                    </p>
-                                                )}
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_phone
+                                                    }
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -766,13 +783,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_gender && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            profileForm.errors
-                                                                .next_of_kin_gender
-                                                        }
-                                                    </p>
-                                                )}
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_gender
+                                                    }
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -795,13 +812,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_date_of_birth && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            profileForm.errors
-                                                                .next_of_kin_date_of_birth
-                                                        }
-                                                    </p>
-                                                )}
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_date_of_birth
+                                                    }
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -824,13 +841,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_relationship && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            profileForm.errors
-                                                                .next_of_kin_relationship
-                                                        }
-                                                    </p>
-                                                )}
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_relationship
+                                                    }
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="border border-gray-200 bg-gray-50 p-4">
                                             <label className="mb-2 block text-xs font-bold text-gray-700 uppercase">
@@ -853,13 +870,13 @@ const Settings = () => {
                                             />
                                             {profileForm.errors
                                                 .next_of_kin_address && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            profileForm.errors
-                                                                .next_of_kin_address
-                                                        }
-                                                    </p>
-                                                )}
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        profileForm.errors
+                                                            .next_of_kin_address
+                                                    }
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     {editMode && (
@@ -874,6 +891,157 @@ const Settings = () => {
                                         </Button>
                                     )}
                                 </form>
+                            </div>
+                        </div>
+
+                        {/* Referral System Section */}
+                        <div className="grid xl:grid-cols-1 xl:gap-8">
+                            <div className="border border-gray-200 bg-white p-8">
+                                <div className="mb-6 flex items-center gap-3">
+                                    <div className="bg-emerald-100 p-3">
+                                        <Gift className="h-5 w-5 text-emerald-600" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900">
+                                            Referral Program
+                                        </h2>
+                                        <p className="text-sm text-gray-500">
+                                            Invite friends and earn rewards
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Referral Stats */}
+                                <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                                    <div className="border border-emerald-200 bg-emerald-50 p-4">
+                                        <div className="flex items-center gap-3">
+                                            <Users className="h-5 w-5 text-emerald-600" />
+                                            <div>
+                                                <p className="text-xs font-bold text-emerald-700 uppercase">
+                                                    Total Referrals
+                                                </p>
+                                                <p className="text-2xl font-bold text-emerald-900">
+                                                    {referral.total_referrals}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="border border-blue-200 bg-blue-50 p-4">
+                                        <div className="flex items-center gap-3">
+                                            <Star className="h-5 w-5 text-blue-600" />
+                                            <div>
+                                                <p className="text-xs font-bold text-blue-700 uppercase">
+                                                    Total Points
+                                                </p>
+                                                <p className="text-2xl font-bold text-blue-900">
+                                                    {referral.total_points}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="border border-purple-200 bg-purple-50 p-4">
+                                        <div className="flex items-center gap-3">
+                                            <Share2 className="h-5 w-5 text-purple-600" />
+                                            <div>
+                                                <p className="text-xs font-bold text-purple-700 uppercase">
+                                                    Your Referral Code
+                                                </p>
+                                                <p className="font-mono text-lg font-bold text-purple-900">
+                                                    {referral.code}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Referral Code Copy Section */}
+                                <div className="mb-6 border-l-4 border-emerald-500 bg-emerald-50 p-6">
+                                    <p className="mb-3 font-semibold text-emerald-900">
+                                        Share Your Referral Code
+                                    </p>
+                                    <p className="mb-4 text-sm text-emerald-800">
+                                        Share your unique referral code with
+                                        friends. When they sign up using your
+                                        code, you both earn rewards!
+                                    </p>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex-1 border border-emerald-300 bg-white px-4 py-3 font-mono text-lg font-bold tracking-wider text-emerald-900">
+                                            {referral.code}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleCopyToClipboard(
+                                                    referral.code,
+                                                    'Referral code',
+                                                )
+                                            }
+                                            className="flex items-center gap-2 bg-emerald-600 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-700"
+                                        >
+                                            <Copy className="h-4 w-4" />
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Referred Users List */}
+                                {referral.referrals.length > 0 && (
+                                    <div>
+                                        <h3 className="mb-4 text-lg font-bold text-gray-900">
+                                            People You Referred
+                                        </h3>
+                                        <div className="space-y-3">
+                                            {referral.referrals.map((ref) => (
+                                                <div
+                                                    key={ref.id}
+                                                    className="flex items-center justify-between border border-gray-200 bg-gray-50 p-4 transition hover:bg-gray-100"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+                                                            <User className="h-5 w-5 text-emerald-600" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-semibold text-gray-900">
+                                                                {
+                                                                    ref.referred_name
+                                                                }
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">
+                                                                {
+                                                                    ref.referred_email
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-sm font-bold text-emerald-600">
+                                                            +{ref.points_earned}{' '}
+                                                            pts
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {new Date(
+                                                                ref.created_at,
+                                                            ).toLocaleDateString()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {referral.referrals.length === 0 && (
+                                    <div className="py-8 text-center">
+                                        <Users className="mx-auto mb-3 h-12 w-12 text-gray-300" />
+                                        <p className="font-semibold text-gray-500">
+                                            No referrals yet
+                                        </p>
+                                        <p className="mt-1 text-sm text-gray-400">
+                                            Share your referral code to start
+                                            earning points!
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -918,13 +1086,13 @@ const Settings = () => {
                                             />
                                             {passwordForm.errors
                                                 .current_password && (
-                                                    <p className="mt-1 text-xs text-red-600">
-                                                        {
-                                                            passwordForm.errors
-                                                                .current_password
-                                                        }
-                                                    </p>
-                                                )}
+                                                <p className="mt-1 text-xs text-red-600">
+                                                    {
+                                                        passwordForm.errors
+                                                            .current_password
+                                                    }
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -949,13 +1117,13 @@ const Settings = () => {
                                                 />
                                                 {passwordForm.errors
                                                     .password && (
-                                                        <p className="mt-1 text-xs text-red-600">
-                                                            {
-                                                                passwordForm.errors
-                                                                    .password
-                                                            }
-                                                        </p>
-                                                    )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            passwordForm.errors
+                                                                .password
+                                                        }
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         <div>
@@ -979,13 +1147,13 @@ const Settings = () => {
                                                 />
                                                 {passwordForm.errors
                                                     .password_confirmation && (
-                                                        <p className="mt-1 text-xs text-red-600">
-                                                            {
-                                                                passwordForm.errors
-                                                                    .password_confirmation
-                                                            }
-                                                        </p>
-                                                    )}
+                                                    <p className="mt-1 text-xs text-red-600">
+                                                        {
+                                                            passwordForm.errors
+                                                                .password_confirmation
+                                                        }
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

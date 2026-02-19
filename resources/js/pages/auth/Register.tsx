@@ -8,6 +8,7 @@ import {
     Eye,
     EyeOff,
     Gem,
+    Gift,
     Lock,
     Mail,
     Medal,
@@ -64,6 +65,7 @@ const Register = ({ packages, packageId }: RegisterProps) => {
         email: '',
         phone: '',
         package_id: packageId || '',
+        referral_code: '',
         password: '',
         password_confirmation: '',
         terms: false,
@@ -407,26 +409,28 @@ const Register = ({ packages, packageId }: RegisterProps) => {
                                                                         false,
                                                                     );
                                                                 }}
-                                                                className={`group relative w-full rounded-lg p-4 text-left transition-all duration-200 ${data.package_id ===
-                                                                        pkg.id.toString()
+                                                                className={`group relative w-full rounded-lg p-4 text-left transition-all duration-200 ${
+                                                                    data.package_id ===
+                                                                    pkg.id.toString()
                                                                         ? 'bg-gradient-to-r ' +
-                                                                        pkg.color +
-                                                                        ' text-white'
+                                                                          pkg.color +
+                                                                          ' text-white'
                                                                         : 'hover:bg-gray-50'
-                                                                    }`}
+                                                                }`}
                                                             >
                                                                 <div className="flex items-start justify-between gap-3">
                                                                     <div className="flex items-start gap-3">
                                                                         <div
-                                                                            className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-all ${data.package_id ===
-                                                                                    pkg.id.toString()
+                                                                            className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl transition-all ${
+                                                                                data.package_id ===
+                                                                                pkg.id.toString()
                                                                                     ? 'bg-white/20'
                                                                                     : 'bg-gradient-to-br ' +
-                                                                                    pkg.color
-                                                                                }`}
+                                                                                      pkg.color
+                                                                            }`}
                                                                         >
                                                                             {data.package_id ===
-                                                                                pkg.id.toString() ? (
+                                                                            pkg.id.toString() ? (
                                                                                 <Check className="h-6 w-6" />
                                                                             ) : (
                                                                                 <pkg.icon className="h-6 w-6" />
@@ -452,19 +456,19 @@ const Register = ({ packages, packageId }: RegisterProps) => {
 
                                                                     {data.package_id ===
                                                                         pkg.id.toString() && (
-                                                                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/20">
-                                                                                <Check className="h-4 w-4 text-white" />
-                                                                            </div>
-                                                                        )}
+                                                                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/20">
+                                                                            <Check className="h-4 w-4 text-white" />
+                                                                        </div>
+                                                                    )}
                                                                 </div>
 
                                                                 {/* Hover Glow Effect */}
                                                                 {data.package_id !==
                                                                     pkg.id.toString() && (
-                                                                        <div
-                                                                            className={`absolute inset-0 -z-10 rounded-lg bg-gradient-to-r ${pkg.color} opacity-0 blur-xl transition-opacity group-hover:opacity-20`}
-                                                                        />
-                                                                    )}
+                                                                    <div
+                                                                        className={`absolute inset-0 -z-10 rounded-lg bg-gradient-to-r ${pkg.color} opacity-0 blur-xl transition-opacity group-hover:opacity-20`}
+                                                                    />
+                                                                )}
                                                             </button>
                                                         ),
                                                     )}
@@ -508,6 +512,42 @@ const Register = ({ packages, packageId }: RegisterProps) => {
                                     {errors.package_id && (
                                         <p className="mt-2 text-sm text-red-600">
                                             {errors.package_id}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Password */}
+                                <div>
+                                    <label
+                                        htmlFor="referral_code"
+                                        className="mb-2 block text-sm font-semibold text-gray-700"
+                                    >
+                                        Referral Code{' '}
+                                        <span className="text-gray-400">
+                                            (Optional)
+                                        </span>
+                                    </label>
+                                    <div className="group relative">
+                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 transition-colors">
+                                            <Gift className="h-5 w-5 text-gray-400 group-focus-within:text-blue-600" />
+                                        </div>
+                                        <input
+                                            id="referral_code"
+                                            type="text"
+                                            value={data.referral_code}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'referral_code',
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full rounded-xl border-2 border-gray-200 bg-gray-50 py-3.5 pr-4 pl-12 text-gray-900 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                                            placeholder="REF-XXXXXXXXX"
+                                        />
+                                    </div>
+                                    {errors.referral_code && (
+                                        <p className="mt-2 text-sm text-red-600">
+                                            {errors.referral_code}
                                         </p>
                                     )}
                                 </div>

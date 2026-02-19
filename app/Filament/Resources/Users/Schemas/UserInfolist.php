@@ -79,7 +79,28 @@ class UserInfolist
                             ->copyMessage('Referral ID copied!')
                             ->placeholder('Not generated'),
 
-                        IconEntry::make('registration_paid')
+                TextEntry::make('referral_points')
+                    ->label('Referral Points')
+                    ->icon('heroicon-o-star')
+                    ->iconColor('success')
+                    ->badge()
+                    ->color('success'),
+
+                TextEntry::make('referrals_count')
+                    ->label('Total Referrals')
+                    ->state(fn($record) => $record->referrals()->count())
+                    ->icon('heroicon-o-user-group')
+                    ->iconColor('info')
+                    ->badge()
+                    ->color('info'),
+
+                TextEntry::make('referrer.name')
+                    ->label('Referred By')
+                    ->icon('heroicon-o-user')
+                    ->iconColor('primary')
+                    ->placeholder('Direct signup'),
+
+                IconEntry::make('registration_paid')
                             ->label('Registration Status')
                             ->boolean()
                             ->trueIcon('heroicon-o-check-circle')
@@ -194,7 +215,14 @@ class UserInfolist
                             ->color(fn($state) => $state > 0 ? 'warning' : 'gray')
                             ->icon('heroicon-o-chat-bubble-left-right'),
 
-                        TextEntry::make('settlement_accounts_count')
+                TextEntry::make('referrals_total_count')
+                    ->label('Referrals')
+                    ->state(fn($record) => $record->referrals()->count())
+                    ->badge()
+                    ->color('success')
+                    ->icon('heroicon-o-user-plus'),
+
+                TextEntry::make('settlement_accounts_count')
                             ->label('Settlements')
                             ->state(fn($record) => $record->settlementAccounts()->count())
                             ->badge()

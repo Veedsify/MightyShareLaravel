@@ -27,7 +27,7 @@ class UserRegistrationRequest extends FormRequest
             'phone' => ['required', 'string', 'regex:/^(\+234|0)[789][01]\d{8}$/'],
             'password' => ['required', 'string', 'min:8'],
             'package_id' => ['required', 'integer', 'exists:thrift_packages,id'],
-            'referralId' => ['nullable', 'string', 'max:255'],
+            'referral_code' => ['nullable', 'string', 'max:255', 'exists:users,referral_id'],
         ];
     }
 
@@ -58,8 +58,9 @@ class UserRegistrationRequest extends FormRequest
             'package_id.integer' => 'Invalid package selection',
             'package_id.exists' => 'Selected package does not exist',
 
-            'referralId.string' => 'Referral ID must be a valid string',
-            'referralId.max' => 'Referral ID cannot exceed 255 characters',
+            'referral_code.string' => 'Referral code must be a valid string',
+            'referral_code.max' => 'Referral code cannot exceed 255 characters',
+            'referral_code.exists' => 'The referral code is invalid or does not exist',
         ];
     }
 }

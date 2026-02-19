@@ -145,6 +145,9 @@ class AuthController extends Controller
             Auth::login($user);
             $request->session()->regenerate();
 
+            // Ensure user has a referral ID (for legacy users who don't have one)
+            $user->ensureReferralId();
+
             if (Auth::user()->isAdmin()) {
                 redirect('/admin')->with('success', 'Login successful!');
             }

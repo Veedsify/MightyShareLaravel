@@ -86,7 +86,14 @@ class UserForm
                                     ->placeholder('Auto-generated')
                                     ->helperText('Automatically generated on creation'),
 
-                                Toggle::make('registration_paid')
+                    TextInput::make('referral_points')
+                        ->label('Referral Points')
+                        ->numeric()
+                        ->default(0)
+                        ->disabled()
+                        ->helperText('Points earned from referrals'),
+
+                    Toggle::make('registration_paid')
                                     ->label('Registration Paid')
                                     ->default(false)
                                     ->inline(false)

@@ -9,22 +9,17 @@ class Referral extends Model
 {
     use HasFactory;
 
-    const UPDATED_AT = null;
-
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'referral_code',
-        'referred_user_id',
-        'referred_name',
-        'referred_phone',
+        'referrer_id',
+        'referred_id',
+        'points_earned',
         'status',
-        'reward_amount',
         'rewarded_at',
-        'account_id',
     ];
 
     /**
@@ -33,17 +28,23 @@ class Referral extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'referred_user_id' => 'integer',
-        'reward_amount' => 'integer',
+        'points_earned' => 'integer',
         'rewarded_at' => 'datetime',
-        'created_at' => 'datetime',
     ];
 
     /**
-     * Get the account that owns the referral.
+     * Get the user who made the referral (the referrer).
      */
-    public function account()
+    public function referrer()
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(User::class, 'referrer_id');
+    }
+
+    /**
+     * Get the user who was referred.
+     */
+    public function referred()
+    {
+        return $this->belongsTo(User::class, 'referred_id');
     }
 }

@@ -33,6 +33,8 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'role',
         'referral_id',
+        'referred_by',
+        'referral_points',
         'plan_start_date',
         'registration_paid',
         'notifications',
@@ -74,6 +76,7 @@ class User extends Authenticatable implements FilamentUser
             'transaction_alerts' => 'boolean',
             'marketing_emails' => 'boolean',
             'notifications' => 'array',
+            'referral_points' => 'integer',
         ];
     }
 
@@ -311,5 +314,48 @@ class User extends Authenticatable implements FilamentUser
     public function topUpTransactions()
     {
         return $this->hasMany(TopUpTransactions::class);
+    }
+
+    /**
+     * Get the user who referred this user.
+     */
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    /**
+     * Get users referred by this user.
+     */
+    public function referredUsers()
+    {
+        return $this->hasMany(User::class, 'referred_by');
+    }
+
+    /**
+     * Get the referral records where this user is the referrer.
+     */
+    public function referrals()
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
+    }
+
+    /**
+     * Get the referral record where this user was referred.
+     */
+    public function referredByRecord()
+    {
+        return $this->hasOne(Referral::class, 'referred_id');
+    }
+
+    /**
+     * Ensure the user has a referral ID, generating one if missing.
+     */
+    public function ensureReferralId(): void
+    {
+        if (empty($this->referral_id)) {
+            $this->referral_id = $this->generateReferralId();
+            $this->save();
+        }
     }
 }

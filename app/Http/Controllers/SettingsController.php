@@ -18,6 +18,9 @@ class SettingsController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user()->load('nextOfKin');
 
+        // Ensure user has a referral ID
+        $user->ensureReferralId();
+
         // Load static account
         $staticAccount = $user->staticAccount;
         $nextOfKin = $user->nextOfKin;
@@ -31,6 +34,18 @@ class SettingsController extends Controller
                 'address' => $nextOfKin->address ?? null,
             ];
         }
+
+        // Load referral data
+        $referrals = $user->referrals()->with('referred')->latest()->get()->map(function ($referral) {
+            return [
+                'id' => $referral->id,
+                'referred_name' => $referral->referred->name,
+                'referred_email' => $referral->referred->email,
+                'points_earned' => $referral->points_earned,
+                'status' => $referral->status,
+                'created_at' => $referral->created_at->toISOString(),
+            ];
+        });
 
         return Inertia::render('settings/Settings', [
             'user' => [
@@ -54,6 +69,12 @@ class SettingsController extends Controller
                 'balance' => $staticAccount->balance,
                 'created_at' => $staticAccount->created_at->toISOString(),
             ] : null,
+            'referral' => [
+                'code' => $user->referral_id,
+                'total_referrals' => $user->referrals()->count(),
+                'total_points' => $user->referral_points,
+                'referrals' => $referrals,
+            ],
         ]);
     }
 

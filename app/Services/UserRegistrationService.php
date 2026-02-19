@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Account;
 use App\Models\Notification;
+use App\Models\Referral;
 use App\Models\ThriftPackage;
 use App\Models\ThriftSubscription;
 use Illuminate\Support\Facades\DB;
@@ -25,10 +26,16 @@ class UserRegistrationService
             // Validate that the package exists
             $package = ThriftPackage::findOrFail($data['package_id']);
 
-            // Generate referral ID if not provided
-            $referralId = $data['referralId'] ?? $this->generateReferralId();
+            // Always generate a unique referral ID for the new user
+            $referralId = $this->generateReferralId();
 
             $e164 = PhoneService::normalize($data['phone'], "NG");
+
+            // Look up the referrer if a referral code was provided
+            $referrer = null;
+            if (!empty($data['referral_code'])) {
+                $referrer = User::where('referral_id', $data['referral_code'])->first();
+            }
 
             // Create the user
             $user = User::create([
@@ -37,10 +44,24 @@ class UserRegistrationService
                 'phone' => $e164,
                 'password' => Hash::make($data['password']),
                 'referral_id' => $referralId,
+                'referred_by' => $referrer?->id,
                 'registration_paid' => false,
                 'plan_start_date' => now(),
                 'last_activity' => now(),
             ]);
+
+            // If referred by someone, create a referral record and award points
+            if ($referrer) {
+                Referral::create([
+                    'referrer_id' => $referrer->id,
+                    'referred_id' => $user->id,
+                    'points_earned' => 10,
+                    'status' => 'active',
+                ]);
+
+                // Increment referrer's points
+                $referrer->increment('referral_points', 10);
+            }
 
             // Create associated account
             Account::create([
