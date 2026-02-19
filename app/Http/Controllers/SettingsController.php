@@ -342,35 +342,25 @@ class SettingsController extends Controller
 
             $transactionID = $data['Data']['Id'] ?? null;
             $accountNumber = $data['Data']['StaticAccountResponse']['AccountNumber'] ?? null;
-            $accountEmail = $data['Data']['StaticAccountResponse']['Email'] ?? null;
 
-            if (!$transactionID || !$accountNumber || !$accountEmail) {
+            if (!$transactionID || !$accountNumber) {
                 Log::error('Static Account Callback Missing Required Data', [
                     'data' => $data,
                 ]);
                 return response()->json(['error' => 'Missing required data'], 400);
             }
 
-            $user = User::where('email', $accountEmail)->first();
+            $staticAccount = StaticAccount::where('account_number', $accountNumber)->first();
 
-            if (!$user) {
-                Log::error('Static Account Callback User Not Found', [
-                    'email' => $accountEmail,
+            if (!$staticAccount) {
+                Log::error('Static Account Callback Account Not Found', [
+                    'account_number' => $accountNumber,
                     'data' => $data,
                 ]);
-                return response()->json(['error' => 'User not found'], 404);
+                return response()->json(['error' => 'Account not found'], 404);
             }
 
-            $staticAccount = $user->staticAccount;
-
-            if ($staticAccount->account_number !== $accountNumber) {
-                Log::error('Static Account Callback Account Number Mismatch', [
-                    'expected_account_number' => $staticAccount->account_number,
-                    'received_account_number' => $accountNumber,
-                    'data' => $data,
-                ]);
-                return response()->json(['error' => 'Account number mismatch'], 400);
-            }
+            $user = $staticAccount->user;
 
             $verifyTransaction = Http::withHeaders([
                 'Ocp-Apim-Subscription-Key' => config('services.alatpay.public_key'),
