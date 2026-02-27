@@ -24,6 +24,7 @@ class ThriftPackage extends Model
         'terms',
         'is_active',
         'min_contribution',
+        'distribution_frequency',
         'max_contribution',
         'number_of_accounts',
         'min_number_of_accounts',

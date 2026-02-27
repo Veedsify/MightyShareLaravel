@@ -1,7 +1,7 @@
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     AlertCircle,
     ArrowUpRight,
@@ -18,7 +18,9 @@ type WalletAccount = {
     id: number;
     account_number: string;
     balance: number;
+    total_contributions: number;
     is_paid: boolean;
+    is_primary: boolean;
 };
 
 type WalletData = {
@@ -27,8 +29,9 @@ type WalletData = {
     staticAccountNumber?: string;
     staticAccountBank?: string;
     unpaidAccountsCount: number;
-    totalInitialPaymentRequired: number;
-    packagePrice: number;
+    registrationFee: number;
+    totalRegistrationRequired: number;
+    pendingRegistrationBalance: number;
     minContribution: number;
     packageName: string;
     accounts: WalletAccount[];
@@ -41,67 +44,9 @@ interface WalletPageProps extends SharedData {
 const Wallet = () => {
     const { walletData } = usePage<WalletPageProps>().props;
     const [balanceVisible, setBalanceVisible] = useState(true);
-    const [showTopupModal, setShowTopupModal] = useState(false);
-    const [topupAmount, setTopupAmount] = useState('');
-    const [isProcessing, setIsProcessing] = useState(false);
 
     const formattedBalance = `₦${walletData.staticAccountBalance.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
-    const formattedPackagePrice = `₦${walletData.packagePrice.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
-    const formattedMinContribution = `₦${walletData.minContribution.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
-
-    const handleTopup = () => {
-        // Check if user has static account
-        if (!walletData.hasStaticAccount) {
-            alert(
-                'You need to generate a static account first. Please go to Settings.',
-            );
-            return;
-        }
-        setTopupAmount('');
-        setShowTopupModal(true);
-    };
-
-    const processTopup = () => {
-        if (!topupAmount) return;
-
-        const amount = Math.round(parseFloat(topupAmount));
-
-        // Validation based on unpaid accounts
-        if (walletData.unpaidAccountsCount > 0) {
-            if (amount < walletData.totalInitialPaymentRequired) {
-                alert(
-                    `You have ${walletData.unpaidAccountsCount} unpaid account(s). Minimum required: ${formattedPackagePrice} × ${walletData.unpaidAccountsCount} = ₦${walletData.totalInitialPaymentRequired.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`,
-                );
-                return;
-            }
-        } else {
-            // Check minimum contribution
-            if (amount < walletData.minContribution) {
-                alert(`Minimum top-up amount is ${formattedMinContribution}`);
-                return;
-            }
-        }
-
-        setIsProcessing(true);
-
-        router.post(
-            '/dashboard/wallet/topup',
-            {
-                amount: amount,
-            },
-            {
-                onSuccess: () => {
-                    setShowTopupModal(false);
-                    setTopupAmount('');
-                    setIsProcessing(false);
-                },
-                onError: () => {
-                    setIsProcessing(false);
-                },
-            },
-        );
-    };
-
+    const formattedRegistrationFee = `₦${walletData.registrationFee.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
     const quickActions = [
         {
             label: 'Static Account',
@@ -145,7 +90,7 @@ const Wallet = () => {
                                 <AlertCircle className="mt-0.5 h-5 w-5 text-orange-600" />
                                 <div className="flex-1">
                                     <h3 className="font-semibold text-orange-900">
-                                        Initial Payment Required
+                                        Registration Fee Required
                                     </h3>
                                     <p className="mt-1 text-sm text-orange-800">
                                         You have{' '}
@@ -154,13 +99,12 @@ const Wallet = () => {
                                         {walletData.unpaidAccountsCount > 1
                                             ? 's'
                                             : ''}
-                                        . Each account requires an initial
-                                        payment of {formattedPackagePrice} (
-                                        {walletData.packageName}). Total
+                                        . Each account requires a registration
+                                        fee of {formattedRegistrationFee}. Total
                                         required:{' '}
                                         <strong>
                                             ₦
-                                            {walletData.totalInitialPaymentRequired.toLocaleString(
+                                            {walletData.totalRegistrationRequired.toLocaleString(
                                                 'en-NG',
                                                 {
                                                     minimumFractionDigits: 2,
@@ -173,13 +117,34 @@ const Wallet = () => {
                         </div>
                     )}
 
+                    {/* Pending Balances */}
+                    {walletData.pendingRegistrationBalance > 0 && (
+                        <div className="mb-6 border border-yellow-200 bg-yellow-50 p-4">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="mt-0.5 h-5 w-5 text-yellow-600" />
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-yellow-900">
+                                        Pending Balances
+                                    </h3>
+                                    <p className="mt-1 text-sm text-yellow-800">
+                                        Pending registration fees:{' '}
+                                        <strong>
+                                            ₦{walletData.pendingRegistrationBalance.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                                        </strong>
+                                        {' '}— will be deducted on next top-up.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Balance Card */}
                     <div className="relative mb-6 bg-blue-600 p-8 text-white shadow-lg overflow-hidden">
                         <div className="pointer-events-none absolute inset-0">
                             <div className="absolute -top-40 -right-32 h-72 w-72 rounded-full bg-cyan-400/40 blur-3xl" />
                             <div className="absolute top-10 left-16 h-52 w-52 rounded-full bg-pink-500/30 blur-3xl" />
                             <div className="absolute right-1/4 bottom-0 h-80 w-80 rounded-full bg-blue-500/30 blur-3xl" />
-                            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:72px_72px]" />
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-size[72px_72px]" />
                         </div>
                         <div className="mb-6 flex items-center justify-between">
                             <div>
@@ -248,8 +213,8 @@ const Wallet = () => {
                         <div className="space-y-3">
                             {walletData.accounts.length > 0 ? (
                                 walletData.accounts.map(
-                                    (account, idx: number) => {
-                                        const accountBalance = `₦${(account.balance / 100).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+                                    (account) => {
+                                        const accountBalance = `₦${(account.balance).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
                                         return (
                                             <div
                                                 key={account.id}
@@ -276,7 +241,9 @@ const Wallet = () => {
                                                     <div>
                                                         <p className="font-medium text-gray-900">
                                                             {
-                                                                account.account_number
+                                                                account.is_primary
+                                                                    ? 'Primary - ' + account.account_number :
+                                                                    account.account_number
                                                             }
                                                         </p>
                                                         <p className="text-sm text-gray-600">
@@ -295,17 +262,6 @@ const Wallet = () => {
                                                         <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
                                                             Active
                                                         </span>
-                                                    )}
-                                                    {idx === 0 && (
-                                                        <button
-                                                            onClick={() =>
-                                                                handleTopup()
-                                                            }
-                                                            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-                                                            type="button"
-                                                        >
-                                                            Top Up
-                                                        </button>
                                                     )}
                                                 </div>
                                             </div>
@@ -329,103 +285,6 @@ const Wallet = () => {
                             )}
                         </div>
                     </div>
-
-                    {/* Top-up Modal */}
-                    {showTopupModal && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                            <div className="w-full max-w-md bg-white p-6 shadow-xl">
-                                <h3 className="mb-4 text-xl font-bold text-gray-900">
-                                    Top Up Wallet
-                                </h3>
-                                <div className="mb-4 bg-gray-50 p-4">
-                                    <p className="text-sm text-gray-600">
-                                        Static Account Number
-                                    </p>
-                                    <p className="font-semibold text-gray-900">
-                                        {walletData.staticAccountNumber}
-                                    </p>
-                                    <p className="mt-2 text-sm text-gray-600">
-                                        Bank
-                                    </p>
-                                    <p className="font-semibold text-gray-900">
-                                        {walletData.staticAccountBank}
-                                    </p>
-                                    <p className="mt-2 text-sm text-gray-600">
-                                        Current Balance
-                                    </p>
-                                    <p className="font-semibold text-gray-900">
-                                        {formattedBalance}
-                                    </p>
-                                    {walletData.unpaidAccountsCount > 0 && (
-                                        <div className="mt-3 rounded-md border border-orange-200 bg-orange-50 p-3">
-                                            <p className="text-sm font-medium text-orange-900">
-                                                {walletData.unpaidAccountsCount}{' '}
-                                                Unpaid Account(s)
-                                            </p>
-                                            <p className="mt-1 text-xs text-orange-700">
-                                                Minimum deposit: ₦
-                                                {walletData.totalInitialPaymentRequired.toLocaleString(
-                                                    'en-NG',
-                                                    {
-                                                        minimumFractionDigits: 2,
-                                                    },
-                                                )}{' '}
-                                                (
-                                                {walletData.unpaidAccountsCount}{' '}
-                                                × {formattedPackagePrice})
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="mb-4">
-                                    <label
-                                        htmlFor="amount"
-                                        className="mb-2 block text-sm font-medium text-gray-700"
-                                    >
-                                        Amount (₦)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        id="amount"
-                                        value={topupAmount}
-                                        onChange={(e) =>
-                                            setTopupAmount(e.target.value)
-                                        }
-                                        placeholder={
-                                            walletData.unpaidAccountsCount > 0
-                                                ? `Min: ${walletData.totalInitialPaymentRequired.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`
-                                                : `Min: ${formattedMinContribution}`
-                                        }
-                                        min="1"
-                                        step="1"
-                                        className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none text-black"
-                                    />
-                                </div>
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => {
-                                            setShowTopupModal(false);
-                                            setTopupAmount('');
-                                        }}
-                                        className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                                        type="button"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={processTopup}
-                                        disabled={isProcessing || !topupAmount}
-                                        className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-                                        type="button"
-                                    >
-                                        {isProcessing
-                                            ? 'Processing...'
-                                            : 'Top Up'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </DashboardLayout>
         </>

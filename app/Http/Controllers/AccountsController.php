@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Account;
 use App\Models\User;
+use App\Services\RegistrationFeeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,11 +35,11 @@ class AccountsController extends Controller
 
             // Get active subscription
             $activeSubscription = $userData->thriftSubscriptions->first();
-            
+
             // Determine account limits (min and max)
             $minAccountLimit = 1; // Default minimum
             $maxAccountLimit = 1; // Default maximum
-            
+
             if ($activeSubscription && $activeSubscription->package) {
                 $maxAccountLimit = $activeSubscription->package->number_of_accounts ?? 1;
                 $minAccountLimit = $activeSubscription->package->min_number_of_accounts ?? 1;
@@ -59,9 +60,10 @@ class AccountsController extends Controller
                             'id' => $account->id,
                             'accountNumber' => $account->account_number,
                             'balance' => $account->balance,
+                            'isPrimary' => $account->is_primary,
                             'createdAt' => $account->created_at->toISOString(),
                         ];
-                    }),
+                    })->values(),
                 ],
                 'limits' => [
                     'minAccountLimit' => $minAccountLimit,
@@ -71,6 +73,7 @@ class AccountsController extends Controller
                 'remaining' => $remaining,
                 'needsMore' => $needsMore,
                 'meetsMinimum' => $currentCount >= $minAccountLimit,
+                'registrationFee' => RegistrationFeeService::REGISTRATION_FEE,
                 'activeSubscription' => $activeSubscription ? [
                     'id' => $activeSubscription->id,
                     'package' => [
@@ -84,7 +87,7 @@ class AccountsController extends Controller
             return Inertia::render('accounts/Add', $formattedData);
         } catch (\Exception $e) {
             Log::error('Error loading add account page: ' . $e->getMessage());
-            
+
             return Inertia::render('errors/500', [
                 'error' => 'Failed to load page'
             ]);
@@ -120,9 +123,9 @@ class AccountsController extends Controller
 
             // Get active subscription and determine limit
             $activeSubscription = $userData->thriftSubscriptions->first();
-            $minAccountLimit = 1; // Default minimum
-            $maxAccountLimit = 1; // Default maximum
-            
+            $minAccountLimit = 1;
+            $maxAccountLimit = 1;
+
             if ($activeSubscription && $activeSubscription->package) {
                 $maxAccountLimit = $activeSubscription->package->number_of_accounts ?? 1;
                 $minAccountLimit = $activeSubscription->package->min_number_of_accounts ?? 1;
@@ -130,7 +133,6 @@ class AccountsController extends Controller
 
             $currentCount = $userData->accounts->count();
 
-            // Check if user has reached maximum limit
             if ($currentCount >= $maxAccountLimit) {
                 return response()->json([
                     'success' => false,
@@ -141,7 +143,6 @@ class AccountsController extends Controller
                 ], 400);
             }
 
-            // Check if requested quantity exceeds available slots
             if ($currentCount + $quantity > $maxAccountLimit) {
                 return response()->json([
                     'success' => false,
@@ -153,12 +154,16 @@ class AccountsController extends Controller
                 ], 400);
             }
 
-            // Create accounts
+            $hasPrimaryAccount = $userData->accounts->where('is_primary', true)->isNotEmpty();
+            $registrationFeeService = app(RegistrationFeeService::class);
+
             $createdAccounts = [];
-            
+
             DB::beginTransaction();
             try {
                 for ($i = 0; $i < $quantity; $i++) {
+                    $isPrimary = !$hasPrimaryAccount && $i === 0;
+
                     $account = Account::create([
                         'user_id' => $user->id,
                         'account_number' => $this->generateAccountNumber(),
@@ -167,22 +172,35 @@ class AccountsController extends Controller
                         'rewards' => 0,
                         'total_debt' => 0,
                         'referral_earnings' => 0,
+                        'is_primary' => $isPrimary,
                     ]);
+
+                    if ($isPrimary) {
+                        $hasPrimaryAccount = true;
+                        $userData->update(['registration_paid' => true]);
+                    }
+
+                    // Bill registration fee for every account
+                    $registrationFeeService->processRegistrationFee($account);
 
                     $createdAccounts[] = [
                         'id' => $account->id,
                         'accountNumber' => $account->account_number,
                         'balance' => $account->balance,
+                        'isPrimary' => $account->is_primary,
                         'createdAt' => $account->created_at->toISOString(),
                     ];
                 }
 
                 DB::commit();
 
+                $totalBilled = $quantity * RegistrationFeeService::REGISTRATION_FEE;
+
                 return response()->json([
                     'success' => true,
-                    'message' => "Successfully created {$quantity} account(s)",
+                    'message' => "Successfully created {$quantity} account(s). Total billed: ₦" . number_format($totalBilled, 2),
                     'accounts' => $createdAccounts,
+                    'totalBilled' => $totalBilled,
                 ], 201);
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -196,7 +214,7 @@ class AccountsController extends Controller
             ], 422);
         } catch (\Exception $e) {
             Log::error('Error creating accounts: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'error' => 'Failed to create accounts',

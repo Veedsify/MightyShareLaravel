@@ -22,6 +22,7 @@ class Account extends Model
         'total_debt',
         'referral_earnings',
         'is_paid',
+        'is_primary',
         'user_id',
     ];
 
@@ -37,6 +38,7 @@ class Account extends Model
         'total_debt' => 'integer',
         'referral_earnings' => 'integer',
         'is_paid' => 'boolean',
+        'is_primary' => 'boolean',
     ];
 
     /**

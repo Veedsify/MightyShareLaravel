@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StaticAccount;
 use App\Models\User;
+use App\Services\TopUpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -378,26 +379,26 @@ class SettingsController extends Controller
 
             $transactionData = $verifyTransaction->json();
             $transactionStatus = $transactionData['status'] ?? null;
-            $transactionAmount = number_format($transactionData['data']['amount'] ?? 0, 2);
+            $transactionAmount = (int) ($transactionData['data']['amount'] ?? 0);
 
             if ($transactionStatus === true) {
-                $staticAccount->balance += $transactionAmount;
-                $staticAccount->save();
+                // Use TopUpService to credit balance and deduct pending registration fees
+                $topUpService = app(TopUpService::class);
+                $result = $topUpService->processTopUp(
+                    $user->id,
+                    $transactionAmount,
+                    'AlatPay Static Account',
+                    $transactionID,
+                );
+
+                $staticAccount->refresh();
 
                 $user->userNotifications()->create([
                     'type' => 'transaction',
                     'title' => 'Static Account Credited',
                     'recipient_type' => 'specific_users',
                     'user_ids' => [$user->id],
-                    'message' => "Your static account has been credited with ₦{$transactionAmount}. New balance: ₦{$staticAccount->balance}.",
-                ]);
-
-                $user->topUpTransactions()->create([
-                    'amount' => $transactionAmount,
-                    'status' => 'completed',
-                    'reference' => "Static Account Credit - Transaction ID: {$transactionID}",
-                    'transaction_id' => $transactionID,
-                    'payment_method' => 'AlatPay Static Account',
+                    'message' => "Your static account has been credited with ₦" . number_format($transactionAmount, 2) . ". New balance: ₦" . number_format($staticAccount->balance, 2) . ".",
                 ]);
 
                 Log::info('Static Account Callback Processed Successfully', [
@@ -405,6 +406,7 @@ class SettingsController extends Controller
                     'transaction_id' => $transactionID,
                     'amount' => $transactionAmount,
                     'new_balance' => $staticAccount->balance,
+                    'registration_deducted' => $result['registration_deducted'],
                 ]);
 
                 return response()->json(['message' => 'Static account updated successfully']);

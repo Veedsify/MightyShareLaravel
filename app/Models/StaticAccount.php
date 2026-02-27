@@ -19,6 +19,8 @@ class StaticAccount extends Model
         'bank_name',
         'account_name',
         'balance',
+        'pending_registration_balance',
+        'pending_distribution_balance',
         'user_id',
         'is_verified',
         'static_account_id',
@@ -31,6 +33,8 @@ class StaticAccount extends Model
      */
     protected $casts = [
         'balance' => 'integer',
+        'pending_registration_balance' => 'integer',
+        'pending_distribution_balance' => 'integer',
     ];
 
     /**
@@ -39,6 +43,15 @@ class StaticAccount extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the transactions for the static account (user-level, no account_id).
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'user_id', 'user_id')
+            ->whereNull('account_id');
     }
 
     /**

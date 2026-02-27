@@ -18,11 +18,13 @@ class Transaction extends Model
         'reference',
         'amount',
         'type',
+        'direction',
         'status',
         'payment_method',
         'description',
         'platform_transaction_reference',
         'account_id',
+        'user_id',
     ];
 
     /**
@@ -40,5 +42,25 @@ class Transaction extends Model
     public function account()
     {
         return $this->belongsTo(Account::class);
+    }
+
+    /**
+     * Get the user that owns the transaction.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Generate a unique transaction reference.
+     */
+    public static function generateReference(string $prefix = 'TXN'): string
+    {
+        do {
+            $reference = $prefix . '-' . now()->format('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
+        } while (self::where('reference', $reference)->exists());
+
+        return $reference;
     }
 }
