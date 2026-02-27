@@ -49,7 +49,9 @@ class TransactionsController extends Controller
                 'accountNumber' => $txn->account?->account_number,
             ]);
 
-        $allTransactions = $transactions->merge($payments)
+        // Combine and sort transactions and payments
+        $allTransactions = collect([$payments, $transactions])
+            ->flatten(1)
             ->sortByDesc('createdAt')
             ->values();
 
