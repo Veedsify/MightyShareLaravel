@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 use App\Models\User;
 use App\Services\RegistrationFeeService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -104,6 +105,10 @@ class AccountsController extends Controller
                     'success' => false,
                     'error' => 'User not authenticated'
                 ], 401);
+            }
+
+            if (!$user->staticAccount) {
+                throw new Exception("Please create a static account before adding accounts");
             }
 
             // Validate request
@@ -217,7 +222,7 @@ class AccountsController extends Controller
 
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to create accounts',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

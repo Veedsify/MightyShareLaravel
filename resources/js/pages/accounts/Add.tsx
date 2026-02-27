@@ -444,8 +444,7 @@ const AddAccount = ({
                                                         <p className="text-lg font-bold text-gray-900">
                                                             ₦
                                                             {Number(
-                                                                a.balance /
-                                                                100 || 0,
+                                                                a.balance || 0,
                                                             ).toLocaleString()}
                                                         </p>
                                                     </div>
