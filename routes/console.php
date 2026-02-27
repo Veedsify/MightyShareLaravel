@@ -12,10 +12,9 @@ Artisan::command('inspire', function () {
 
 // Monthly distribution: runs daily, dispatches jobs on the 1st of each month
 Schedule::call(function () {
-    if (now()->day !== 1) {
-        return;
-    }
-
+    // if (now()->day !== 1) {
+    //     return;
+    // }
     $month = now()->format('Y-m');
 
     $userIds = ThriftSubscription::where('status', 'active')
@@ -28,15 +27,15 @@ Schedule::call(function () {
 })->daily()->at('01:00')->name('monthly-distribution-check');
 
 // TEST ONLY: distribution every 10 seconds for development testing
-Schedule::call(function () {
-    $month = now()->format('Y-m');
+// Schedule::call(function () {
+//     $month = now()->format('Y-m');
 
-    $userIds = ThriftSubscription::where('status', 'active')
-        ->distinct('user_id')
-        ->pluck('user_id');
+//     $userIds = ThriftSubscription::where('status', 'active')
+//         ->distinct('user_id')
+//         ->pluck('user_id');
 
-    foreach ($userIds as $userId) {
-        ProcessMonthlyDistribution::dispatch($userId, $month);
-    }
-})->everyTenSeconds()->name('test-distribution-check')
-    ->environments(['local']);
+//     foreach ($userIds as $userId) {
+//         ProcessMonthlyDistribution::dispatch($userId, $month);
+//     }
+// })->everyTenSeconds()->name('test-distribution-check')
+//     ->environments(['local']);
