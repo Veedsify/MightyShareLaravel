@@ -15,6 +15,8 @@ use Inertia\Response;
 
 class AccountsController extends Controller
 {
+
+
     public function create(): Response
     {
         try {

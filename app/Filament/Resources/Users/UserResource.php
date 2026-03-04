@@ -11,6 +11,7 @@ use App\Filament\Resources\Users\RelationManagers\ComplaintsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\ReferralsRelationManager;
 use App\Filament\Resources\Users\RelationManagers\ThriftSubscriptionsRelationManager;
+use App\Filament\Resources\Users\RelationManagers\TransactionsRelationManager;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
@@ -59,6 +60,7 @@ class UserResource extends Resource
         return [
             AccountsRelationManager::class,
             PaymentsRelationManager::class,
+            TransactionsRelationManager::class,
             ThriftSubscriptionsRelationManager::class,
             ComplaintsRelationManager::class,
             ReferralsRelationManager::class,

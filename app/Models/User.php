@@ -316,6 +316,45 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(TopUpTransactions::class);
     }
 
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Get the referral points for the user.
+     *
+     * @return int
+     */
+    public function getReferralPoints(): int
+    {
+        return $this->referral_points ?? 0;
+    }
+
+    /**
+     * Add referral points to the user.
+     *
+     * @param int $points
+     * @return void
+     */
+    public function addReferralPoints(int $points): void
+    {
+        $this->referral_points = $this->getReferralPoints() + $points;
+        $this->save();
+    }
+
+    /**
+     * Subtract referral points from the user.
+     *
+     * @param int $points
+     * @return void
+     */
+    public function subtractReferralPoints(int $points): void
+    {
+        $this->referral_points = max(0, $this->getReferralPoints() - $points);
+        $this->save();
+    }
+
     /**
      * Get the user who referred this user.
      */

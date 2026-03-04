@@ -64,6 +64,7 @@ export default function RegisterPayment({ user }: RegisterPaymentProps) {
     const [bankdata, setBankdata] = useState<PaymentData | null>(null);
     const [bankAccountModalOpen, setBankAccountModalOpen] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
+    const [transactionId, setTransactionId] = useState<string | null>(null);
     const [message, setMessage] = useState<MessageState>({
         text: '',
         type: 'idle',
@@ -130,7 +131,7 @@ export default function RegisterPayment({ user }: RegisterPaymentProps) {
             try {
                 const response = await axios.post(
                     '/alatpay/verify',
-                    { reference, orderId: reference },
+                    { reference, orderId: reference, transactionId },
                     {
                         headers: {
                             'Content-Type': 'application/json',
@@ -189,6 +190,7 @@ export default function RegisterPayment({ user }: RegisterPaymentProps) {
 
                 if (data?.status && data.transactionId) {
                     setBankdata(data);
+                    setTransactionId(data.transactionId);
                     setBankAccountModalOpen(true);
                     return;
                 }

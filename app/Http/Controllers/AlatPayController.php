@@ -115,6 +115,7 @@ class AlatPayController extends Controller
         try {
             $request->validate([
                 'orderId' => 'required|string',
+                'transactionId' => 'required|string',
             ]);
 
             /** @var User|null $user */
@@ -124,7 +125,7 @@ class AlatPayController extends Controller
             }
 
             $orderId = $request->orderId;
-            $transactionId = $request->transactionId ?? $orderId;
+            $transactionId = $request->transactionId;
 
             // Find payment record
             $payment = Payment::where('order_id', $orderId)
@@ -132,6 +133,7 @@ class AlatPayController extends Controller
                 ->first();
 
             if (!$payment) {
+                dd('Payment record not found for orderId: ' . $orderId);
                 return response()->json([
                     'error' => 'Payment record not found'
                 ], 404);
@@ -144,7 +146,7 @@ class AlatPayController extends Controller
                 $transaction = $result['data'];
 
                 // Verify amount matches
-                if (($transaction['amount'] ?? 0) < $payment->amount) {
+                if (($transaction['amount'] > 0) < $payment->amount) {
                     return response()->json([
                         'error' => 'Payment amount insufficient'
                     ], 400);

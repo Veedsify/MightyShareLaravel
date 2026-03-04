@@ -60,7 +60,7 @@ class DashboardController extends Controller
                     $recentTransactions->push([
                         'id' => $transaction->id,
                         'type' => ucfirst($transaction->type),
-                        'amount' => '₦' . number_format($transaction->amount / 100, 2),
+                        'amount' => '₦' . number_format($transaction->amount, 2),
                         'status' => $transaction->status,
                         'date' => $transaction->created_at->diffForHumans(),
                         'reference' => $transaction->reference,
@@ -89,7 +89,7 @@ class DashboardController extends Controller
                                 'id' => $account->id,
                                 'name' => 'Default ' . substr($account->account_number, -4), // Generate friendly name
                                 'accountNumber' => $account->account_number,
-                                'balance' => '₦' . number_format($account->balance / 100, 2),
+                                'balance' => '₦' . number_format($account->balance, 2),
                                 'balanceRaw' => $account->balance,
                                 'totalContributions' => $account->total_contributions,
                                 'rewards' => $account->rewards,
@@ -101,7 +101,7 @@ class DashboardController extends Controller
                                 'id' => $account->id,
                                 'name' => 'Account ' . substr($account->account_number, -4), // Generate friendly name
                                 'accountNumber' => $account->account_number,
-                                'balance' => '₦' . number_format($account->balance / 100, 2),
+                                'balance' => '₦' . number_format($account->balance, 2),
                                 'balanceRaw' => $account->balance,
                                 'totalContributions' => $account->total_contributions,
                                 'rewards' => $account->rewards,
@@ -130,8 +130,8 @@ class DashboardController extends Controller
                 'dashboardStats' => [
                     'totalBalance' => '₦' . number_format($totalBalance, 2),
                     'totalTransactions' => $totalTransactions,
-                    'totalContributions' => '₦' . number_format($totalContributions / 100, 2),
-                    'totalRewards' => '₦' . number_format($totalRewards / 100, 2),
+                    'totalContributions' => '₦' . number_format($totalContributions, 2),
+                    'totalRewards' => '₦' . number_format($totalRewards, 2),
                     'activePackages' => $activePackagesCount,
                 ],
                 'recentTransactions' => $recentTransactions,
