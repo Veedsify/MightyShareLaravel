@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\StaticAccount;
 use App\Models\Transaction;
+use App\Mail\TopUpSuccessfulEmail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TopUpService
 {
@@ -20,6 +22,7 @@ class TopUpService
     {
         return DB::transaction(function () use ($userId, $amount, $paymentMethod, $platformReference) {
             $staticAccount = StaticAccount::where('user_id', $userId)
+                ->with('user')
                 ->lockForUpdate()
                 ->firstOrFail();
 
@@ -44,6 +47,9 @@ class TopUpService
                 ->deductPendingRegistrationFees($staticAccount);
 
             $staticAccount->refresh();
+
+            // Send Top-up Email
+            Mail::to($staticAccount->user->email)->queue(new TopUpSuccessfulEmail($staticAccount->user, $topUpTransaction));
 
             return [
                 'topup_transaction' => $topUpTransaction,

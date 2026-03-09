@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\Account;
 use App\Models\StaticAccount;
 use App\Models\Transaction;
+use App\Mail\DeductionNotificationEmail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class RegistrationFeeService
 {
@@ -19,6 +21,7 @@ class RegistrationFeeService
     {
         return DB::transaction(function () use ($account) {
             $staticAccount = StaticAccount::where('user_id', $account->user_id)
+                ->with('user')
                 ->lockForUpdate()
                 ->firstOrFail();
 
@@ -39,7 +42,7 @@ class RegistrationFeeService
 
         $account->update(['is_paid' => true]);
 
-        return Transaction::create([
+        $transaction = Transaction::create([
             'reference' => Transaction::generateReference('REG'),
             'amount' => self::REGISTRATION_FEE,
             'type' => 'registration_fee',
@@ -49,6 +52,11 @@ class RegistrationFeeService
             'account_id' => $account->id,
             'user_id' => $account->user_id,
         ]);
+
+        // Send Deduction Email
+        Mail::to($staticAccount->user->email)->queue(new DeductionNotificationEmail($staticAccount->user, self::REGISTRATION_FEE, $transaction->description));
+
+        return $transaction;
     }
 
     /**
@@ -65,7 +73,7 @@ class RegistrationFeeService
 
         $staticAccount->increment('pending_registration_balance', $shortfall);
 
-        return Transaction::create([
+        $transaction = Transaction::create([
             'reference' => Transaction::generateReference('PREG'),
             'amount' => self::REGISTRATION_FEE,
             'type' => 'pending_registration_fee',
@@ -75,6 +83,13 @@ class RegistrationFeeService
             'account_id' => $account->id,
             'user_id' => $account->user_id,
         ]);
+
+        if ($availableBalance > 0) {
+            // Send email for partial deduction
+            Mail::to($staticAccount->user->email)->queue(new DeductionNotificationEmail($staticAccount->user, $availableBalance, "Partial registration fee deduction for account {$account->account_number}"));
+        }
+
+        return $transaction;
     }
 
     /**
@@ -111,7 +126,7 @@ class RegistrationFeeService
         $staticAccount->decrement('pending_registration_balance', $deductible);
         $staticAccount->refresh();
 
-        Transaction::create([
+        $transaction = Transaction::create([
             'reference' => Transaction::generateReference('PDCT'),
             'amount' => $deductible,
             'type' => 'pending_deduction',
@@ -120,6 +135,12 @@ class RegistrationFeeService
             'description' => "Pending registration fee deduction. Remaining pending: {$staticAccount->pending_registration_balance}",
             'user_id' => $staticAccount->user_id,
         ]);
+
+        // Send Deduction Email
+        if (!$staticAccount->relationLoaded('user')) {
+             $staticAccount->load('user');
+        }
+        Mail::to($staticAccount->user->email)->queue(new DeductionNotificationEmail($staticAccount->user, $deductible, $transaction->description));
 
         // Mark accounts as paid based on how many fees have been fully covered
         $remainingPending = $staticAccount->pending_registration_balance;

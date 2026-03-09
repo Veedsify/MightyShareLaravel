@@ -67,8 +67,8 @@ class AuthController extends Controller
             Auth::login($user);
             $request->session()->regenerate();
 
-            // Redirect to register-payment page on successful registration
-            return redirect()->route('register-payment')->with('success', 'Registration successful! Please complete your payment to activate your account.');
+            // Redirect to register-payment page on successful registration // formerlly register-payment
+            return redirect()->route('dashboard')->with('success', 'Registration successful! Please complete your payment to activate your account.');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::error('Registration failed - Package not found', [
                 'package_id' => $request->input('package_id'),
@@ -132,7 +132,7 @@ class AuthController extends Controller
 
         $user = PhoneService::findUser($credentials['phone']);
 
-        if(!$user) {
+        if (!$user) {
             return back()->withErrors([
                 'phone' => 'User not found'
             ])->onlyInput('phone');

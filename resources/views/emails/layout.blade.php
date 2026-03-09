@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Your Password - MightyShare</title>
+    <title>@yield('title') - MightyShare</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -13,18 +13,20 @@
         * { box-sizing: border-box; }
 
         body {
-            margin: 0;
-            padding: 20px 0 40px;
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f1f5f9;
+            margin: 0;
+            padding: 20px 0 40px;
+            line-height: 1.6;
+            color: #374151;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
-        .email-wrapper {
+        .container {
             max-width: 600px;
             margin: 0 auto;
-            background-color: #ffffff;
+            background: #ffffff;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 8px 30px rgba(30, 58, 138, 0.12);
@@ -48,7 +50,10 @@
             background-size: 40px 40px;
             pointer-events: none;
         }
-        .header-logo-wrap { position: relative; z-index: 1; }
+        .header-logo-wrap {
+            position: relative;
+            z-index: 1;
+        }
         .header-logo-wrap img {
             width: 56px;
             height: 56px;
@@ -78,38 +83,73 @@
         .content {
             padding: 40px 36px;
         }
-        .greeting {
+        .content h1 {
+            margin: 0 0 16px;
+            color: #111827;
             font-size: 22px;
             font-weight: 700;
-            color: #111827;
-            margin: 0 0 16px;
+            line-height: 1.3;
         }
-        .message {
-            font-size: 15px;
-            line-height: 1.7;
-            color: #4b5563;
+        .content p {
             margin: 0 0 16px;
+            color: #4b5563;
+            font-size: 15px;
         }
 
         /* ── CTA Button ── */
-        .button-container {
-            text-align: center;
-            margin: 36px 0;
-        }
-        .reset-button {
+        .button {
             display: inline-block;
-            padding: 15px 36px;
+            padding: 14px 32px;
             background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
             color: #ffffff !important;
             text-decoration: none;
             border-radius: 10px;
             font-weight: 700;
             font-size: 15px;
-            letter-spacing: 0.2px;
+            margin-top: 24px;
             box-shadow: 0 4px 18px rgba(236, 72, 153, 0.38);
+            letter-spacing: 0.2px;
         }
 
-        /* ── Info Boxes ── */
+        /* ── Details Table ── */
+        .details-table {
+            width: 100%;
+            margin-top: 24px;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+        .details-table th, .details-table td {
+            padding: 13px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .details-table tr:last-child th,
+        .details-table tr:last-child td {
+            border-bottom: none;
+        }
+        .details-table th {
+            background-color: #f8faff;
+            color: #1e3a8a;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            width: 42%;
+            border-right: 2px solid #e0e7ff;
+        }
+        .details-table td {
+            color: #111827;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .details-table tr:hover td,
+        .details-table tr:hover th {
+            background-color: #f8faff;
+        }
+
+        /* ── Info / Alert Boxes ── */
         .info-box {
             background-color: #eff6ff;
             border-left: 4px solid #22d3ee;
@@ -128,23 +168,17 @@
         }
         .warning-box p { margin: 0; font-size: 13px; color: #92400e; }
 
-        /* ── Fallback Link Box ── */
-        .alternative-link {
-            margin-top: 24px;
-            padding: 18px 20px;
-            background-color: #f8faff;
-            border: 1px solid #e0e7ff;
-            border-radius: 10px;
-        }
-        .alternative-link p {
-            margin: 0 0 10px;
-            font-size: 13px;
-            color: #6b7280;
-        }
-        .alternative-link a {
-            color: #1e3a8a;
-            word-break: break-all;
+        .success-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
             font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 99px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
         }
 
         /* ── Footer ── */
@@ -173,29 +207,20 @@
             border-top: 1px solid rgba(255,255,255,0.1);
             margin: 14px 0;
         }
-        .footer-links { margin: 10px 0; }
-        .footer-links a {
-            color: #93c5fd;
-            text-decoration: none;
-            margin: 0 8px;
-            font-size: 13px;
-        }
 
         @media only screen and (max-width: 620px) {
             body { padding: 10px 0 30px; }
-            .email-wrapper { border-radius: 0; }
+            .container { border-radius: 0; }
             .content { padding: 28px 20px; }
             .header { padding: 28px 20px; }
-            .reset-button { padding: 14px 24px; font-size: 14px; }
         }
     </style>
 </head>
 <body>
-    <div class="email-wrapper">
-        <!-- Header -->
+    <div class="container">
         <div class="header">
             <div class="header-logo-wrap">
-                <img src="{{ asset('images/logo.jpg') }}" alt="MightyShare Logo">
+                <img src="{{ config('app.url') }}/images/logo.jpg" alt="MightyShare Logo">
                 <p class="brand-name">
                     <span class="mighty">Mighty</span><span class="share">Share</span>
                 </p>
@@ -203,55 +228,17 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="content">
-            <h2 class="greeting">{{ $greeting ?? 'Hello!' }}</h2>
-
-            <p class="message">
-                You are receiving this email because we received a password reset request for your MightyShare account.
-            </p>
-
-            <!-- Reset Button -->
-            <div class="button-container">
-                <a href="{{ $actionUrl }}" class="reset-button">🔑 Reset My Password</a>
-            </div>
-
-            <!-- Time Sensitive Info -->
-            <div class="info-box">
-                <p><strong>⏱️ Time Sensitive:</strong> This password reset link will expire in <strong>{{ $expireTime ?? '60' }} minutes</strong> for your security.</p>
-            </div>
-
-            <!-- Security Notice -->
-            <div class="warning-box">
-                <p><strong>🔒 Security Notice:</strong> If you did not request a password reset, no action is needed — your account remains secure.</p>
-            </div>
-
-            <!-- Fallback Link -->
-            <div class="alternative-link">
-                <p>Having trouble with the button? Copy and paste this URL into your browser:</p>
-                <a href="{{ $actionUrl }}">{{ $actionUrl }}</a>
-            </div>
-
-            <p class="message" style="margin-top: 28px;">
-                Best regards,<br>
-                <strong style="color:#111827;">The MightyShare Team</strong><br>
-                <span style="color:#9ca3af; font-size:13px;">Secure. Reliable. Growing Together.</span>
-            </p>
+            @yield('content')
         </div>
 
-        <!-- Footer -->
         <div class="footer">
             <p class="footer-brand">MightyShare</p>
             <p>Secure &bull; Reliable &bull; Growing Together</p>
             <hr class="footer-divider">
-            <div class="footer-links">
-                <a href="{{ url('/') }}">Website</a>
-                <a href="{{ url('/login') }}">Login</a>
-                <a href="{{ url('/register') }}">Sign Up</a>
-            </div>
-            <hr class="footer-divider">
-            <p style="font-size:12px; color:#60a5fa;">This is an automated email. Please do not reply.</p>
             <p>&copy; {{ date('Y') }} MightyShare. All rights reserved.</p>
+            <p>You're receiving this as a registered member of MightyShare.</p>
+            <p><a href="{{ config('app.url') }}">Visit our website</a></p>
         </div>
     </div>
 </body>

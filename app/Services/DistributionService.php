@@ -10,9 +10,11 @@ use App\Models\ThriftPackage;
 use App\Models\ThriftSubscription;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Mail\DistributionReceivedEmail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class DistributionService
 {
@@ -166,6 +168,11 @@ class DistributionService
             'accounts_funded' => $accountsProcessed,
             'accounts_remaining' => $remainingAccounts,
         ]);
+
+        if ($totalDistributed > 0) {
+            // Send Distribution Received Email
+            Mail::to($user->email)->queue(new DistributionReceivedEmail($user, $package, $totalDistributed, $accountsProcessed, $month));
+        }
 
         $message = $remainingAccounts > 0
             ? "{$remainingAccounts} accounts still awaiting funds"

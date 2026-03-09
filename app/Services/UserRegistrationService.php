@@ -8,8 +8,10 @@ use App\Models\Notification;
 use App\Models\Referral;
 use App\Models\ThriftPackage;
 use App\Models\ThriftSubscription;
+use App\Mail\WelcomeEmail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserRegistrationService
 {
@@ -97,6 +99,9 @@ class UserRegistrationService
 
             // Load relationships for return
             $user->load(['accounts', 'thriftSubscriptions.package']);
+
+            // Send Welcome Email
+            Mail::to($user->email)->queue(new WelcomeEmail($user));
 
             return $user;
         });

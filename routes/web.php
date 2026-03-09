@@ -60,7 +60,7 @@ Route::middleware('auth')->group(function () {
 
 // Protected payment routes (requires authentication)
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('register-payment', [PaymentRegistrationController::class, 'show'])->name('register-payment');
+    // Route::get('register-payment', [PaymentRegistrationController::class, 'show'])->name('register-payment');
     Route::post('payment/registration/complete', [PaymentRegistrationController::class, 'complete'])->name('payment.registration.complete');
 
     // AlatPay protected routes
