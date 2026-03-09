@@ -8,34 +8,34 @@ use Illuminate\Support\Facades\Route;
 Route::post('settlements/static-account/callback', [SettingsController::class, 'staticAccountCallback'])->name('static-account.callback');
 
 // TEST ONLY: fake top-up endpoint for development
-Route::post('test/topup', function (Request $request) {
-    if (app()->environment('production')) {
-        abort(404);
-    }
+// Route::post('test/topup', function (Request $request) {
+//     if (app()->environment('production')) {
+//         abort(404);
+//     }
 
-    $request->validate([
-        'user_id' => 'required|exists:users,id',
-        'amount' => 'required|integer|min:1',
-    ]);
+//     $request->validate([
+//         'user_id' => 'required|exists:users,id',
+//         'amount' => 'required|integer|min:1',
+//     ]);
 
-    $topUpService = app(\App\Services\TopUpService::class);
-    $result = $topUpService->processTopUp(
-        $request->input('user_id'),
-        $request->input('amount'),
-        'test',
-        'TEST-' . now()->timestamp,
-    );
+//     $topUpService = app(\App\Services\TopUpService::class);
+//     $result = $topUpService->processTopUp(
+//         $request->input('user_id'),
+//         $request->input('amount'),
+//         'test',
+//         'TEST-' . now()->timestamp,
+//     );
 
-    return response()->json([
-        'message' => 'Top-up processed',
-        'data' => [
-            'transaction_reference' => $result['topup_transaction']->reference,
-            'amount' => $result['topup_transaction']->amount,
-            'registration_deducted' => $result['registration_deducted'],
-            'remaining_balance' => $result['remaining_balance'],
-        ],
-    ]);
-})->name('test.topup');
+//     return response()->json([
+//         'message' => 'Top-up processed',
+//         'data' => [
+//             'transaction_reference' => $result['topup_transaction']->reference,
+//             'amount' => $result['topup_transaction']->amount,
+//             'registration_deducted' => $result['registration_deducted'],
+//             'remaining_balance' => $result['remaining_balance'],
+//         ],
+//     ]);
+// })->name('test.topup');
 
 // Contact endpoints
 Route::post('contacts', [ContactController::class, 'store'])->name('contacts.store');
