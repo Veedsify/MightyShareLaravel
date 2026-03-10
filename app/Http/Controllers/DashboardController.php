@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -13,7 +12,6 @@ class DashboardController extends Controller
     public function index(): Response
     {
         try {
-            // Get the authenticated user
             $user = Auth::user();
 
             if (!$user) {
@@ -22,7 +20,6 @@ class DashboardController extends Controller
                 ]);
             }
 
-            // Load user data with comprehensive relationships
             $userData = \App\Models\User::with([
                 'accounts' => function ($query) {
                     $query->select('id', 'user_id', 'account_number', 'balance', 'total_contributions', 'rewards', 'total_debt', 'referral_earnings');
@@ -44,7 +41,6 @@ class DashboardController extends Controller
                 ]);
             }
 
-            // Calculate dashboard statistics
             $totalBalance = $userData->staticAccount->balance ?? 0;
             $totalTransactions = $userData->accounts->sum(function ($account) {
                 return $account->transactions->count();
@@ -53,7 +49,6 @@ class DashboardController extends Controller
             $totalRewards = $userData->accounts->sum('rewards');
             $activePackagesCount = $userData->thriftSubscriptions->where('status', 'active')->count();
 
-            // Get recent transactions from all accounts
             $recentTransactions = collect();
             foreach ($userData->accounts as $account) {
                 foreach ($account->transactions as $transaction) {
@@ -70,7 +65,13 @@ class DashboardController extends Controller
             }
             $recentTransactions = $recentTransactions->sortByDesc('id')->take(5)->values();
 
-            // Format user data for Inertia.js compatibility (matching Next.js API structure)
+            // Fetch unread notifications for the dashboard banner
+            $unreadNotifications = $userData->userNotifications()
+                ->wherePivot('read', false)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(fn($n) => $n->toApiArray());
+
             $dashboardData = [
                 'success' => true,
                 'user' => [
@@ -87,7 +88,7 @@ class DashboardController extends Controller
                         if ($idx === 0) {
                             return [
                                 'id' => $account->id,
-                                'name' => 'Default ' . substr($account->account_number, -4), // Generate friendly name
+                                'name' => 'Default ' . substr($account->account_number, -4),
                                 'accountNumber' => $account->account_number,
                                 'balance' => '₦' . number_format($account->balance, 2),
                                 'balanceRaw' => $account->balance,
@@ -99,7 +100,7 @@ class DashboardController extends Controller
                         } else {
                             return [
                                 'id' => $account->id,
-                                'name' => 'Account ' . substr($account->account_number, -4), // Generate friendly name
+                                'name' => 'Account ' . substr($account->account_number, -4),
                                 'accountNumber' => $account->account_number,
                                 'balance' => '₦' . number_format($account->balance, 2),
                                 'balanceRaw' => $account->balance,
@@ -135,11 +136,11 @@ class DashboardController extends Controller
                     'activePackages' => $activePackagesCount,
                 ],
                 'recentTransactions' => $recentTransactions,
+                'unreadNotifications' => $unreadNotifications,
             ];
 
             return Inertia::render('dashboard/Dashboard', $dashboardData);
         } catch (\Exception $e) {
-            // Log the error for debugging
             Log::error('Dashboard loading error: ' . $e->getMessage());
 
             return Inertia::render('errors/500', [

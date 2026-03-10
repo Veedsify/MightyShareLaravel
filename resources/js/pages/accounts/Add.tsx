@@ -435,6 +435,11 @@ const AddAccount = ({
                                                                     a.accountNumber
                                                                 }
                                                             </p>
+                                                            {a.createdAt && (
+                                                                <p className="text-xs text-gray-400">
+                                                                    Created: {new Date(a.createdAt).toLocaleDateString('en-NG', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                                </p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="text-right">

@@ -24,7 +24,7 @@ class ThriftPackageSeeder extends Seeder
                 'min_number_of_accounts' => 1,
                 'number_of_accounts' => 100,
                 'min_contribution' => 2400,
-                'distribution_frequency' => 'monthly',
+                'distribution_frequency' => 'weekly',
                 'max_contribution' => 100000,
                 'features' => [
                     'Monthly contribution plan',

@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/Button';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
 import {
     ArrowUpRight,
+    Bell,
     CreditCard,
     DollarSign,
     Package,
@@ -13,7 +14,9 @@ import {
     TrendingUp,
     User,
     Wallet,
+    X,
 } from 'lucide-react';
+import { useState } from 'react';
 
 type StatCard = {
     title: string;
@@ -29,6 +32,15 @@ type QuickAction = {
     icon: LucideIcon;
     href: string;
     color: string;
+};
+
+type DashboardNotification = {
+    id: string;
+    title: string;
+    message: string;
+    type: string;
+    read: boolean;
+    date: string;
 };
 
 const quickActions: QuickAction[] = [
@@ -109,18 +121,42 @@ interface DashboardProps {
         reference: string;
         accountNumber: string;
     }>;
+    unreadNotifications?: DashboardNotification[];
 }
 
 const Dashboard = () => {
-    const { user, dashboardStats, recentTransactions } = usePage<
+    const { user, dashboardStats, recentTransactions, unreadNotifications } = usePage<
         SharedData & DashboardProps
     >().props;
 
-    // Use real user data with proper fallbacks
+    // Track locally dismissed notifications (dismissed without marking as read)
+    const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+
+    const visibleNotifications = (unreadNotifications ?? []).filter(
+        (n) => !dismissedIds.has(n.id),
+    );
+
+    const dismissNotification = (id: string) => {
+        setDismissedIds((prev) => new Set([...prev, id]));
+    };
+
+    const markAsRead = (id: string) => {
+        router.post(
+            `/api/notifications/${id}/read`,
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    setDismissedIds((prev) => new Set([...prev, id]));
+                },
+            },
+        );
+    };
+
     const userName = user?.name || 'User';
     const firstName = userName.split(' ')[0] || 'User';
 
-    // Generate stat cards from real data with meaningful change indicators
     const statCards: StatCard[] = [
         {
             title: 'Total Balance',
@@ -174,6 +210,54 @@ const Dashboard = () => {
             <Head title="Dashboard" />
             <DashboardLayout>
                 <div className="bg-gray-50 p-6 lg:p-8">
+                    {/* Admin Notification Banners */}
+                    {visibleNotifications.length > 0 && (
+                        <div className="mb-6 space-y-3">
+                            {visibleNotifications.map((notification) => (
+                                <div
+                                    key={notification.id}
+                                    className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4"
+                                >
+                                    <div className="mt-0.5 rounded-full bg-blue-100 p-2">
+                                        <Bell className="h-4 w-4 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-semibold text-blue-900">
+                                            {notification.title}
+                                        </h4>
+                                        <p className="mt-0.5 text-sm text-blue-700">
+                                            {notification.message}
+                                        </p>
+                                        <div className="mt-2 flex items-center gap-3">
+                                            <span className="text-xs text-blue-500">
+                                                {notification.date}
+                                            </span>
+                                            <button
+                                                onClick={() =>
+                                                    markAsRead(notification.id)
+                                                }
+                                                className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
+                                                type="button"
+                                            >
+                                                Mark as read
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() =>
+                                            dismissNotification(notification.id)
+                                        }
+                                        className="rounded-full p-1 text-blue-400 transition-colors hover:bg-blue-100 hover:text-blue-600"
+                                        type="button"
+                                        aria-label="Dismiss notification"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     {/* Welcome Header */}
                     <div className="mb-6 rounded-lg border border-gray-200 bg-white p-6">
                         <h1 className="mb-2 text-3xl font-bold text-gray-900">
@@ -185,32 +269,6 @@ const Dashboard = () => {
                         <p className="text-base text-gray-600">
                             Here's what's happening with your accounts today.
                         </p>
-                        {/*{!user?.registrationPaid && (
-                            <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="rounded-full bg-yellow-100 p-2">
-                                        <Package className="h-5 w-5 text-yellow-600" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-sm font-semibold text-yellow-800">
-                                            Complete Your Registration
-                                        </h3>
-                                        <p className="text-sm text-yellow-700">
-                                            Pay your registration fee to unlock
-                                            all features
-                                        </p>
-                                    </div>
-                                    <Link href="/register-payment">
-                                        <Button
-                                            size="sm"
-                                            className="bg-yellow-600 text-white hover:bg-yellow-700"
-                                        >
-                                            Pay Now
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </div>
-                        )}*/}
                     </div>
 
                     {/* Stats Grid */}

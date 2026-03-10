@@ -21,6 +21,7 @@ type WalletAccount = {
     total_contributions: number;
     is_paid: boolean;
     is_primary: boolean;
+    created_at?: string;
 };
 
 type WalletData = {
@@ -250,6 +251,11 @@ const Wallet = () => {
                                                             Balance:{' '}
                                                             {accountBalance}
                                                         </p>
+                                                        {account.created_at && (
+                                                            <p className="text-xs text-gray-400">
+                                                                Created: {new Date(account.created_at).toLocaleDateString('en-NG', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
